@@ -98,4 +98,36 @@ describe('createGame', () => {
     const handIds = (s: typeof a, p: 'p1' | 'p2') => s.players[p].hand.map((c) => c.instanceId);
     expect(handIds(a, 'p1')).not.toEqual(handIds(b, 'p1'));
   });
+
+  it('mirror matchups (NR vs NR, MON vs MON) play to completion', async () => {
+    const { applyMove } = await import('../apply.ts');
+    const { getLegalMoves } = await import('../legal.ts');
+    const { rngInt, seedToRngState } = await import('../rng.ts');
+    const mirrors: GameConfig[] = [
+      { players: { p1: { deck: NORTHERN_REALMS_STARTER }, p2: { deck: NORTHERN_REALMS_STARTER } } },
+      { players: { p1: { deck: MONSTERS_STARTER }, p2: { deck: MONSTERS_STARTER } } },
+    ];
+    for (const [index, config] of mirrors.entries()) {
+      let state = createGame(config, `mirror-${index}`);
+      let botRng = seedToRngState(`mirror-bot-${index}`);
+      let guard = 0;
+      while (!state.result) {
+        if (++guard > 500) {
+          throw new Error('mirror game did not terminate');
+        }
+        const actor = state.pendingChoice
+          ? state.pendingChoice.player
+          : state.phase === 'mulligan'
+            ? state.players.p1.mulliganDone
+              ? 'p2'
+              : 'p1'
+            : state.turn;
+        const moves = getLegalMoves(state, actor);
+        const [pick, next] = rngInt(botRng, moves.length);
+        botRng = next;
+        state = applyMove(state, moves[pick]);
+      }
+      expect(state.result).not.toBeNull();
+    }
+  });
 });

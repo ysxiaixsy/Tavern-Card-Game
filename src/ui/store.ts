@@ -16,18 +16,23 @@ import { create } from 'zustand';
 import { applyMove } from '../engine/apply';
 import { createGame } from '../engine/game';
 import { getView } from '../engine/view';
-import { MONSTERS_STARTER, NORTHERN_REALMS_STARTER } from '../engine/data/decks';
+import { STARTER_DECKS } from '../engine/data/decks';
 import { GwentError } from '../engine/types';
 import type { GameConfig, GameState, Move, PlayerId } from '../engine/types';
 import { chooseMove, type Difficulty } from '../ai/agent';
 import { playerLabel } from './cardInfo';
 
-const HOTSEAT_CONFIG: GameConfig = {
-  players: {
-    p1: { deck: NORTHERN_REALMS_STARTER },
-    p2: { deck: MONSTERS_STARTER },
-  },
-};
+/** Factions with a complete starter deck (NG/ST card sets arrive in M5). */
+export type PlayableFaction = keyof typeof STARTER_DECKS;
+
+export function buildConfig(p1: PlayableFaction, p2: PlayableFaction): GameConfig {
+  return {
+    players: {
+      p1: { deck: STARTER_DECKS[p1] },
+      p2: { deck: STARTER_DECKS[p2] },
+    },
+  };
+}
 
 const AI_PLAYER: PlayerId = 'p2';
 const AI_THINK_MS = 600;
@@ -65,16 +70,16 @@ interface Session {
 interface AppStore {
   screen: 'home' | 'game';
   session: Session | null;
-  startHotSeat(): void;
-  startVsAi(difficulty: Difficulty): void;
+  startHotSeat(p1: PlayableFaction, p2: PlayableFaction): void;
+  startVsAi(difficulty: Difficulty, human: PlayableFaction, ai: PlayableFaction): void;
   rematch(): void;
   dispatchMove(move: Move): void;
   confirmHandoff(): void;
   quitToHome(): void;
 }
 
-function newSession(mode: GameMode, aiDifficulty: Difficulty): Session {
-  const state = createGame(HOTSEAT_CONFIG, `${mode}-${freshSeed()}`);
+function newSession(mode: GameMode, aiDifficulty: Difficulty, config: GameConfig): Session {
+  const state = createGame(config, `${mode}-${freshSeed()}`);
   const actor = actorOf(state);
   return {
     state,
@@ -121,19 +126,25 @@ export const useAppStore = create<AppStore>((set, get) => {
     screen: 'home',
     session: null,
 
-    startHotSeat() {
-      set({ screen: 'game', session: newSession('hotseat', 'normal') });
+    startHotSeat(p1: PlayableFaction, p2: PlayableFaction) {
+      set({ screen: 'game', session: newSession('hotseat', 'normal', buildConfig(p1, p2)) });
     },
 
-    startVsAi(difficulty: Difficulty) {
-      set({ screen: 'game', session: newSession('ai', difficulty) });
+    startVsAi(difficulty: Difficulty, human: PlayableFaction, ai: PlayableFaction) {
+      set({ screen: 'game', session: newSession('ai', difficulty, buildConfig(human, ai)) });
       scheduleAiIfNeeded();
     },
 
     rematch() {
       const prev = get().session;
-      const mode = prev?.mode ?? 'hotseat';
-      set({ screen: 'game', session: newSession(mode, prev?.aiDifficulty ?? 'normal') });
+      if (!prev) {
+        return;
+      }
+      // Same matchup (the config lives in the GameState), fresh shuffle.
+      set({
+        screen: 'game',
+        session: newSession(prev.mode, prev.aiDifficulty, prev.state.config),
+      });
       scheduleAiIfNeeded();
     },
 

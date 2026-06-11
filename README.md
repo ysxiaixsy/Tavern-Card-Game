@@ -69,8 +69,10 @@ Re-run `npm run usb` after unplugging/replugging the phone.
 
 ## What to verify manually after M3 (on the phone)
 
-1. Home screen now offers **vs AI** with Easy / Normal / Hard — you play
-   Northern Realms, no pass-the-phone screens, "🤖 thinking…" while it moves.
+1. Home screen: pick a faction for **each seat** (mirror matches allowed),
+   then start hot-seat or **vs AI** (Easy / Normal / Hard — the AI plays
+   Player 2's side). No pass-the-phone screens vs AI; "🤖 thinking…" shows
+   while it moves.
 2. Play Normal: it should open with spies, answer your big rows with weather
    or Scorch, revive spies with medics, and **concede hopeless rounds** rather
    than bleed cards — then beat you in round 3 with the cards it saved.
