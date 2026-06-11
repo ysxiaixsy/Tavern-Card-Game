@@ -13,8 +13,8 @@ Hot-seat first, then vs-AI, then online play via Supabase room codes.
 | Milestone | State |
 | --- | --- |
 | M1 — game engine, tests, simulator | ✅ done (81 tests green) |
-| M2 — hot-seat UI in Expo | next |
-| M3 — AI opponent | planned |
+| M2 — hot-seat UI in Expo | ✅ done |
+| M3 — AI opponent | next |
 | M4 — online play (Supabase) | planned |
 | M5 — polish, deck builder, NG/ST factions | planned |
 
@@ -22,13 +22,34 @@ Hot-seat first, then vs-AI, then online play via Supabase room codes.
 
 ```sh
 npm install
+npm start           # Expo dev server — scan the QR with Expo Go on your phone
 npm test            # engine test suite (vitest)
 npm run typecheck   # strict TypeScript
 npm run simulate    # watch two bots play a full match in the terminal
 npm run simulate my-seed   # any seed string reproduces the same game
 ```
 
-## What to verify manually after M1
+## What to verify manually after M2 (on a phone, in Expo Go)
+
+1. **Start a hot-seat game** — privacy screen appears before anyone sees cards.
+2. **Mulligan** — swap 0–2 cards each; phone-pass gate between players.
+3. **Board reads top-to-bottom**: opponent gems/hand/deck → their siege/ranged/
+   melee → weather strip → your melee/ranged/siege → totals → hand → PASS.
+4. **Play flows**: normal unit (one Play button), Celaeno Harpy (row choice),
+   Commander's Horn (free-slot row choice), Decoy (valid targets glow gold —
+   try stealing a spy the opponent planted on you), a Medic (undismissable
+   graveyard picker; chain two medics), a spy (lands on the enemy side, you
+   draw 2 — check the hand count).
+5. **Leader button** — preview text, confirm use (Foltest pulls fog from deck;
+   Eredin lists graveyard units), chip greys out after use.
+6. **Long-press any card** (hand, board, graveyard) → zoom with ability text;
+   tap either graveyard chip to browse it.
+7. **Pass** asks for confirmation; after passing, the other player takes
+   consecutive turns; round banner appears on the privacy screen; forced
+   passes are announced when someone runs out of cards.
+8. **Finish a match** — result screen with per-round scores; Rematch reshuffles.
+
+## What to verify after M1
 
 1. `npm test` — all suites pass, including the 100-game determinism replay.
 2. `npm run simulate gwent-demo` — read the log and sanity-check the rules:
@@ -44,6 +65,9 @@ npm run simulate my-seed   # any seed string reproduces the same game
 src/engine/          pure rules engine (no React/Node imports — runs in Deno too)
   data/              card database + starter decks
   __tests__/         vitest suites incl. the 9 named scenarios from the brief
+src/ui/              Expo app: theme.ts (ALL visuals), store.ts (zustand),
+  components/        card frames, board rows, hand carousel, modal sheets
+  screens/           home, mulligan, battle, privacy gate, result
 scripts/simulate.ts  headless AI-vs-AI runner
 docs/BRIEF.md        the build brief (source of truth for rules)
 ```

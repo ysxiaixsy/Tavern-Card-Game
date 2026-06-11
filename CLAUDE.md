@@ -42,7 +42,10 @@ Placeholder art only; never reference CDPR assets (see IP note in the brief).
 - **M1 ✅** engine + 81 tests + simulator (this includes all 9 named scenarios
   from the brief; Francesca's auto-draw inside `createGame` is the one branch
   without end-to-end coverage — a legal Scoia'tael deck needs M5 card data).
-- **M2 (next)** hot-seat UI: portrait board, card carousel, pass-the-phone screen.
-- **M3** heuristic AI over `PlayerView` (`chooseMove(view, difficulty)`).
+- **M2 ✅** hot-seat UI (`src/ui/`): zustand store (`store.ts`) wraps the
+  engine and inserts pass-the-phone privacy gates; ALL visuals live in
+  `theme.ts`; play options derive from `view.legalMoves` — the UI never
+  re-implements rules. Components only ever consume a `PlayerView`.
+- **M3 (next)** heuristic AI over `PlayerView` (`chooseMove(view, difficulty)`).
 - **M4** Supabase online play (Edge Functions run this same engine).
 - **M5** polish + Nilfgaard/Scoia'tael card data, deck builder.
