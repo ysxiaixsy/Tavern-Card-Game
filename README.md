@@ -16,7 +16,8 @@ Hot-seat first, then vs-AI, then online play via Supabase room codes.
 | M2 — hot-seat UI in Expo | ✅ done |
 | M3 — AI opponent (easy/normal/hard) | ✅ done (97 tests green) |
 | M4 — online play (Supabase) | next |
-| M5 — polish, deck builder, NG/ST factions | planned |
+| M5 — polish, deck builder, animations | planned |
+| Bonus — all four factions playable (NG + ST pulled forward from M5) | ✅ done |
 
 ## Getting started
 
@@ -69,10 +70,13 @@ Re-run `npm run usb` after unplugging/replugging the phone.
 
 ## What to verify manually after M3 (on the phone)
 
-1. Home screen: pick a faction for **each seat** (mirror matches allowed),
-   then start hot-seat or **vs AI** (Easy / Normal / Hard — the AI plays
-   Player 2's side). No pass-the-phone screens vs AI; "🤖 thinking…" shows
-   while it moves.
+1. Home screen: pick a faction for **each seat** — all four are playable
+   (mirror matches allowed) — then start hot-seat or **vs AI** (Easy /
+   Normal / Hard — the AI plays Player 2's side). No pass-the-phone screens
+   vs AI; "🤖 thinking…" shows while it moves.
+1b. Pick Scoia'tael: you start with 11 cards (Francesca) and a "who goes
+   first?" choice before the mulligan. Pick Nilfgaard and force a tied
+   round to see the tiebreak perk fire.
 2. Play Normal: it should open with spies, answer your big rows with weather
    or Scorch, revive spies with medics, and **concede hopeless rounds** rather
    than bleed cards — then beat you in round 3 with the cards it saved.

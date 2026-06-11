@@ -2,7 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { applyMove } from '../../engine/apply.ts';
 import { createGame } from '../../engine/game.ts';
 import { getView } from '../../engine/view.ts';
-import { MONSTERS_STARTER, NORTHERN_REALMS_STARTER } from '../../engine/data/decks.ts';
+import {
+  MONSTERS_STARTER,
+  NILFGAARD_STARTER,
+  NORTHERN_REALMS_STARTER,
+  SCOIATAEL_STARTER,
+} from '../../engine/data/decks.ts';
 import type { GameConfig, GameState, Move, PlayerId } from '../../engine/types.ts';
 import { makeState, play } from '../../engine/__tests__/testkit.ts';
 import { chooseMove, type Difficulty } from '../agent.ts';
@@ -11,6 +16,13 @@ const STARTER_CONFIG: GameConfig = {
   players: {
     p1: { deck: NORTHERN_REALMS_STARTER },
     p2: { deck: MONSTERS_STARTER },
+  },
+};
+
+const NG_ST_CONFIG: GameConfig = {
+  players: {
+    p1: { deck: NILFGAARD_STARTER },
+    p2: { deck: SCOIATAEL_STARTER },
   },
 };
 
@@ -25,8 +37,13 @@ function pickActor(state: GameState): PlayerId {
 }
 
 /** Full AI-vs-AI game; asserts every chosen move is one of the legal moves. */
-function playFullGame(seed: string, p1: Difficulty, p2: Difficulty): GameState {
-  let state = createGame(STARTER_CONFIG, seed);
+function playFullGame(
+  seed: string,
+  p1: Difficulty,
+  p2: Difficulty,
+  config: GameConfig = STARTER_CONFIG,
+): GameState {
+  let state = createGame(config, seed);
   let guard = 0;
   while (!state.result) {
     if (++guard > 400) {
@@ -58,6 +75,13 @@ describe('chooseMove legality and termination', () => {
   it('hard vs normal: full games end legally', () => {
     for (const seed of ['ai-h-1', 'ai-h-2']) {
       playFullGame(seed, 'hard', 'normal');
+    }
+  });
+
+  it('Nilfgaard vs Scoia\'tael: the AI handles spies-heavy and agile decks', () => {
+    for (const seed of ['ai-ngst-1', 'ai-ngst-2']) {
+      const final = playFullGame(seed, 'normal', 'normal', NG_ST_CONFIG);
+      expect(final.result).not.toBeNull();
     }
   });
 

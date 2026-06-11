@@ -99,8 +99,6 @@ describe('Francesca — extra card at match start (auto)', () => {
     });
     expect(getLegalMoves(state, 'p1').some((m) => m.type === 'USE_LEADER')).toBe(false);
     expect(() => useLeader(state, 'p1')).toThrowError(GwentError);
-    // NOTE: the auto-draw itself runs inside createGame and is end-to-end
-    // testable once Scoia'tael card data ships (M5) — a legal ST deck cannot
-    // be built from the v1 card pool.
+    // The auto-draw itself is covered end-to-end in factions.test.ts.
   });
 });

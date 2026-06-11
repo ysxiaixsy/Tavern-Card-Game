@@ -1,11 +1,11 @@
 /**
- * Starter deck lists for v1 (the deck builder arrives in M5).
+ * Starter deck lists, one per faction (the deck builder arrives in M5).
  *
- * Both decks are legal: 1 leader, ≥ 22 unit cards (heroes count as units),
+ * Every deck is legal: 1 leader, ≥ 22 unit cards (heroes count as units),
  * ≤ 10 special cards, and every card is faction-locked or neutral. Between
- * them they exercise every mechanic: spies, medics (incl. a hero medic), a
- * tight-bond trio, moral boost, several muster groups, a horn unit, an agile
- * unit, unit-scorch, all three weathers + clear, horn, scorch and decoy.
+ * them they exercise every mechanic: spies, medics (incl. hero medics), tight
+ * bonds, moral boost, muster groups, horn units, agile units, unit-scorch,
+ * all three weathers + clear, horn, scorch and decoy.
  */
 
 import type { DeckList } from '../types.ts';
@@ -107,7 +107,102 @@ export const MONSTERS_STARTER: DeckList = {
   ],
 };
 
+/** Nilfgaard — Emhyr. 25 units, 8 specials. Spies and ties. */
+export const NILFGAARD_STARTER: DeckList = {
+  leaderId: 'ng_emhyr',
+  cardIds: [
+    // Heroes
+    'ng_letho',
+    'ng_menno', // hero medic
+    'ng_morvran',
+    'ng_tibor',
+    // Spies — the faction's engine
+    'ng_skellen',
+    'ng_shilard',
+    'ng_vattier',
+    // Medics
+    'ng_etolian_archers',
+    'ng_etolian_archers',
+    // Tight bond
+    'ng_impera',
+    'ng_impera',
+    'ng_impera',
+    'ng_nausicaa',
+    'ng_nausicaa',
+    'ng_nausicaa',
+    'ng_emissary',
+    'ng_emissary',
+    // Bodies
+    'ng_arbalest',
+    'ng_arbalest',
+    'ng_assire',
+    'ng_fringilla',
+    'ng_renuald',
+    'ng_heavy_scorpion',
+    'ng_scorpion',
+    'ng_siege_engineer',
+    // Specials (8) — decoys feed the spy loop
+    'neu_decoy',
+    'neu_decoy',
+    'neu_decoy',
+    'neu_horn',
+    'neu_horn',
+    'neu_clear',
+    'neu_fog',
+    'neu_rain',
+  ],
+};
+
+/** Scoia'tael — Francesca. 26 units, 8 specials. Agility and ambushes. */
+export const SCOIATAEL_STARTER: DeckList = {
+  leaderId: 'st_francesca',
+  cardIds: [
+    // Heroes
+    'st_eithne',
+    'st_saesenthessis',
+    'st_isengrim', // hero with moral boost
+    'st_filavandrel',
+    // Muster packages
+    'st_elven_skirmisher',
+    'st_elven_skirmisher',
+    'st_elven_skirmisher',
+    'st_dwarven_skirmisher',
+    'st_dwarven_skirmisher',
+    'st_dwarven_skirmisher',
+    'st_havekar_smuggler',
+    'st_havekar_smuggler',
+    'st_havekar_smuggler',
+    // Medics
+    'st_havekar_healer',
+    'st_havekar_healer',
+    // Agile corps
+    'st_ciaran',
+    'st_yaevinn',
+    'st_dol_scout',
+    'st_dol_scout',
+    'st_vrihedd_veteran',
+    'st_barclay',
+    // Bodies & toolbox
+    'st_milva',
+    'st_ida',
+    'st_dennis',
+    'st_toruviel',
+    'st_schirru', // unit-scorch
+    // Specials (8)
+    'neu_horn',
+    'neu_horn',
+    'neu_decoy',
+    'neu_decoy',
+    'neu_clear',
+    'neu_clear',
+    'neu_frost',
+    'neu_scorch',
+  ],
+};
+
 export const STARTER_DECKS = {
   northern_realms: NORTHERN_REALMS_STARTER,
+  nilfgaard: NILFGAARD_STARTER,
   monsters: MONSTERS_STARTER,
+  scoiatael: SCOIATAEL_STARTER,
 } as const;

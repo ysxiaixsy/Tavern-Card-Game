@@ -132,10 +132,12 @@ const styles = StyleSheet.create({
   },
   pickerRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: sp(2),
   },
   factionChip: {
-    flex: 1,
+    flexBasis: '47%',
+    flexGrow: 1,
     borderWidth: 1.5,
     borderRadius: 12,
     paddingVertical: sp(2),

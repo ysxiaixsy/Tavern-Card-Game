@@ -26,8 +26,8 @@ export function rowUnitViews(state: GameState, side: PlayerId, rowKind: RowKind)
   const row = state.players[side].rows[rowKind];
   const underWeather = isRowUnderWeather(state, rowKind);
 
-  // Row-wide modifiers, computed once. Heroes can PROVIDE row effects (none
-  // do in the v1 data) — immunity only means they never RECEIVE them.
+  // Row-wide modifiers, computed once. Heroes can PROVIDE row effects (e.g.
+  // Isengrim's moral boost) — immunity only means they never RECEIVE them.
   const hornActive =
     row.horn !== null ||
     row.units.some((u) => getCardDef(u.defId).abilities.includes('horn'));

@@ -39,9 +39,8 @@ Placeholder art only; never reference CDPR assets (see IP note in the brief).
 
 ## Milestone status
 
-- **M1 ✅** engine + 81 tests + simulator (this includes all 9 named scenarios
-  from the brief; Francesca's auto-draw inside `createGame` is the one branch
-  without end-to-end coverage — a legal Scoia'tael deck needs M5 card data).
+- **M1 ✅** engine + tests + simulator (all 9 named scenarios from the brief;
+  Francesca/ST flows covered end-to-end in `factions.test.ts`).
 - **M2 ✅** hot-seat UI (`src/ui/`): zustand store (`store.ts`) wraps the
   engine and inserts pass-the-phone privacy gates; ALL visuals live in
   `theme.ts`; play options derive from `view.legalMoves` — the UI never
@@ -52,5 +51,7 @@ Placeholder art only; never reference CDPR assets (see IP note in the brief).
   `hard.ts` re-ranks normal's shortlist with determinized rollouts (samples
   hidden zones, plays the round out with the normal policy via the real
   engine). The store runs the AI as p2 on a 600 ms timer loop.
+- **Bonus ✅** all four factions playable: NG + ST card sets and starter
+  decks (pulled forward from M5); faction picker per seat on Home.
 - **M4 (next)** Supabase online play (Edge Functions run this same engine).
-- **M5** polish + Nilfgaard/Scoia'tael card data, deck builder.
+- **M5** polish: deck builder, animations (Reanimated), sound, settings.

@@ -1,10 +1,11 @@
 /**
- * Headless AI-vs-AI simulator: `npm run simulate [seed] [p1Diff] [p2Diff]`
+ * Headless AI-vs-AI simulator:
+ *   npm run simulate [seed] [p1Diff] [p2Diff] [p1Faction] [p2Faction]
+ *   npm run simulate arena hard easy ng st
  *
- * Plays the two starter decks against each other with the real M3 agent
- * (easy | normal | hard, default normal vs normal) and prints a readable
- * turn-by-turn log. The agents honour the information model: they only ever
- * see a PlayerView.
+ * Difficulties: easy | normal | hard (default normal). Factions: nr | ng |
+ * mon | st (default nr vs mon). The agents honour the information model:
+ * they only ever see a PlayerView.
  */
 
 import {
@@ -12,8 +13,7 @@ import {
   createGame,
   getCardDef,
   getView,
-  MONSTERS_STARTER,
-  NORTHERN_REALMS_STARTER,
+  STARTER_DECKS,
   type GameState,
   type Move,
   type PlayerId,
@@ -29,6 +29,25 @@ function parseDiff(arg: string | undefined, fallback: Difficulty): Difficulty {
 const difficulty: Record<PlayerId, Difficulty> = {
   p1: parseDiff(process.argv[3], 'normal'),
   p2: parseDiff(process.argv[4], 'normal'),
+};
+
+type PlayableFaction = keyof typeof STARTER_DECKS;
+const FACTION_ALIAS: Record<string, PlayableFaction> = {
+  nr: 'northern_realms',
+  northern_realms: 'northern_realms',
+  ng: 'nilfgaard',
+  nilfgaard: 'nilfgaard',
+  mon: 'monsters',
+  monsters: 'monsters',
+  st: 'scoiatael',
+  scoiatael: 'scoiatael',
+};
+function parseFaction(arg: string | undefined, fallback: PlayableFaction): PlayableFaction {
+  return FACTION_ALIAS[(arg ?? '').toLowerCase()] ?? fallback;
+}
+const factions: Record<PlayerId, PlayableFaction> = {
+  p1: parseFaction(process.argv[5], 'northern_realms'),
+  p2: parseFaction(process.argv[6], 'monsters'),
 };
 
 const FACTION_TAG: Record<string, string> = {
@@ -93,17 +112,15 @@ function describeMove(view: PlayerView, move: Move): string {
 let state = createGame(
   {
     players: {
-      p1: { deck: NORTHERN_REALMS_STARTER },
-      p2: { deck: MONSTERS_STARTER },
+      p1: { deck: STARTER_DECKS[factions.p1] },
+      p2: { deck: STARTER_DECKS[factions.p2] },
     },
   },
   seed,
 );
 
 console.log(`Gwent simulator — seed "${seed}"`);
-console.log(
-  `p1: Northern Realms (${difficulty.p1})  vs  p2: Monsters (${difficulty.p2})`,
-);
+console.log(`p1: ${factions.p1} (${difficulty.p1})  vs  p2: ${factions.p2} (${difficulty.p2})`);
 console.log(`${state.roundLeader} wins the coin flip\n`);
 
 let guard = 0;
