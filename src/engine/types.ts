@@ -309,7 +309,8 @@ export interface PlayerView {
   pendingChoice: PendingChoice | null;
   you: SideView & { hand: CardInstance[]; mulliganDone: boolean; mulligansUsed: number };
   opponent: SideView & { handCount: number; revealedHand: CardInstance[] };
-  weather: { kinds: WeatherKind[]; cards: WeatherCardOnBoard[] };
+  /** 'clear' is never an active weather — it only exists on cards. */
+  weather: { kinds: Exclude<WeatherKind, 'clear'>[]; cards: WeatherCardOnBoard[] };
   roundHistory: RoundResult[];
   result: MatchResult | null;
   /** Legal moves for the viewing player right now ([] when not their turn). */

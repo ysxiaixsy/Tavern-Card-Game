@@ -46,6 +46,11 @@ Placeholder art only; never reference CDPR assets (see IP note in the brief).
   engine and inserts pass-the-phone privacy gates; ALL visuals live in
   `theme.ts`; play options derive from `view.legalMoves` — the UI never
   re-implements rules. Components only ever consume a `PlayerView`.
-- **M3 (next)** heuristic AI over `PlayerView` (`chooseMove(view, difficulty)`).
-- **M4** Supabase online play (Edge Functions run this same engine).
+- **M3 ✅** AI in `src/ai/`: `chooseMove(view, difficulty)` — sees ONLY a
+  PlayerView, deterministic (same view ⇒ same move). `normal.ts` holds the
+  heuristics (card economy, spies-first, concede logic, weather nets);
+  `hard.ts` re-ranks normal's shortlist with determinized rollouts (samples
+  hidden zones, plays the round out with the normal policy via the real
+  engine). The store runs the AI as p2 on a 600 ms timer loop.
+- **M4 (next)** Supabase online play (Edge Functions run this same engine).
 - **M5** polish + Nilfgaard/Scoia'tael card data, deck builder.

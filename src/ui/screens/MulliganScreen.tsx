@@ -29,6 +29,16 @@ export function MulliganScreen(): React.JSX.Element | null {
 
   const choicePending = view.pendingChoice !== null;
 
+  // Vs AI: after submitting your own mulligan you briefly wait for theirs.
+  if (view.you.mulliganDone) {
+    return (
+      <View style={[styles.screen, styles.waiting]}>
+        <Text style={styles.title}>Opponent is choosing their cards…</Text>
+        <Text style={styles.subtitle}>The battle begins in a moment.</Text>
+      </View>
+    );
+  }
+
   const toggle = (instanceId: string): void => {
     setSelected((current) =>
       current.includes(instanceId)
@@ -94,6 +104,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: palette.bg,
     paddingTop: sp(4),
+  },
+  waiting: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   title: {
     color: palette.goldBright,

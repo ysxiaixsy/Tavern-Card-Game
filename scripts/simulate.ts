@@ -1,9 +1,10 @@
 /**
- * Headless AI-vs-AI simulator: `npm run simulate [seed]`
+ * Headless AI-vs-AI simulator: `npm run simulate [seed] [p1Diff] [p2Diff]`
  *
- * Plays the two starter decks against each other with a tiny placeholder bot
- * (the real heuristic AI lands in M3) and prints a readable turn-by-turn log.
- * The bot honours the information model: it only ever sees a PlayerView.
+ * Plays the two starter decks against each other with the real M3 agent
+ * (easy | normal | hard, default normal vs normal) and prints a readable
+ * turn-by-turn log. The agents honour the information model: they only ever
+ * see a PlayerView.
  */
 
 import {
@@ -18,9 +19,17 @@ import {
   type PlayerId,
   type PlayerView,
 } from '../src/engine/index.ts';
-import { rngInt, seedToRngState } from '../src/engine/rng.ts';
+import { chooseMove, type Difficulty } from '../src/ai/agent.ts';
 
 const seed = process.argv[2] ?? `sim-${Date.now().toString(36)}`;
+const DIFFS: readonly Difficulty[] = ['easy', 'normal', 'hard'];
+function parseDiff(arg: string | undefined, fallback: Difficulty): Difficulty {
+  return DIFFS.includes(arg as Difficulty) ? (arg as Difficulty) : fallback;
+}
+const difficulty: Record<PlayerId, Difficulty> = {
+  p1: parseDiff(process.argv[3], 'normal'),
+  p2: parseDiff(process.argv[4], 'normal'),
+};
 
 const FACTION_TAG: Record<string, string> = {
   northern_realms: 'NR ',
@@ -40,104 +49,36 @@ function pickActor(state: GameState): PlayerId {
   return state.turn;
 }
 
-/** Placeholder bot: spies first, simple pass logic, otherwise random card. */
-function chooseMove(view: PlayerView, rngState: number): [Move, number] {
-  const moves = view.legalMoves;
-
-  if (view.phase === 'mulligan') {
-    return [moves.find((m) => m.type === 'MULLIGAN')!, rngState];
-  }
-  if (view.pendingChoice?.kind === 'medic_revive') {
-    // Revive priority: spy > strongest unit.
-    const revives = moves.filter((m) => m.type === 'RESOLVE_MEDIC');
-    const bySpy = revives.find((m) =>
-      getCardDef(graveDef(view, m.targetInstanceId)).abilities.includes('spy'),
-    );
-    if (bySpy) {
-      return [bySpy, rngState];
-    }
-    revives.sort(
-      (a, b) =>
-        (getCardDef(graveDef(view, b.targetInstanceId)).strength ?? 0) -
-        (getCardDef(graveDef(view, a.targetInstanceId)).strength ?? 0),
-    );
-    return [revives[0], rngState];
-  }
-
-  // Opponent passed and we lead → lock the round in.
-  if (view.opponent.passed && view.you.total > view.opponent.total) {
-    return [{ type: 'PASS', player: view.player }, rngState];
-  }
-
-  // Spies are near-free card advantage: always first.
-  const spyMove = moves.find(
-    (m) =>
-      m.type === 'PLAY_CARD' &&
-      getCardDef(handDef(view, m.cardInstanceId)).abilities.includes('spy'),
-  );
-  if (spyMove) {
-    return [spyMove, rngState];
-  }
-
-  const plays = moves.filter((m) => m.type !== 'PASS');
-  if (plays.length === 0) {
-    return [{ type: 'PASS', player: view.player }, rngState];
-  }
-
-  // Occasionally pass when ahead (crude card economy); otherwise random play.
-  let s = rngState;
-  if (view.you.total > view.opponent.total + 5) {
-    const [roll, next] = rngInt(s, 10);
-    s = next;
-    if (roll === 0) {
-      return [{ type: 'PASS', player: view.player }, s];
-    }
-  }
-  const [index, next] = rngInt(s, plays.length);
-  return [plays[index], next];
-}
-
-function handDef(view: PlayerView, instanceId: string): string {
-  const card = view.you.hand.find((c) => c.instanceId === instanceId);
-  if (!card) {
-    throw new Error(`simulator: ${instanceId} not in hand`);
-  }
-  return card.defId;
-}
-
-function graveDef(view: PlayerView, instanceId: string): string {
-  const card = view.you.graveyard.find((c) => c.instanceId === instanceId);
-  if (!card) {
-    throw new Error(`simulator: ${instanceId} not in graveyard`);
-  }
-  return card.defId;
+function cardName(view: PlayerView, zone: 'hand' | 'graveyard', instanceId: string): string {
+  const list = zone === 'hand' ? view.you.hand : view.you.graveyard;
+  const card = list.find((c) => c.instanceId === instanceId);
+  return card ? getCardDef(card.defId).name : instanceId;
 }
 
 function describeMove(view: PlayerView, move: Move): string {
   switch (move.type) {
     case 'MULLIGAN':
-      return `keeps their hand`;
+      return move.cardInstanceIds.length === 0
+        ? 'keeps their hand'
+        : `redraws ${move.cardInstanceIds.length} card(s)`;
     case 'PASS':
       return 'passes';
     case 'PLAY_CARD': {
-      const def = getCardDef(handDef(view, move.cardInstanceId));
-      const bits = [def.name];
+      const bits = [cardName(view, 'hand', move.cardInstanceId)];
       if (move.row) {
         bits.push(`→ ${move.row}`);
       }
       if (move.targetInstanceId) {
-        bits.push(`(target ${move.targetInstanceId})`);
+        bits.push('(decoy swap)');
       }
       return `plays ${bits.join(' ')}`;
     }
-    case 'RESOLVE_MEDIC': {
-      const def = getCardDef(graveDef(view, move.targetInstanceId));
-      return `revives ${def.name}`;
-    }
+    case 'RESOLVE_MEDIC':
+      return `revives ${cardName(view, 'graveyard', move.targetInstanceId)}`;
     case 'USE_LEADER': {
       const name = getCardDef(view.you.leader.defId).name;
       return move.targetInstanceId
-        ? `uses leader ${name}, restoring ${getCardDef(graveDef(view, move.targetInstanceId)).name}`
+        ? `uses leader ${name}, restoring ${cardName(view, 'graveyard', move.targetInstanceId)}`
         : `uses leader ${name}`;
     }
     case 'CHOOSE_FIRST_PLAYER':
@@ -158,24 +99,24 @@ let state = createGame(
   },
   seed,
 );
-let botRng = seedToRngState(`bot-${seed}`);
 
 console.log(`Gwent simulator — seed "${seed}"`);
-console.log(`p1: Northern Realms (Foltest)  vs  p2: Monsters (Eredin)`);
+console.log(
+  `p1: Northern Realms (${difficulty.p1})  vs  p2: Monsters (${difficulty.p2})`,
+);
 console.log(`${state.roundLeader} wins the coin flip\n`);
 
 let guard = 0;
 while (!state.result) {
-  if (++guard > 1000) {
+  if (++guard > 500) {
     throw new Error('simulation did not terminate');
   }
   const actor = pickActor(state);
   const view = getView(state, actor);
-  const [move, nextRng] = chooseMove(view, botRng);
-  botRng = nextRng;
+  const move = chooseMove(view, difficulty[actor]);
 
   const roundsBefore = state.roundHistory.length;
-  const roundLabel = Math.max(state.round, 1); // capture BEFORE the move advances rounds
+  const roundLabel = Math.max(state.round, 1);
   const tag = FACTION_TAG[state.players[actor].faction] ?? '???';
   state = applyMove(state, move);
 
@@ -203,7 +144,7 @@ while (!state.result) {
 const result = state.result;
 console.log('═'.repeat(60));
 if (result.winner) {
-  console.log(`${result.winner} wins the match!`);
+  console.log(`${result.winner} (${difficulty[result.winner]}) wins the match!`);
 } else {
   console.log('The match is a draw.');
 }

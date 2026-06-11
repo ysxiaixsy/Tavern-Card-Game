@@ -94,6 +94,7 @@ export function GameScreen(): React.JSX.Element | null {
       <View style={styles.header}>
         <Text style={styles.headerText}>
           Round {Math.max(view.round, 1)} · {playerLabel(session.state, view.player)}
+          {session.mode === 'ai' && !myAction && view.result === null ? '   🤖 thinking…' : ''}
         </Text>
         <Pressable onPress={confirmQuit} hitSlop={8}>
           <Text style={styles.quit}>✕</Text>
