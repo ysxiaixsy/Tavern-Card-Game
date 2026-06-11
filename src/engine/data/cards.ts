@@ -185,7 +185,24 @@ export const CARD_DEFS: readonly CardDef[] = [
     faction: 'northern_realms',
     type: 'leader',
     abilities: [],
-    leaderAbility: 'foltest_fog',
+    leaderAbility: 'weather_from_deck',
+    leaderWeather: 'fog',
+  },
+  {
+    id: 'nr_foltest_commander',
+    name: 'Foltest, Lord Commander of the North',
+    faction: 'northern_realms',
+    type: 'leader',
+    abilities: [],
+    leaderAbility: 'clear_weather',
+  },
+  {
+    id: 'nr_foltest_medell',
+    name: 'Foltest, Son of Medell',
+    faction: 'northern_realms',
+    type: 'leader',
+    abilities: [],
+    leaderAbility: 'scorch_melee_leader', // VERIFY: melee variant (Steel-Forged is the siege one)
   },
   {
     id: 'nr_vernon',
@@ -414,13 +431,32 @@ export const CARD_DEFS: readonly CardDef[] = [
   // -------------------------------------------------------------------------
   // Monsters
   // -------------------------------------------------------------------------
+  // VERIFY: the name↔ability mapping across Eredin variants (Bringer of
+  // Death vs King of the Wild Hunt) — the mechanics themselves are W3's.
   {
     id: 'mon_eredin',
     name: 'Eredin, Bringer of Death',
     faction: 'monsters',
     type: 'leader',
     abilities: [],
-    leaderAbility: 'eredin_restore',
+    leaderAbility: 'restore_to_hand',
+  },
+  {
+    id: 'mon_eredin_king',
+    name: 'Eredin, King of the Wild Hunt',
+    faction: 'monsters',
+    type: 'leader',
+    abilities: [],
+    leaderAbility: 'play_from_graveyard',
+  },
+  {
+    id: 'mon_eredin_redriders',
+    name: 'Eredin, Commander of the Red Riders',
+    faction: 'monsters',
+    type: 'leader',
+    abilities: [],
+    leaderAbility: 'row_horn',
+    leaderHornRow: 'melee',
   },
   {
     id: 'mon_draug',
@@ -718,7 +754,24 @@ export const CARD_DEFS: readonly CardDef[] = [
     faction: 'nilfgaard',
     type: 'leader',
     abilities: [],
-    leaderAbility: 'emhyr_peek',
+    leaderAbility: 'peek_hand',
+  },
+  {
+    id: 'ng_emhyr_whiteflame',
+    name: 'Emhyr var Emreis, the White Flame',
+    faction: 'nilfgaard',
+    type: 'leader',
+    abilities: [],
+    leaderAbility: 'weather_from_deck',
+    leaderWeather: 'rain',
+  },
+  {
+    id: 'ng_emhyr_emperor',
+    name: 'Emhyr var Emreis, Emperor of Nilfgaard',
+    faction: 'nilfgaard',
+    type: 'leader',
+    abilities: [],
+    leaderAbility: 'cancel_leader',
   },
   {
     id: 'ng_letho',
@@ -909,13 +962,33 @@ export const CARD_DEFS: readonly CardDef[] = [
   // -------------------------------------------------------------------------
   // Scoia'tael — the agile faction (decides who goes first)
   // -------------------------------------------------------------------------
+  // W3 correction: Daisy of the Valley draws the extra card; Pureblood Elf
+  // fetches Biting Frost. (st_francesca keeps its id for save-compat.)
   {
     id: 'st_francesca',
+    name: 'Francesca Findabair, Daisy of the Valley',
+    faction: 'scoiatael',
+    type: 'leader',
+    abilities: [],
+    leaderAbility: 'draw_extra_start',
+  },
+  {
+    id: 'st_francesca_pureblood',
     name: 'Francesca Findabair, Pureblood Elf',
     faction: 'scoiatael',
     type: 'leader',
     abilities: [],
-    leaderAbility: 'francesca_draw',
+    leaderAbility: 'weather_from_deck',
+    leaderWeather: 'frost',
+  },
+  {
+    id: 'st_francesca_beautiful',
+    name: 'Francesca Findabair, the Beautiful',
+    faction: 'scoiatael',
+    type: 'leader',
+    abilities: [],
+    leaderAbility: 'row_horn',
+    leaderHornRow: 'ranged',
   },
   {
     id: 'st_eithne',
@@ -1087,7 +1160,29 @@ export const CARD_DEFS: readonly CardDef[] = [
     strength: 8,
     abilities: ['scorch_melee'], // VERIFY: Schirrú carries Scorch–Close Combat.
   },
+
+  // -------------------------------------------------------------------------
+  // Internal pseudo-cards (never deck-legal)
+  // -------------------------------------------------------------------------
+  {
+    // row_horn leader marker: occupies the horn slot like a Commander's Horn
+    // but silently disappears at round end (it is not a real card).
+    id: 'leader_horn_marker',
+    name: "Leader's Horn",
+    faction: 'neutral',
+    type: 'horn',
+    abilities: [],
+    maxCopiesPerDeck: 0,
+  },
 ];
+
+/** Horn-slot marker placed by row_horn leader abilities. */
+export const LEADER_HORN_MARKER_ID = 'leader_horn_marker';
+
+/** All leader variants of a faction, in data order (drives the UI picker). */
+export function leadersOf(faction: CardDef['faction']): CardDef[] {
+  return CARD_DEFS.filter((def) => def.type === 'leader' && def.faction === faction);
+}
 
 const CARD_INDEX: Record<string, CardDef> = {};
 for (const def of CARD_DEFS) {

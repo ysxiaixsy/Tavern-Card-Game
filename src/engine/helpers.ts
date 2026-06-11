@@ -88,9 +88,9 @@ export function medicTargets(ps: PlayerState): CardInstance[] {
   return ps.graveyard.filter((c) => getCardDef(c.defId).type === 'unit');
 }
 
-/** Index of the first Impenetrable Fog in the deck (Foltest), or -1. */
-export function fogIndexInDeck(ps: PlayerState): number {
-  return ps.deck.findIndex((c) => getCardDef(c.defId).weather === 'fog');
+/** Index of the first card of a weather kind in the deck (weather_from_deck leaders), or -1. */
+export function weatherIndexInDeck(ps: PlayerState, kind: WeatherKind): number {
+  return ps.deck.findIndex((c) => getCardDef(c.defId).weather === kind);
 }
 
 /** Draw up to n cards from the top of the deck into the hand (mutates). */

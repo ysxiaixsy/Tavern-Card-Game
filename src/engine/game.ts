@@ -114,8 +114,8 @@ export function createGame(config: GameConfig, seed: string): GameState {
     players[p] = {
       faction: leaderDef.faction,
       leader: { instanceId: `${p}:leader`, defId: deckList.leaderId },
-      // Francesca's ability is consumed automatically at match start.
-      leaderUsed: leaderDef.leaderAbility === 'francesca_draw',
+      // draw_extra_start leaders are consumed automatically at match start.
+      leaderUsed: leaderDef.leaderAbility === 'draw_extra_start',
       gems: STARTING_GEMS,
       hand: shuffled.slice(0, HAND_SIZE),
       deck: shuffled.slice(HAND_SIZE),
@@ -149,9 +149,9 @@ export function createGame(config: GameConfig, seed: string): GameState {
     moveCount: 0,
   };
 
-  // Francesca (Scoia'tael): draw an extra card at the start of the match.
+  // draw_extra_start (Francesca, Daisy of the Valley): one extra card now.
   for (const p of PLAYER_IDS) {
-    if (getCardDef(players[p].leader.defId).leaderAbility === 'francesca_draw') {
+    if (getCardDef(players[p].leader.defId).leaderAbility === 'draw_extra_start') {
       drawCards(state, p, 1);
     }
   }

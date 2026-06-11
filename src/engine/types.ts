@@ -76,10 +76,15 @@ export type Ability =
   | 'scorch_melee'; // unit-scorch (Villentretenmerth): on play, scorch opponent melee if its total ≥ 10
 
 export type LeaderAbilityId =
-  | 'foltest_fog' // play an Impenetrable Fog from your deck
-  | 'emhyr_peek' // look at 3 random cards in the opponent's hand
-  | 'eredin_restore' // restore a non-hero unit from your graveyard to your hand
-  | 'francesca_draw'; // auto: draw an extra card at match start (never an on-demand move)
+  | 'weather_from_deck' // play this leader's weather kind straight from your deck (see CardDef.leaderWeather)
+  | 'clear_weather' // remove all active weather
+  | 'scorch_melee_leader' // destroy enemy's strongest melee unit(s) if their melee row totals 10+
+  | 'row_horn' // double one of YOUR rows like a Commander's Horn (see CardDef.leaderHornRow)
+  | 'cancel_leader' // cancel the opponent's (unused) leader ability
+  | 'peek_hand' // look at 3 random cards in the opponent's hand
+  | 'restore_to_hand' // restore a non-hero unit from your graveyard to your hand
+  | 'play_from_graveyard' // play a non-hero unit from your graveyard instantly, full effects
+  | 'draw_extra_start'; // auto: draw an extra card at match start (never an on-demand move)
 
 /** Static card definition (see data/cards.ts). */
 export interface CardDef {
@@ -104,6 +109,10 @@ export interface CardDef {
   weather?: WeatherKind;
   /** Leader cards only. */
   leaderAbility?: LeaderAbilityId;
+  /** weather_from_deck leaders: which kind they fetch. */
+  leaderWeather?: Exclude<WeatherKind, 'clear'>;
+  /** row_horn leaders: which of your rows they double. */
+  leaderHornRow?: RowKind;
 }
 
 /** A concrete copy of a card in one game. instanceIds are unique per game. */
@@ -251,8 +260,10 @@ export interface ResolveMedicMove {
 export interface UseLeaderMove {
   type: 'USE_LEADER';
   player: PlayerId;
-  /** Required for Eredin (graveyard unit to restore to hand). */
+  /** Required for graveyard-targeting leaders (restore_to_hand, play_from_graveyard). */
   targetInstanceId?: string;
+  /** Required when play_from_graveyard revives an agile unit. */
+  row?: RowKind;
 }
 
 export interface PassMove {

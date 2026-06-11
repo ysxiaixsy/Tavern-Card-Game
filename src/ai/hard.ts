@@ -126,17 +126,25 @@ function determinize(view: PlayerView, rng: number): [GameState, number] {
   const opp: PlayerId = me === 'p1' ? 'p2' : 'p1';
 
   // My hidden deck: sampled — but stay consistent with observed legality
-  // (a usable Foltest implies a fog really is in there).
+  // (a usable weather_from_deck leader implies its weather really is in there).
   const myPool = samplePool(view.you.faction);
   let [myDeck, rng1] = sampleCards(myPool, view.you.deckCount, rng);
-  const foltestUsable = view.legalMoves.some((m) => m.type === 'USE_LEADER');
+  const myLeader = getCardDef(view.you.leader.defId);
+  const leaderUsable = view.legalMoves.some((m) => m.type === 'USE_LEADER');
   if (
-    foltestUsable &&
-    getCardDef(view.you.leader.defId).leaderAbility === 'foltest_fog' &&
+    leaderUsable &&
+    myLeader.leaderAbility === 'weather_from_deck' &&
+    myLeader.leaderWeather &&
     myDeck.length > 0 &&
-    !myDeck.some((c) => getCardDef(c.defId).weather === 'fog')
+    !myDeck.some((c) => getCardDef(c.defId).weather === myLeader.leaderWeather)
   ) {
-    myDeck = [...myDeck.slice(0, -1), { instanceId: `sim:fog-${++simCounter}`, defId: 'neu_fog' }];
+    const weatherDefId = { frost: 'neu_frost', fog: 'neu_fog', rain: 'neu_rain' }[
+      myLeader.leaderWeather
+    ];
+    myDeck = [
+      ...myDeck.slice(0, -1),
+      { instanceId: `sim:weather-${++simCounter}`, defId: weatherDefId },
+    ];
   }
 
   // Opponent hand: Emhyr-revealed cards are known; the rest is sampled.

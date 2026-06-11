@@ -8,11 +8,12 @@
 import { getCardDef } from './data/cards.ts';
 import {
   decoyTargets,
-  fogIndexInDeck,
   medicTargets,
   opponentOf,
   ROW_KINDS,
+  weatherIndexInDeck,
 } from './helpers.ts';
+import { rowTotal } from './strength.ts';
 import type {
   CardInstance,
   GameState,
@@ -129,20 +130,56 @@ function leaderMoves(state: GameState, player: PlayerId): Move[] {
   if (ps.leaderUsed) {
     return [];
   }
-  switch (getCardDef(ps.leader.defId).leaderAbility) {
-    case 'foltest_fog':
-      return fogIndexInDeck(ps) === -1 ? [] : [{ type: 'USE_LEADER', player }];
-    case 'emhyr_peek':
+  const def = getCardDef(ps.leader.defId);
+  switch (def.leaderAbility) {
+    case 'weather_from_deck':
+      return def.leaderWeather && weatherIndexInDeck(ps, def.leaderWeather) !== -1
+        ? [{ type: 'USE_LEADER', player }]
+        : [];
+    case 'clear_weather':
+      // Only offered while weather is actually on the board (no wasted uses).
+      return state.weatherCards.length === 0 ? [] : [{ type: 'USE_LEADER', player }];
+    case 'scorch_melee_leader': {
+      const opp = opponentOf(player);
+      const hasVictim = state.players[opp].rows.melee.units.some(
+        (u) => getCardDef(u.defId).type === 'unit',
+      );
+      return rowTotal(state, opp, 'melee') >= 10 && hasVictim
+        ? [{ type: 'USE_LEADER', player }]
+        : [];
+    }
+    case 'row_horn': {
+      const row = def.leaderHornRow;
+      return row && ps.rows[row].horn === null ? [{ type: 'USE_LEADER', player }] : [];
+    }
+    case 'cancel_leader':
+      return state.players[opponentOf(player)].leaderUsed
+        ? []
+        : [{ type: 'USE_LEADER', player }];
+    case 'peek_hand':
       return state.players[opponentOf(player)].hand.length === 0
         ? []
         : [{ type: 'USE_LEADER', player }];
-    case 'eredin_restore':
+    case 'restore_to_hand':
       return medicTargets(ps).map((target) => ({
         type: 'USE_LEADER',
         player,
         targetInstanceId: target.instanceId,
       }));
-    case 'francesca_draw':
+    case 'play_from_graveyard': {
+      const moves: Move[] = [];
+      for (const target of medicTargets(ps)) {
+        if (getCardDef(target.defId).row === 'agile') {
+          for (const row of AGILE_ROWS) {
+            moves.push({ type: 'USE_LEADER', player, targetInstanceId: target.instanceId, row });
+          }
+        } else {
+          moves.push({ type: 'USE_LEADER', player, targetInstanceId: target.instanceId });
+        }
+      }
+      return moves;
+    }
+    case 'draw_extra_start':
       // Auto-triggered at match start; never an on-demand move.
       return [];
     default:

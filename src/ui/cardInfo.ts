@@ -26,12 +26,37 @@ const weatherText: Record<WeatherKind, string> = {
   clear: 'Clear Weather: removes all weather effects from the board.',
 };
 
-const leaderText: Record<string, string> = {
-  foltest_fog: 'Once per match: play an Impenetrable Fog straight from your deck.',
-  emhyr_peek: 'Once per match: look at 3 random cards in your opponent’s hand.',
-  eredin_restore: 'Once per match: restore a non-hero unit from your graveyard to your hand.',
-  francesca_draw: 'Automatic: draw an extra card at the start of the match.',
+const WEATHER_NAME: Record<string, string> = {
+  frost: 'Biting Frost',
+  fog: 'an Impenetrable Fog',
+  rain: 'a Torrential Rain',
 };
+
+const leaderText: Record<string, string> = {
+  weather_from_deck: 'Once per match: play {weather} straight from your deck.',
+  clear_weather: 'Once per match: clear every weather effect from the board.',
+  scorch_melee_leader:
+    'Once per match: destroy the enemy’s strongest Close Combat unit(s) if that row totals 10 or more.',
+  row_horn:
+    'Once per match: double the strength of your {row} row, as if by a Commander’s Horn (does not stack with one).',
+  cancel_leader: 'Once per match: cancel your opponent’s leader ability before they use it.',
+  peek_hand: 'Once per match: look at 3 random cards in your opponent’s hand.',
+  restore_to_hand: 'Once per match: restore a non-hero unit from your graveyard to your hand.',
+  play_from_graveyard:
+    'Once per match: play a non-hero unit from your graveyard instantly, with its full effect.',
+  draw_extra_start: 'Automatic: draw an extra card at the start of the match.',
+};
+
+/** Leader ability text with its weather/row blanks filled in. */
+export function leaderAbilityText(def: CardDef): string {
+  if (!def.leaderAbility) {
+    return '';
+  }
+  let text = leaderText[def.leaderAbility] ?? '';
+  text = text.replace('{weather}', def.leaderWeather ? WEATHER_NAME[def.leaderWeather] : 'weather');
+  text = text.replace('{row}', def.leaderHornRow ? rowLabel[def.leaderHornRow] : 'chosen');
+  return text;
+}
 
 /** Full description lines for the zoomed card view. */
 export function describeCard(defId: string): string[] {
@@ -57,7 +82,7 @@ export function describeCard(defId: string): string[] {
     );
   }
   if (def.type === 'leader' && def.leaderAbility) {
-    lines.push(leaderText[def.leaderAbility] ?? '');
+    lines.push(leaderAbilityText(def));
   }
   for (const ability of def.abilities) {
     lines.push(abilityText[ability]);

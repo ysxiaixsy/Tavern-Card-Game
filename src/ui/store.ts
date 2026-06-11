@@ -22,14 +22,20 @@ import type { GameConfig, GameState, Move, PlayerId } from '../engine/types';
 import { chooseMove, type Difficulty } from '../ai/agent';
 import { playerLabel } from './cardInfo';
 
-/** Factions with a complete starter deck (NG/ST card sets arrive in M5). */
+/** Factions with a complete starter deck. */
 export type PlayableFaction = keyof typeof STARTER_DECKS;
 
-export function buildConfig(p1: PlayableFaction, p2: PlayableFaction): GameConfig {
+/** One seat's pre-game choices: a faction and one of its leader variants. */
+export interface SeatSetup {
+  faction: PlayableFaction;
+  leaderId: string;
+}
+
+export function buildConfig(p1: SeatSetup, p2: SeatSetup): GameConfig {
   return {
     players: {
-      p1: { deck: STARTER_DECKS[p1] },
-      p2: { deck: STARTER_DECKS[p2] },
+      p1: { deck: { ...STARTER_DECKS[p1.faction], leaderId: p1.leaderId } },
+      p2: { deck: { ...STARTER_DECKS[p2.faction], leaderId: p2.leaderId } },
     },
   };
 }
@@ -70,8 +76,8 @@ interface Session {
 interface AppStore {
   screen: 'home' | 'game';
   session: Session | null;
-  startHotSeat(p1: PlayableFaction, p2: PlayableFaction): void;
-  startVsAi(difficulty: Difficulty, human: PlayableFaction, ai: PlayableFaction): void;
+  startHotSeat(p1: SeatSetup, p2: SeatSetup): void;
+  startVsAi(difficulty: Difficulty, human: SeatSetup, ai: SeatSetup): void;
   rematch(): void;
   dispatchMove(move: Move): void;
   confirmHandoff(): void;
@@ -126,11 +132,11 @@ export const useAppStore = create<AppStore>((set, get) => {
     screen: 'home',
     session: null,
 
-    startHotSeat(p1: PlayableFaction, p2: PlayableFaction) {
+    startHotSeat(p1: SeatSetup, p2: SeatSetup) {
       set({ screen: 'game', session: newSession('hotseat', 'normal', buildConfig(p1, p2)) });
     },
 
-    startVsAi(difficulty: Difficulty, human: PlayableFaction, ai: PlayableFaction) {
+    startVsAi(difficulty: Difficulty, human: SeatSetup, ai: SeatSetup) {
       set({ screen: 'game', session: newSession('ai', difficulty, buildConfig(human, ai)) });
       scheduleAiIfNeeded();
     },

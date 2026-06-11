@@ -12,17 +12,16 @@
  * player keeps the turn until the chain is exhausted (see types.ts).
  */
 
-import { getCardDef } from './data/cards.ts';
+import { getCardDef, LEADER_HORN_MARKER_ID } from './data/cards.ts';
 import {
-  activeWeatherKinds,
   cloneState,
   drawCards,
   findInRows,
-  fogIndexInDeck,
   medicTargets,
   opponentOf,
   PLAYER_IDS,
   ROW_KINDS,
+  weatherIndexInDeck,
 } from './helpers.ts';
 import { rngInt, rngPick, rngShuffle } from './rng.ts';
 import { rowTotal, rowUnitViews, sideTotal } from './strength.ts';
@@ -348,14 +347,17 @@ function destroyUnits(
   }
 }
 
+/** All weather lifts; the spent cards return to their owners' graveyards. */
+function clearAllWeather(s: GameState): void {
+  for (const wc of s.weatherCards) {
+    s.players[wc.owner].graveyard.push({ instanceId: wc.instanceId, defId: wc.defId });
+  }
+  s.weatherCards = [];
+}
+
 function resolveWeatherPlay(s: GameState, actor: PlayerId, card: CardInstance, def: CardDef): void {
   if (def.weather === 'clear') {
-    // All weather cards return to their owners' graveyards; Clear Weather
-    // itself goes straight to its owner's graveyard.
-    for (const wc of s.weatherCards) {
-      s.players[wc.owner].graveyard.push({ instanceId: wc.instanceId, defId: wc.defId });
-    }
-    s.weatherCards = [];
+    clearAllWeather(s);
     s.players[actor].graveyard.push(card);
     return;
   }
@@ -409,23 +411,80 @@ function applyResolveMedic(s: GameState, move: ResolveMedicMove): void {
   resolveUnitPlay(s, move.player, target, def, move.row);
 }
 
+/** Pull a non-hero unit out of the actor's graveyard or throw. */
+function takeGraveyardUnit(s: GameState, player: PlayerId, targetInstanceId: string | undefined) {
+  if (!targetInstanceId) {
+    throw new GwentError('ILLEGAL_MOVE', 'this leader needs a graveyard unit as its target');
+  }
+  const ps = s.players[player];
+  const graveIndex = ps.graveyard.findIndex((c) => c.instanceId === targetInstanceId);
+  if (graveIndex === -1) {
+    throw new GwentError('INVALID_TARGET', `${targetInstanceId} is not in your graveyard`);
+  }
+  const def = getCardDef(ps.graveyard[graveIndex].defId);
+  if (def.type !== 'unit') {
+    throw new GwentError('INVALID_TARGET', 'leaders can only target non-hero units');
+  }
+  const [card] = ps.graveyard.splice(graveIndex, 1);
+  return { card, def };
+}
+
 function applyUseLeader(s: GameState, move: UseLeaderMove): void {
   const ps = s.players[move.player];
   if (ps.leaderUsed) {
     throw new GwentError('LEADER_UNAVAILABLE', 'leader ability already used');
   }
-  const ability = getCardDef(ps.leader.defId).leaderAbility;
-  switch (ability) {
-    case 'foltest_fog': {
-      const fogIndex = fogIndexInDeck(ps);
-      if (fogIndex === -1) {
-        throw new GwentError('LEADER_UNAVAILABLE', 'no Impenetrable Fog left in your deck');
+  const leaderDef = getCardDef(ps.leader.defId);
+  switch (leaderDef.leaderAbility) {
+    case 'weather_from_deck': {
+      const kind = leaderDef.leaderWeather;
+      const index = kind ? weatherIndexInDeck(ps, kind) : -1;
+      if (index === -1) {
+        throw new GwentError('LEADER_UNAVAILABLE', `no ${kind ?? 'weather'} left in your deck`);
       }
-      const [fog] = ps.deck.splice(fogIndex, 1);
-      s.weatherCards.push({ ...fog, owner: move.player });
+      const [weather] = ps.deck.splice(index, 1);
+      s.weatherCards.push({ ...weather, owner: move.player });
       break;
     }
-    case 'emhyr_peek': {
+    case 'clear_weather': {
+      if (s.weatherCards.length === 0) {
+        throw new GwentError('LEADER_UNAVAILABLE', 'no weather to clear');
+      }
+      clearAllWeather(s);
+      break;
+    }
+    case 'scorch_melee_leader': {
+      const opp = opponentOf(move.player);
+      if (rowTotal(s, opp, 'melee') < 10) {
+        throw new GwentError('LEADER_UNAVAILABLE', "opponent's melee row is below 10");
+      }
+      resolveMeleeScorch(s, move.player);
+      break;
+    }
+    case 'row_horn': {
+      const row = leaderDef.leaderHornRow;
+      if (!row) {
+        throw new GwentError('LEADER_UNAVAILABLE', 'leader has no horn row configured');
+      }
+      if (ps.rows[row].horn !== null) {
+        throw new GwentError('INVALID_TARGET', `the ${row} horn slot is occupied`);
+      }
+      // A marker, not a real card: it evaporates at round end.
+      ps.rows[row].horn = {
+        instanceId: `${move.player}:leader-horn`,
+        defId: LEADER_HORN_MARKER_ID,
+      };
+      break;
+    }
+    case 'cancel_leader': {
+      const opp = s.players[opponentOf(move.player)];
+      if (opp.leaderUsed) {
+        throw new GwentError('LEADER_UNAVAILABLE', "opponent's leader is already spent");
+      }
+      opp.leaderUsed = true; // their ability dies unspent
+      break;
+    }
+    case 'peek_hand': {
       const oppHand = s.players[opponentOf(move.player)].hand;
       if (oppHand.length === 0) {
         throw new GwentError('LEADER_UNAVAILABLE', 'opponent has no cards in hand');
@@ -439,24 +498,21 @@ function applyUseLeader(s: GameState, move: UseLeaderMove): void {
       }
       break;
     }
-    case 'eredin_restore': {
-      if (!move.targetInstanceId) {
-        throw new GwentError('ILLEGAL_MOVE', 'Eredin needs a graveyard unit to restore');
-      }
-      const graveIndex = ps.graveyard.findIndex((c) => c.instanceId === move.targetInstanceId);
-      if (graveIndex === -1) {
-        throw new GwentError('INVALID_TARGET', `${move.targetInstanceId} is not in your graveyard`);
-      }
-      if (getCardDef(ps.graveyard[graveIndex].defId).type !== 'unit') {
-        throw new GwentError('INVALID_TARGET', 'only non-hero units can be restored to hand');
-      }
-      const [restored] = ps.graveyard.splice(graveIndex, 1);
-      ps.hand.push(restored);
+    case 'restore_to_hand': {
+      const { card } = takeGraveyardUnit(s, move.player, move.targetInstanceId);
+      ps.hand.push(card);
       break;
     }
-    case 'francesca_draw':
+    case 'play_from_graveyard': {
+      const { card, def } = takeGraveyardUnit(s, move.player, move.targetInstanceId);
+      // Full effects, exactly like a medic revival (spies draw, musters
+      // muster, a revived medic opens a pendingChoice chain).
+      resolveUnitPlay(s, move.player, card, def, move.row);
+      break;
+    }
+    case 'draw_extra_start':
       // Auto-resolved at match start (extra card already drawn).
-      throw new GwentError('LEADER_UNAVAILABLE', "Francesca's ability triggers automatically");
+      throw new GwentError('LEADER_UNAVAILABLE', 'this ability triggers automatically');
     default:
       throw new GwentError('LEADER_UNAVAILABLE', 'this leader has no usable ability');
   }
@@ -586,7 +642,10 @@ function resolveRound(s: GameState): void {
       }
       row.units = surviving;
       if (row.horn) {
-        ps.graveyard.push(row.horn);
+        // Leader horn markers are not real cards — they simply evaporate.
+        if (row.horn.defId !== LEADER_HORN_MARKER_ID) {
+          ps.graveyard.push(row.horn);
+        }
         row.horn = null;
       }
     }

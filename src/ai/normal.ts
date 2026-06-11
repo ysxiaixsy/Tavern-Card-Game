@@ -169,8 +169,23 @@ export function estimateGain(view: PlayerView, move: Move): number {
     return 0;
   }
   if (move.type === 'USE_LEADER') {
-    const ability = getCardDef(view.you.leader.defId).leaderAbility;
-    return ability === 'foltest_fog' ? weatherNetGain(view, 'fog') : 0;
+    const leader = getCardDef(view.you.leader.defId);
+    switch (leader.leaderAbility) {
+      case 'weather_from_deck':
+        return leader.leaderWeather ? weatherNetGain(view, leader.leaderWeather) : 0;
+      case 'clear_weather':
+        return clearWeatherNetGain(view);
+      case 'scorch_melee_leader':
+        return meleeScorchGain(view);
+      case 'row_horn':
+        return leader.leaderHornRow ? hornGain(view, leader.leaderHornRow) : 0;
+      case 'play_from_graveyard': {
+        const def = move.targetInstanceId ? graveyardDef(view, move.targetInstanceId) : null;
+        return def && !def.abilities.includes('spy') ? (def.strength ?? 0) : 0;
+      }
+      default:
+        return 0;
+    }
   }
   const def = handDef(view, move.cardInstanceId);
   switch (def.type) {
@@ -383,15 +398,33 @@ export function scoreMoves(view: PlayerView): ScoredMove[] {
   }
 
   function leaderScore(move: UseLeaderMove): number {
-    const ability = getCardDef(view.you.leader.defId).leaderAbility;
-    switch (ability) {
-      case 'foltest_fog': {
-        const gain = weatherNetGain(view, 'fog') + 6; // +6: it costs no card
+    const leader = getCardDef(view.you.leader.defId);
+    switch (leader.leaderAbility) {
+      case 'weather_from_deck': {
+        if (!leader.leaderWeather) {
+          return 0;
+        }
+        const gain = weatherNetGain(view, leader.leaderWeather) + 6; // +6: costs no card
         return gain >= 10 ? 60 + gain : 2;
       }
-      case 'emhyr_peek':
+      case 'clear_weather': {
+        const gain = clearWeatherNetGain(view) + 6;
+        return gain >= 9 ? 60 + gain : 2;
+      }
+      case 'scorch_melee_leader': {
+        const gain = meleeScorchGain(view);
+        return gain >= 6 ? 65 + gain : 3;
+      }
+      case 'row_horn': {
+        const gain = leader.leaderHornRow ? hornGain(view, leader.leaderHornRow) : 0;
+        return gain >= 10 ? 40 + Math.min(gain, 40) * 0.8 : 2;
+      }
+      case 'cancel_leader':
+        // Denying an unspent enemy leader is worth a quiet early turn.
+        return round === 1 ? 22 : 14;
+      case 'peek_hand':
         return round >= 2 ? 12 : 6;
-      case 'eredin_restore': {
+      case 'restore_to_hand': {
         const def = move.targetInstanceId ? graveyardDef(view, move.targetInstanceId) : null;
         if (!def) {
           return 0;
@@ -400,6 +433,16 @@ export function scoreMoves(view: PlayerView): ScoredMove[] {
           return 170;
         }
         return (def.strength ?? 0) >= 8 ? 45 : 14;
+      }
+      case 'play_from_graveyard': {
+        const def = move.targetInstanceId ? graveyardDef(view, move.targetInstanceId) : null;
+        if (!def) {
+          return 0;
+        }
+        if (def.abilities.includes('spy')) {
+          return 180; // instant revive: the spy redraws immediately
+        }
+        return (def.strength ?? 0) >= 8 ? 55 : 16;
       }
       default:
         return 0;

@@ -18,6 +18,7 @@ Hot-seat first, then vs-AI, then online play via Supabase room codes.
 | M4 — online play (Supabase) | next |
 | M5 — polish, deck builder, animations | planned |
 | Bonus — all four factions playable (NG + ST pulled forward from M5) | ✅ done |
+| Bonus — leader variants (3 per faction, pickable per seat) | ✅ done |
 
 ## Getting started
 
@@ -74,9 +75,14 @@ Re-run `npm run usb` after unplugging/replugging the phone.
    (mirror matches allowed) — then start hot-seat or **vs AI** (Easy /
    Normal / Hard — the AI plays Player 2's side). No pass-the-phone screens
    vs AI; "🤖 thinking…" shows while it moves.
-1b. Pick Scoia'tael: you start with 11 cards (Francesca) and a "who goes
-   first?" choice before the mulligan. Pick Nilfgaard and force a tied
-   round to see the tiebreak perk fire.
+1b. Pick Scoia'tael with Daisy of the Valley: you start with 11 cards and a
+   "who goes first?" choice before the mulligan. Pick Nilfgaard and force a
+   tied round to see the tiebreak perk fire.
+1c. Each faction now has **three leader variants** — long-press a leader on
+   the home screen to read its ability. Try Son of Medell (on-demand melee
+   scorch), the Emperor (cancels the enemy leader — use it before they use
+   theirs), Red Riders / the Beautiful (a free Commander's Horn for one row),
+   and King of the Wild Hunt (plays a unit straight from your graveyard).
 2. Play Normal: it should open with spies, answer your big rows with weather
    or Scorch, revive spies with medics, and **concede hopeless rounds** rather
    than bleed cards — then beat you in round 3 with the cards it saved.

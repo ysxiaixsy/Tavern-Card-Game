@@ -1,48 +1,86 @@
 /**
- * The tavern door. Pick a faction for each seat (mirrors allowed), then
- * start hot-seat or face the AI. Online (M4) is signposted.
+ * The tavern door. Each seat picks a faction AND one of its leader variants
+ * (long-press a leader to read its ability). Mirrors allowed. Online is M4.
  */
 
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { getCardDef } from '../../engine/data/cards';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { getCardDef, leadersOf } from '../../engine/data/cards';
 import { STARTER_DECKS } from '../../engine/data/decks';
 import { factionTheme, palette, sp } from '../theme';
-import { useAppStore, type PlayableFaction } from '../store';
+import { useAppStore, type PlayableFaction, type SeatSetup } from '../store';
+import { CardZoomSheet } from '../components/Sheets';
 
 const PLAYABLE: readonly PlayableFaction[] = Object.keys(STARTER_DECKS) as PlayableFaction[];
 
-function FactionPicker({
+/** "Foltest, King of Temeria" → "King of Temeria" for compact chips. */
+function variantName(defId: string): string {
+  const name = getCardDef(defId).name;
+  const comma = name.indexOf(',');
+  return comma === -1 ? name : name.slice(comma + 1).trim();
+}
+
+function SeatPicker({
   label,
-  value,
+  seat,
   onChange,
+  onInspectLeader,
 }: {
   label: string;
-  value: PlayableFaction;
-  onChange: (faction: PlayableFaction) => void;
+  seat: SeatSetup;
+  onChange: (seat: SeatSetup) => void;
+  onInspectLeader: (defId: string) => void;
 }): React.JSX.Element {
+  const theme = factionTheme[seat.faction];
   return (
     <View style={styles.pickerBlock}>
       <Text style={styles.pickerLabel}>{label}</Text>
       <View style={styles.pickerRow}>
         {PLAYABLE.map((faction) => {
-          const theme = factionTheme[faction];
-          const selected = faction === value;
-          const leaderName = getCardDef(STARTER_DECKS[faction].leaderId).name.split(',')[0];
+          const fTheme = factionTheme[faction];
+          const selected = faction === seat.faction;
           return (
             <Pressable
               key={faction}
-              onPress={() => onChange(faction)}
+              onPress={() =>
+                onChange({ faction, leaderId: STARTER_DECKS[faction].leaderId })
+              }
               style={[
                 styles.factionChip,
+                { borderColor: selected ? fTheme.accent : palette.line },
+                selected && { backgroundColor: palette.surfaceRaised },
+              ]}
+            >
+              <Text
+                style={[styles.factionName, { color: selected ? fTheme.accent : palette.textDim }]}
+              >
+                {fTheme.label}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+      <View style={styles.leaderRow}>
+        {leadersOf(seat.faction).map((leader) => {
+          const selected = leader.id === seat.leaderId;
+          return (
+            <Pressable
+              key={leader.id}
+              onPress={() => onChange({ ...seat, leaderId: leader.id })}
+              onLongPress={() => onInspectLeader(leader.id)}
+              delayLongPress={250}
+              style={[
+                styles.leaderChip,
                 { borderColor: selected ? theme.accent : palette.line },
                 selected && { backgroundColor: palette.surfaceRaised },
               ]}
             >
-              <Text style={[styles.factionName, { color: selected ? theme.accent : palette.textDim }]}>
-                {theme.label}
+              <Text
+                numberOfLines={2}
+                style={[styles.leaderName, { color: selected ? palette.text : palette.textDim }]}
+              >
+                👑 {variantName(leader.id)}
               </Text>
-              <Text style={styles.factionLeader}>👑 {leaderName}</Text>
             </Pressable>
           );
         })}
@@ -54,20 +92,32 @@ function FactionPicker({
 export function HomeScreen(): React.JSX.Element {
   const startHotSeat = useAppStore((s) => s.startHotSeat);
   const startVsAi = useAppStore((s) => s.startVsAi);
-  const [p1Faction, setP1Faction] = useState<PlayableFaction>('northern_realms');
-  const [p2Faction, setP2Faction] = useState<PlayableFaction>('monsters');
+  const [seat1, setSeat1] = useState<SeatSetup>({
+    faction: 'northern_realms',
+    leaderId: STARTER_DECKS.northern_realms.leaderId,
+  });
+  const [seat2, setSeat2] = useState<SeatSetup>({
+    faction: 'monsters',
+    leaderId: STARTER_DECKS.monsters.leaderId,
+  });
+  const [zoomDefId, setZoomDefId] = useState<string | null>(null);
 
   return (
-    <View style={styles.screen}>
+    <ScrollView style={styles.scroll} contentContainerStyle={styles.screen}>
       <Text style={styles.kicker}>THE WITCHER 3 TAVERN GAME</Text>
       <Text style={styles.title}>GWENT</Text>
-      <Text style={styles.sub}>best of 3 · 10 cards · no draw step</Text>
+      <Text style={styles.sub}>best of 3 · 10 cards · no draw step · long-press a leader for details</Text>
 
-      <FactionPicker label="PLAYER 1 — YOU" value={p1Faction} onChange={setP1Faction} />
-      <FactionPicker label="PLAYER 2 — FRIEND OR AI" value={p2Faction} onChange={setP2Faction} />
+      <SeatPicker label="PLAYER 1 — YOU" seat={seat1} onChange={setSeat1} onInspectLeader={setZoomDefId} />
+      <SeatPicker
+        label="PLAYER 2 — FRIEND OR AI"
+        seat={seat2}
+        onChange={setSeat2}
+        onInspectLeader={setZoomDefId}
+      />
 
       <View style={styles.menu}>
-        <Pressable style={styles.button} onPress={() => startHotSeat(p1Faction, p2Faction)}>
+        <Pressable style={styles.button} onPress={() => startHotSeat(seat1, seat2)}>
           <Text style={styles.buttonText}>⚔️ Hot-seat — two players, one phone</Text>
         </Pressable>
         <Text style={styles.menuLabel}>🤖 Versus AI (it plays Player 2's side)</Text>
@@ -76,7 +126,7 @@ export function HomeScreen(): React.JSX.Element {
             <Pressable
               key={difficulty}
               style={styles.diffButton}
-              onPress={() => startVsAi(difficulty, p1Faction, p2Faction)}
+              onPress={() => startVsAi(difficulty, seat1, seat2)}
             >
               <Text style={styles.diffText}>
                 {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
@@ -89,36 +139,40 @@ export function HomeScreen(): React.JSX.Element {
         </View>
       </View>
 
-      <Text style={styles.footer}>
-        Fan-made, non-commercial. Placeholder art only — no CDPR assets.
-      </Text>
-    </View>
+      <Text style={styles.footer}>Fan-made, non-commercial. Placeholder art only — no CDPR assets.</Text>
+
+      <CardZoomSheet defId={zoomDefId} onClose={() => setZoomDefId(null)} />
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
+  scroll: {
     flex: 1,
     backgroundColor: palette.bg,
+  },
+  screen: {
     alignItems: 'center',
-    justifyContent: 'center',
     padding: sp(5),
+    paddingBottom: sp(8),
   },
   kicker: {
     color: palette.textDim,
     fontSize: 11,
     letterSpacing: 3,
+    marginTop: sp(4),
   },
   title: {
     color: palette.goldBright,
-    fontSize: 48,
+    fontSize: 44,
     fontWeight: '900',
     letterSpacing: 6,
   },
   sub: {
     color: palette.textDim,
-    fontSize: 12,
-    marginBottom: sp(5),
+    fontSize: 11,
+    marginBottom: sp(4),
+    textAlign: 'center',
   },
   pickerBlock: {
     alignSelf: 'stretch',
@@ -133,24 +187,40 @@ const styles = StyleSheet.create({
   pickerRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: sp(2),
+    gap: sp(1),
   },
   factionChip: {
-    flexBasis: '47%',
+    flexBasis: '23%',
     flexGrow: 1,
     borderWidth: 1.5,
-    borderRadius: 12,
+    borderRadius: 10,
     paddingVertical: sp(2),
+    paddingHorizontal: 2,
     alignItems: 'center',
-    gap: 2,
   },
   factionName: {
-    fontWeight: '800',
-    fontSize: 13,
-  },
-  factionLeader: {
-    color: palette.textDim,
+    fontWeight: '700',
     fontSize: 10,
+    textAlign: 'center',
+  },
+  leaderRow: {
+    flexDirection: 'row',
+    gap: sp(1),
+    marginTop: sp(1),
+  },
+  leaderChip: {
+    flex: 1,
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingVertical: sp(1),
+    paddingHorizontal: sp(1),
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 40,
+  },
+  leaderName: {
+    fontSize: 10,
+    textAlign: 'center',
   },
   menu: {
     gap: sp(3),
@@ -206,8 +276,7 @@ const styles = StyleSheet.create({
   footer: {
     color: palette.textDim,
     fontSize: 10,
-    position: 'absolute',
-    bottom: sp(4),
+    marginTop: sp(6),
     textAlign: 'center',
   },
 });
