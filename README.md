@@ -29,6 +29,23 @@ npm run simulate    # watch two bots play a full match in the terminal
 npm run simulate my-seed   # any seed string reproduces the same game
 ```
 
+### Playing on the phone over USB (when Wi-Fi is unreliable)
+
+Some routers/phones mangle the phone↔PC bundle download (symptoms: stuck at
+"Bundling 99%", `JSBigFileString::fromPath` red screens). The cable route
+bypasses all of it. One-time setup is already done on this machine
+(platform-tools + an IPv4→IPv6 portproxy shim on port 18081, because
+`expo start --localhost` binds IPv6-only on Windows). Per session:
+
+```sh
+# terminal 1
+npx expo start --localhost
+# terminal 2 — phone plugged in, USB debugging on
+npm run usb
+```
+
+Re-run `npm run usb` after unplugging/replugging the phone.
+
 ## What to verify manually after M2 (on a phone, in Expo Go)
 
 1. **Start a hot-seat game** — privacy screen appears before anyone sees cards.
