@@ -247,19 +247,31 @@ describe('easy difficulty', () => {
 });
 
 describe('relative strength', () => {
-  it('normal beats easy across a fixed seed set', () => {
+  it('normal beats easy on mirrored decks (fixed seeds)', () => {
+    // Mirrors isolate skill from deck texture (e.g. Easy "accidentally"
+    // playing muster decks well). Deterministic: AI + seeds are fixed.
+    const mirrors: GameConfig[] = [
+      { players: { p1: { deck: NORTHERN_REALMS_STARTER }, p2: { deck: NORTHERN_REALMS_STARTER } } },
+      { players: { p1: { deck: MONSTERS_STARTER }, p2: { deck: MONSTERS_STARTER } } },
+    ];
     let normalWins = 0;
-    const games: Array<[string, Difficulty, Difficulty, PlayerId]> = [];
-    for (let i = 0; i < 5; i++) {
-      games.push([`arena-${i}-a`, 'normal', 'easy', 'p1']);
-      games.push([`arena-${i}-b`, 'easy', 'normal', 'p2']);
-    }
-    for (const [seed, p1, p2, normalSide] of games) {
-      const final = playFullGame(seed, p1, p2);
-      if (final.result?.winner === normalSide) {
-        normalWins += 1;
+    let games = 0;
+    for (const [m, config] of mirrors.entries()) {
+      for (let i = 0; i < 6; i++) {
+        const normalSide: PlayerId = i % 2 === 0 ? 'p1' : 'p2';
+        const final = playFullGame(
+          `arena-mirror-${m}-${i}`,
+          normalSide === 'p1' ? 'normal' : 'easy',
+          normalSide === 'p2' ? 'normal' : 'easy',
+          config,
+        );
+        games += 1;
+        if (final.result?.winner === normalSide) {
+          normalWins += 1;
+        }
       }
     }
-    expect(normalWins).toBeGreaterThanOrEqual(6); // 10 games, deterministic
+    expect(games).toBe(12);
+    expect(normalWins).toBeGreaterThanOrEqual(7);
   });
 });

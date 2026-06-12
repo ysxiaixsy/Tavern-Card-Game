@@ -6,10 +6,8 @@
  * from game files; individual numbers may be off by a point or a row.
  * Anything I am notably unsure about carries an inline `// VERIFY:` comment.
  *
- * v1 ships the full neutral set plus Northern Realms and Monsters (enough
- * for two legal starter decks). Nilfgaard and Scoia'tael card data come in
- * M5, but their leaders exist now because the engine supports all four
- * faction perks from day one.
+ * Scope: the complete base-game pool for all four factions + neutrals,
+ * cross-checked against the player's card checklist (copy counts included).
  *
  * DLC cards are intentionally EXCLUDED (per project decision): the Skellige
  * faction and Skellige Storm, Olgierd von Everec, Gaunter O'Dimm + the three
@@ -143,7 +141,7 @@ export const CARD_DEFS: readonly CardDef[] = [
     type: 'weather',
     weather: 'rain',
     abilities: [],
-    maxCopiesPerDeck: 3,
+    maxCopiesPerDeck: 2,
   },
   {
     id: 'neu_clear',
@@ -152,7 +150,7 @@ export const CARD_DEFS: readonly CardDef[] = [
     type: 'weather',
     weather: 'clear',
     abilities: [],
-    maxCopiesPerDeck: 3,
+    maxCopiesPerDeck: 2,
   },
   {
     id: 'neu_horn',
@@ -287,8 +285,7 @@ export const CARD_DEFS: readonly CardDef[] = [
     type: 'unit',
     row: 'siege',
     strength: 5,
-    abilities: ['medic'],
-    maxCopiesPerDeck: 3,
+    abilities: ['medic'], // single copy in W3 (confirmed by checklist)
   },
   {
     id: 'nr_blue_stripes',
@@ -332,7 +329,7 @@ export const CARD_DEFS: readonly CardDef[] = [
   },
   {
     id: 'nr_poor_infantry',
-    name: 'Poor F***ing Infantry',
+    name: 'Poor Fucking Infantry',
     faction: 'northern_realms',
     type: 'unit',
     row: 'melee',
@@ -785,6 +782,33 @@ export const CARD_DEFS: readonly CardDef[] = [
     strength: 6,
     abilities: [],
   },
+  {
+    id: 'mon_botchling',
+    name: 'Botchling',
+    faction: 'monsters',
+    type: 'unit',
+    row: 'melee',
+    strength: 4, // VERIFY
+    abilities: [],
+  },
+  {
+    id: 'mon_grave_hag',
+    name: 'Grave Hag',
+    faction: 'monsters',
+    type: 'unit',
+    row: 'ranged',
+    strength: 5, // VERIFY
+    abilities: [],
+  },
+  {
+    id: 'mon_plague_maiden',
+    name: 'Plague Maiden',
+    faction: 'monsters',
+    type: 'unit',
+    row: 'melee',
+    strength: 5, // VERIFY
+    abilities: [],
+  },
 
   // -------------------------------------------------------------------------
   // Nilfgaard — the spy faction (wins tied rounds)
@@ -893,7 +917,7 @@ export const CARD_DEFS: readonly CardDef[] = [
     row: 'ranged',
     strength: 1,
     abilities: ['medic'],
-    maxCopiesPerDeck: 3,
+    maxCopiesPerDeck: 2,
   },
   {
     id: 'ng_impera',
@@ -926,8 +950,8 @@ export const CARD_DEFS: readonly CardDef[] = [
     maxCopiesPerDeck: 2,
   },
   {
-    id: 'ng_arbalest',
-    name: 'Black Infantry Arbalest',
+    id: 'ng_arbalest', // id kept for compat; W3 name is "Archer", not "Arbalest"
+    name: 'Black Infantry Archer',
     faction: 'nilfgaard',
     type: 'unit',
     row: 'ranged',
@@ -1068,7 +1092,25 @@ export const CARD_DEFS: readonly CardDef[] = [
     type: 'unit',
     row: 'siege',
     strength: 0,
-    abilities: ['medic'], // VERIFY: 0-strength siege medic in W3.
+    abilities: ['medic'], // VERIFY strength/medic (existence confirmed by checklist)
+  },
+  {
+    id: 'ng_rainfarn',
+    name: 'Rainfarn',
+    faction: 'nilfgaard',
+    type: 'unit',
+    row: 'melee',
+    strength: 4, // VERIFY
+    abilities: [],
+  },
+  {
+    id: 'ng_vreemde',
+    name: 'Vreemde',
+    faction: 'nilfgaard',
+    type: 'unit',
+    row: 'melee',
+    strength: 2, // VERIFY
+    abilities: [],
   },
 
   // -------------------------------------------------------------------------
@@ -1114,6 +1156,15 @@ export const CARD_DEFS: readonly CardDef[] = [
   {
     id: 'st_eithne',
     name: 'Eithné',
+    faction: 'scoiatael',
+    type: 'hero',
+    row: 'ranged',
+    strength: 10,
+    abilities: [],
+  },
+  {
+    id: 'st_iorveth',
+    name: 'Iorveth',
     faction: 'scoiatael',
     type: 'hero',
     row: 'ranged',
@@ -1226,6 +1277,7 @@ export const CARD_DEFS: readonly CardDef[] = [
     row: 'agile',
     strength: 5,
     abilities: ['agile'],
+    maxCopiesPerDeck: 2,
   },
   {
     id: 'st_barclay',

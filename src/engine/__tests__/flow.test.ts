@@ -18,7 +18,8 @@ describe('mulligan phase', () => {
     let state = createGame(STARTER_CONFIG, 'mulligan-test');
     expect(state.phase).toBe('mulligan');
     expect(state.players.p1.hand).toHaveLength(10);
-    expect(state.players.p1.deck).toHaveLength(25); // 35 cards − 10 dealt
+    const deckSize = NORTHERN_REALMS_STARTER.cardIds.length - 10;
+    expect(state.players.p1.deck).toHaveLength(deckSize);
 
     const [a, b] = state.players.p1.hand;
     state = applyMove(state, {
@@ -27,7 +28,7 @@ describe('mulligan phase', () => {
       cardInstanceIds: [a.instanceId, b.instanceId],
     });
     expect(state.players.p1.hand).toHaveLength(10);
-    expect(state.players.p1.deck).toHaveLength(25);
+    expect(state.players.p1.deck).toHaveLength(deckSize);
     expect(state.players.p1.mulligansUsed).toBe(2);
     expect(state.phase).toBe('mulligan'); // p2 still owes a mulligan
     expect(getLegalMoves(state, 'p1')).toEqual([]); // one submission only

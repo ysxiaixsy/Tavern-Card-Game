@@ -301,6 +301,7 @@ export function scoreMoves(view: PlayerView): ScoredMove[] {
   const handAdv = view.you.hand.length - view.opponent.handCount;
   const mustWin = view.you.gems <= 1;
   const committed = ROW_KINDS.reduce((n, r) => n + view.you.rows[r].units.length, 0);
+  const oppCommitted = ROW_KINDS.reduce((n, r) => n + view.opponent.rows[r].units.length, 0);
   const round = view.round;
 
   // Pre-compute the comeback picture when the opponent has locked their total.
@@ -318,15 +319,26 @@ export function scoreMoves(view: PlayerView): ScoredMove[] {
     }
   }
   const roundWinnable = !oppPassed || margin > 0 || margin + totalAvailableGain > 0;
+  /**
+   * Abandoning an ACTIVE round: the deficit is no longer worth cards. Each
+   * card played here would be matched by the opponent — bank the hand, give
+   * the gem, fight the next round with superior resources. (Never while a
+   * loss would end the match.)
+   */
+  const abandoning =
+    !oppPassed &&
+    !mustWin &&
+    ((round === 1 && margin < -18 && oppCommitted >= 4) || margin < -28);
   /** Conceding: round is lost (or not worth it) — dump spies, then pass. */
   const conceding =
-    oppPassed &&
-    margin <= 0 &&
-    (!roundWinnable ||
-      (!mustWin &&
-        // a comeback would take several precious cards — cut the losses
-        margin + bestSingleGain <= 0 &&
-        -margin > totalAvailableGain * 0.6));
+    abandoning ||
+    (oppPassed &&
+      margin <= 0 &&
+      (!roundWinnable ||
+        (!mustWin &&
+          // a comeback would take several precious cards — cut the losses
+          margin + bestSingleGain <= 0 &&
+          -margin > totalAvailableGain * 0.6)));
 
   const scored: ScoredMove[] = view.legalMoves.map((move) => ({
     move,
@@ -385,11 +397,11 @@ export function scoreMoves(view: PlayerView): ScoredMove[] {
       return -100; // fight on
     }
     // Opponent still active.
+    if (abandoning) {
+      return 70; // stop the bleeding (spies still outrank: dump them first)
+    }
     if (margin > 14 && round >= 2 && committed >= 3) {
       return 40; // comfortably ahead late: stop feeding the round
-    }
-    if (margin < -16 && round === 1 && !mustWin && committed <= 2) {
-      return 55; // early bait/concede: keep the hand, give the gem
     }
     if (margin > 0 && handAdv >= 2 && round === 1 && committed >= 2) {
       return 30; // ahead on cards AND points: tempt them to overcommit
@@ -492,6 +504,10 @@ export function scoreMoves(view: PlayerView): ScoredMove[] {
     if (def.abilities.includes('spy')) {
       return conceding || (oppPassed && !roundWinnable) ? 990 : 200 - (def.strength ?? 0);
     }
+    // A round being abandoned deserves no further cards.
+    if (abandoning) {
+      return def.abilities.includes('medic') && bestReviveIsSpy() ? 960 : -10;
+    }
 
     // Opponent locked & we are behind: cheapest card that flips the round.
     if (oppPassed && margin <= 0) {
@@ -577,7 +593,15 @@ export function scoreMoves(view: PlayerView): ScoredMove[] {
           ).length;
           return 90 + inHand * 4;
         }
-        return bodyScore(def) + agileAdjust(move, def);
+        // Posture: behind → cheapest card that RETAKES the lead beats curve
+        // discipline; ahead → drip the smallest body and let THEM spend.
+        let score = bodyScore(def) + agileAdjust(move, def);
+        if (margin <= 0 && gain > -margin) {
+          score += 60 - (def.strength ?? 0); // flip the round, pay minimum
+        } else if (margin > 0 && !mustWin) {
+          score -= (def.strength ?? 0) * 1.2; // hold the big stuff while leading
+        }
+        return score;
       }
       default:
         return 0;
@@ -587,7 +611,8 @@ export function scoreMoves(view: PlayerView): ScoredMove[] {
   /** Mid-value bodies are the round currency; tiny and huge wait their turn. */
   function bodyScore(def: CardDef): number {
     const printed = def.strength ?? 0;
-    let score = 30 - Math.abs(printed - 5) * 3;
+    // Contested must-win rounds want raw power, not curve discipline.
+    let score = mustWin && margin < 0 ? 24 + printed : 30 - Math.abs(printed - 5) * 3;
     if (def.abilities.includes('bond')) {
       const rowKind = def.row as RowKind;
       const onRow =

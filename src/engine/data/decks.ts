@@ -10,7 +10,7 @@
 
 import type { DeckList } from '../types.ts';
 
-/** Northern Realms — Foltest. 27 units, 8 specials. */
+/** Northern Realms — Foltest. 25 units, 8 specials. */
 export const NORTHERN_REALMS_STARTER: DeckList = {
   leaderId: 'nr_foltest',
   cardIds: [
@@ -25,9 +25,7 @@ export const NORTHERN_REALMS_STARTER: DeckList = {
     'nr_stennis',
     'nr_dijkstra',
     'nr_thaler',
-    // Medics
-    'nr_dun_banner_medic',
-    'nr_dun_banner_medic',
+    // Medic (single copy in W3)
     'nr_dun_banner_medic',
     // Tight bond
     'nr_blue_stripes',
