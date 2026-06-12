@@ -28,6 +28,7 @@ import {
 } from '../store';
 import { ensureSignedIn, isOnlineConfigured, supabase } from '../../online/supabase';
 import {
+  cancelRoom,
   createRoom,
   fetchSnapshot,
   joinRoom,
@@ -295,7 +296,16 @@ export function OnlineScreen(): React.JSX.Element {
           Share this code. The match starts the moment your opponent joins.
         </Text>
         <ActivityIndicator color={palette.gold} />
-        <BigButton label="Leave" onPress={leave} ghost />
+        <BigButton
+          label="Cancel room"
+          onPress={() => {
+            // Best-effort: tear the room down server-side, then go home.
+            void cancelRoom(phase.gameId).catch(() => undefined);
+            setLastOnlineGame(null);
+            leave();
+          }}
+          ghost
+        />
       </Centered>
     );
   }

@@ -69,9 +69,17 @@ Setup (one time):
    `npm run sync:engine` → apply `supabase/migrations/` → deploy
    `supabase/functions/gwent`.
 
+Room lifecycle: **one open room per host** (creating a new room retires
+your previous waiting one), the lobby's Cancel button deletes the room,
+and an hourly pg_cron job expires the rest — waiting rooms after 2 h,
+abandoned active games after 48 h without a move, finished games after
+7 days (cascade removes their state + move log). Table growth is bounded
+by live traffic; a thousand concurrent games is a few MB.
+
 Verify the whole stack from a terminal: `npm run smoke:online` — two
-anonymous users play a complete random match through the real backend,
-including RLS and seat-enforcement probes.
+anonymous users exercise room lifecycle (auto-retire + cancel), RLS and
+seat-enforcement probes, then play a complete random match through the
+real backend.
 
 ## What to verify manually after M2 (on a phone, in Expo Go)
 

@@ -92,10 +92,40 @@ async function main(): Promise<void> {
   console.log('  p1 uid:', ra.data.user?.id);
   console.log('  p2 uid:', rb.data.user?.id);
 
-  console.log('— creating room (NR starter)…');
+  console.log('— room lifecycle: one open room per host…');
+  const stale = await call<{ gameId: string; roomCode: string }>(a, 'create_game', {
+    deck: NORTHERN_REALMS_STARTER,
+  });
   const { gameId, roomCode } = await call<{ gameId: string; roomCode: string }>(a, 'create_game', {
     deck: NORTHERN_REALMS_STARTER,
   });
+  try {
+    await call(a, 'get_view', { gameId: stale.gameId });
+    throw new Error('stale waiting room survived a new create_game!');
+  } catch (error) {
+    if (error instanceof Error && /not found/i.test(error.message)) {
+      console.log(`  ✓ previous waiting room ${stale.roomCode} was auto-retired`);
+    } else {
+      throw error;
+    }
+  }
+
+  console.log('— room lifecycle: explicit cancel…');
+  const doomed = await call<{ gameId: string; roomCode: string }>(b, 'create_game', {
+    deck: MONSTERS_STARTER,
+  });
+  await call(b, 'cancel_game', { gameId: doomed.gameId });
+  try {
+    await call(b, 'get_view', { gameId: doomed.gameId });
+    throw new Error('canceled room still exists!');
+  } catch (error) {
+    if (error instanceof Error && /not found/i.test(error.message)) {
+      console.log(`  ✓ canceled room ${doomed.roomCode} is gone`);
+    } else {
+      throw error;
+    }
+  }
+
   console.log('  room:', roomCode, 'game:', gameId);
 
   console.log('— RLS probes…');

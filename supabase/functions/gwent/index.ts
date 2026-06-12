@@ -124,6 +124,10 @@ Deno.serve(async (req) => {
         const deck = body.deck as DeckList;
         validateDeck(deck);
 
+        // One open room per host: creating a new room retires any previous
+        // waiting room of yours (cascade removes its lobby state).
+        await admin.from('games').delete().eq('player1', user.id).eq('status', 'waiting');
+
         for (let attempt = 0; attempt < 5; attempt++) {
           const roomCode = makeRoomCode();
           const { data: game, error } = await admin
@@ -192,6 +196,19 @@ Deno.serve(async (req) => {
         }
         await admin.from('game_states').update({ state, updated_at: new Date().toISOString() }).eq('game_id', game.id);
         return json({ gameId: game.id });
+      }
+
+      // -----------------------------------------------------------------
+      case 'cancel_game': {
+        // The host abandons their still-waiting room; it vanishes entirely.
+        const gameId = String(body.gameId ?? '');
+        await admin
+          .from('games')
+          .delete()
+          .eq('id', gameId)
+          .eq('player1', user.id)
+          .eq('status', 'waiting');
+        return json({ ok: true });
       }
 
       // -----------------------------------------------------------------

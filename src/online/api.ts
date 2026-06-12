@@ -57,6 +57,11 @@ export function fetchSnapshot(gameId: string): Promise<OnlineGameSnapshot> {
   return call('get_view', { gameId });
 }
 
+/** Host-only: delete a still-waiting room (no-op if it already started). */
+export function cancelRoom(gameId: string): Promise<{ ok: boolean }> {
+  return call('cancel_game', { gameId });
+}
+
 export function submitMove(gameId: string, move: Move): Promise<OnlineGameSnapshot> {
   return call('submit_move', { gameId, move });
 }

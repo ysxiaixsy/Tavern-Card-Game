@@ -84,5 +84,9 @@ Placeholder art only; never reference CDPR assets (see IP note in the brief).
   `lastOnlineGame` persisted for resume). BattleScreen/MulliganView are
   presentational and shared by local and online play. E2E:
   `npm run smoke:online`. NOTE: "Allow anonymous sign-ins" must be ON in
-  the dashboard (auth config is not reachable via MCP/SQL).
+  the dashboard (auth config is not reachable via MCP/SQL). Lifecycle:
+  one open room per host (create_game retires the caller's waiting rooms),
+  cancel_game action for the lobby's Cancel button, and migration 0002's
+  pg_cron job `gwent_cleanup_hourly` expires waiting>2h / stale-active>48h
+  / finished>7d (cascade cleans game_states + moves).
 - **M5** polish: animations (Reanimated), sound, settings.
