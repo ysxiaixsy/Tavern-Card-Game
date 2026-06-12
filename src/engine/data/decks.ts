@@ -1,16 +1,15 @@
 /**
- * Starter deck lists, one per faction (the deck builder arrives in M5).
- *
- * Every deck is legal: 1 leader, ≥ 22 unit cards (heroes count as units),
- * ≤ 10 special cards, and every card is faction-locked or neutral. Between
- * them they exercise every mechanic: spies, medics (incl. hero medics), tight
- * bonds, moral boost, muster groups, horn units, agile units, unit-scorch,
- * all three weathers + clear, horn, scorch and decoy.
+ * Starter deck lists, one per faction — the immutable templates the deck
+ * builder offers for duplication. Every starter is exactly MAX_DECK_CARDS
+ * (30) and legal: 1 leader, ≥ 22 unit cards (heroes count), ≤ 10 specials,
+ * 25–30 total, every card faction-locked or neutral. Between them they
+ * exercise every mechanic: spies, medics (incl. hero medics), tight bonds,
+ * moral boost, muster groups, horn units, agile units, unit-scorch, weather.
  */
 
 import type { DeckList } from '../types.ts';
 
-/** Northern Realms — Foltest. 25 units, 8 specials. */
+/** Northern Realms — Foltest. 25 units + 5 specials. */
 export const NORTHERN_REALMS_STARTER: DeckList = {
   leaderId: 'nr_foltest',
   cardIds: [
@@ -45,19 +44,16 @@ export const NORTHERN_REALMS_STARTER: DeckList = {
     'nr_ves',
     'neu_dandelion', // horn unit
     'neu_villentretenmerth', // unit-scorch
-    // Specials (8)
-    'neu_horn',
-    'neu_horn',
-    'neu_decoy',
-    'neu_decoy',
-    'neu_clear',
-    'neu_clear',
-    'neu_scorch',
+    // Specials (5)
     'neu_fog', // required in-deck for Foltest's leader ability
+    'neu_horn',
+    'neu_decoy',
+    'neu_decoy',
+    'neu_scorch',
   ],
 };
 
-/** Monsters — Eredin. 30 units, 8 specials. */
+/** Monsters — Eredin. 24 units + 6 specials. */
 export const MONSTERS_STARTER: DeckList = {
   leaderId: 'mon_eredin',
   cardIds: [
@@ -73,9 +69,6 @@ export const MONSTERS_STARTER: DeckList = {
     'mon_nekker',
     'mon_nekker',
     'mon_nekker',
-    'mon_ghoul',
-    'mon_ghoul',
-    'mon_ghoul',
     'mon_arachas',
     'mon_arachas',
     'mon_arachas',
@@ -88,25 +81,20 @@ export const MONSTERS_STARTER: DeckList = {
     'mon_vampire_fleder',
     'mon_vampire_garkain',
     // Bodies
-    'mon_fiend',
-    'mon_werewolf',
-    'mon_griffin',
     'mon_celaeno_harpy', // agile
     'mon_earth_elemental',
     'mon_fire_elemental',
-    // Specials (8)
-    'neu_frost',
+    // Specials (6)
     'neu_frost',
     'neu_rain',
     'neu_fog',
-    'neu_horn',
     'neu_horn',
     'neu_decoy',
     'neu_scorch',
   ],
 };
 
-/** Nilfgaard — Emhyr. 26 units, 8 specials. Spies and ties. */
+/** Nilfgaard — Emhyr. 26 units + 4 specials. Spies and ties. */
 export const NILFGAARD_STARTER: DeckList = {
   leaderId: 'ng_emhyr',
   cardIds: [
@@ -141,19 +129,15 @@ export const NILFGAARD_STARTER: DeckList = {
     'ng_heavy_scorpion',
     'ng_scorpion',
     'ng_siege_engineer',
-    // Specials (8) — decoys feed the spy loop
-    'neu_decoy',
+    // Specials (4) — decoys feed the spy loop; rain serves the White Flame
     'neu_decoy',
     'neu_decoy',
     'neu_horn',
-    'neu_horn',
-    'neu_clear',
-    'neu_fog',
     'neu_rain',
   ],
 };
 
-/** Scoia'tael — Francesca. 27 units, 8 specials. Agility and ambushes. */
+/** Scoia'tael — Francesca. 25 units + 5 specials. Agility and ambushes. */
 export const SCOIATAEL_STARTER: DeckList = {
   leaderId: 'st_francesca',
   cardIds: [
@@ -176,28 +160,23 @@ export const SCOIATAEL_STARTER: DeckList = {
     'st_havekar_healer',
     'st_havekar_healer',
     // Agile corps
-    'st_ciaran',
     'st_yaevinn',
     'st_dol_scout',
     'st_dol_scout',
     'st_vrihedd_veteran',
     'st_barclay',
-    // Bodies & toolbox
+    // Bodies
     'st_milva',
     'st_ida',
     'st_dennis',
-    'st_toruviel',
     'st_mahakaman',
     'st_mahakaman',
-    // Specials (8)
+    // Specials (5) — frost serves the Pureblood Elf
     'neu_horn',
     'neu_horn',
     'neu_decoy',
-    'neu_decoy',
-    'neu_clear',
     'neu_clear',
     'neu_frost',
-    'neu_scorch',
   ],
 };
 

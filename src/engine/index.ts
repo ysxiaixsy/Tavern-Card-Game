@@ -16,7 +16,15 @@ export {
   NORTHERN_REALMS_STARTER,
   STARTER_DECKS,
 } from './data/decks.ts';
-export { createGame, isTerminal, validateDeck } from './game.ts';
+export {
+  createGame,
+  isTerminal,
+  MAX_DECK_CARDS,
+  MAX_SPECIAL_CARDS,
+  MIN_DECK_CARDS,
+  MIN_UNIT_CARDS,
+  validateDeck,
+} from './game.ts';
 export { getLegalMoves } from './legal.ts';
 export { rowTotal, rowUnitViews, sideTotal } from './strength.ts';
 export { getView } from './view.ts';

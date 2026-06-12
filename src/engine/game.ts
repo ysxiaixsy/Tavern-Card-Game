@@ -19,8 +19,16 @@ import {
 
 const HAND_SIZE = 10;
 const STARTING_GEMS = 2;
-const MIN_UNIT_CARDS = 22;
-const MAX_SPECIAL_CARDS = 10;
+
+/**
+ * Deck-building rules. Units/specials limits are W3's own; the total-size
+ * band is a project rule (W3 has no maximum) so the deck builder stays
+ * focused: faction + neutral cards together must fit the band.
+ */
+export const MIN_UNIT_CARDS = 22;
+export const MAX_SPECIAL_CARDS = 10;
+export const MIN_DECK_CARDS = 25;
+export const MAX_DECK_CARDS = 30;
 
 /** Throws GwentError('INVALID_CONFIG') if the deck breaks a deck-building rule. */
 export function validateDeck(deck: DeckList): void {
@@ -74,6 +82,18 @@ export function validateDeck(deck: DeckList): void {
     throw new GwentError(
       'INVALID_CONFIG',
       `deck has ${specialCount} special cards; at most ${MAX_SPECIAL_CARDS} allowed`,
+    );
+  }
+  if (deck.cardIds.length < MIN_DECK_CARDS) {
+    throw new GwentError(
+      'INVALID_CONFIG',
+      `deck has ${deck.cardIds.length} cards; at least ${MIN_DECK_CARDS} required`,
+    );
+  }
+  if (deck.cardIds.length > MAX_DECK_CARDS) {
+    throw new GwentError(
+      'INVALID_CONFIG',
+      `deck has ${deck.cardIds.length} cards; at most ${MAX_DECK_CARDS} allowed`,
     );
   }
 }

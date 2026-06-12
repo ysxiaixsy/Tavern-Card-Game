@@ -8,7 +8,9 @@ import { Platform, SafeAreaView, StatusBar as RNStatusBar, StyleSheet } from 're
 import { StatusBar } from 'expo-status-bar';
 import { palette } from './theme';
 import { useAppStore } from './store';
+import { DeckBuilderScreen } from './screens/DeckBuilderScreen';
 import { GameScreen } from './screens/GameScreen';
+import { GameSetupScreen } from './screens/GameSetupScreen';
 import { HomeScreen } from './screens/HomeScreen';
 import { MulliganScreen } from './screens/MulliganScreen';
 import { PrivacyScreen } from './screens/PrivacyScreen';
@@ -19,7 +21,11 @@ export function Root(): React.JSX.Element {
   const session = useAppStore((s) => s.session);
 
   let content: React.JSX.Element;
-  if (screen === 'home' || session === null) {
+  if (screen === 'decks') {
+    content = <DeckBuilderScreen />;
+  } else if (screen === 'setup') {
+    content = <GameSetupScreen />;
+  } else if (screen === 'home' || session === null) {
     content = <HomeScreen />;
   } else if (session.state.phase === 'finished') {
     content = <ResultScreen />;

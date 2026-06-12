@@ -20,6 +20,7 @@ Hot-seat first, then vs-AI, then online play via Supabase room codes.
 | Bonus — all four factions playable (NG + ST pulled forward from M5) | ✅ done |
 | Bonus — leader variants (4 per faction, pickable per seat) | ✅ done |
 | Bonus — full base-game card audit (no DLC: Skellige, O'Dimm, Olgierd, Schirrú, …) | ✅ done |
+| Bonus — deck builder (pulled forward from M5): custom decks, persisted | ✅ done |
 
 ## Getting started
 
@@ -70,23 +71,25 @@ Re-run `npm run usb` after unplugging/replugging the phone.
    passes are announced when someone runs out of cards.
 8. **Finish a match** — result screen with per-round scores; Rematch reshuffles.
 
-## What to verify manually after M3 (on the phone)
+## What to verify manually (on the phone)
 
-1. Home screen: pick a faction for **each seat** — all four are playable
-   (mirror matches allowed) — then start hot-seat or **vs AI** (Easy /
-   Normal / Hard — the AI plays Player 2's side). No pass-the-phone screens
-   vs AI; "🤖 thinking…" shows while it moves.
-1b. Pick Scoia'tael with Daisy of the Valley: you start with 11 cards and a
-   "who goes first?" choice before the mulligan. Pick Nilfgaard and force a
-   tied round to see the tiebreak perk fire.
-1c. Each faction now has **four base-game leader variants** — long-press a
-   leader on the home screen to read its ability. Try Queen of Dol Blathanna
-   (on-demand melee scorch) or the Steel-Forged (siege scorch), the Emperor
-   (cancels the enemy leader — use it before they use theirs), Red Riders /
-   the Beautiful / the Siegemaster (a free Commander's Horn for one row),
-   King of the Wild Hunt (plays a unit straight from your graveyard), the
-   Relentless (steals from the ENEMY graveyard) and Destroyer of Worlds
-   (discard 2, fetch any card from your deck via a two-step picker).
+1. **Home is mode-only**: Hot-seat, Versus AI, Deck builder, Online (M4).
+   Tapping a mode opens the **setup screen**: assign a deck (starter or
+   custom) to each seat, pick AI difficulty when relevant, start.
+2. **Deck builder**: duplicate a starter or build new — pick faction (reset
+   warning applies), pick one of the **four leader variants** (long-press
+   for ability text), then use the +/− steppers. The sticky status bar
+   enforces the rules live: 25–30 total, ≥22 units, ≤10 specials, copy
+   limits per card. Save is disabled until legal. Custom decks **survive an
+   app restart** (AsyncStorage) and appear on the setup screen.
+3. Leader abilities worth trying: Queen of Dol Blathanna / Steel-Forged
+   (on-demand row scorch), the Emperor (cancel the enemy leader before they
+   use it), Red Riders / the Beautiful / the Siegemaster (free Commander's
+   Horn on a row), King of the Wild Hunt (play from your graveyard), the
+   Relentless (steal from the ENEMY graveyard), Destroyer of Worlds
+   (discard 2, fetch any deck card via the two-step picker).
+4. Scoia'tael with Daisy of the Valley: 11 starting cards plus the "who goes
+   first?" choice before mulligans. Nilfgaard wins tied rounds.
 2. Play Normal: it should open with spies, answer your big rows with weather
    or Scorch, revive spies with medics, and **concede hopeless rounds** rather
    than bleed cards — then beat you in round 3 with the cards it saved.

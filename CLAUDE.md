@@ -63,5 +63,13 @@ Placeholder art only; never reference CDPR assets (see IP note in the brief).
 - **Card scope:** base game ONLY — the DLC exclusion list lives in the
   cards.ts header (Skellige, O'Dimm/Darkness, Olgierd, Toad, Cow, Schirrú,
   and the four DLC leaders). Don't re-add them without asking.
+- **Bonus ✅** deck builder (pulled forward from M5): faction/leader/cards
+  chosen in `DeckBuilderScreen`, seat assignment in `GameSetupScreen`, Home
+  is mode-only. Deck rules: W3's ≥22 units & ≤10 specials PLUS a project
+  rule of 25–30 total cards (user decision; W3 itself has no max) —
+  constants exported from engine/game.ts, validateDeck is the single source
+  of truth. Custom decks persist via zustand persist + AsyncStorage
+  (`gwent-app` key, customDecks only). All four starters are exactly 30
+  cards and double as immutable builder templates.
 - **M4 (next)** Supabase online play (Edge Functions run this same engine).
 - **M5** polish: deck builder, animations (Reanimated), sound, settings.

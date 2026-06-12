@@ -11,13 +11,14 @@ const STARTER_CONFIG: GameConfig = {
   },
 };
 
-/** A deck of 22 distinct NR/neutral units + the given extras. */
+/** A deck of 25 distinct NR/neutral units (meets every minimum on its own). */
 function legalUnits(): string[] {
   return [
     'nr_vernon', 'nr_natalis', 'nr_esterad', 'nr_philippa', 'neu_geralt', 'neu_yennefer',
     'nr_stennis', 'nr_dijkstra', 'nr_thaler', 'nr_dun_banner_medic', 'nr_blue_stripes',
     'nr_crinfrid', 'nr_catapult', 'nr_kaedweni', 'nr_siegfried', 'nr_ves', 'nr_yarpen',
-    'nr_sile', 'nr_keira', 'nr_sabrina', 'neu_vesemir', 'neu_zoltan',
+    'nr_sile', 'nr_keira', 'nr_sabrina', 'neu_vesemir', 'neu_zoltan', 'nr_sheldon',
+    'nr_dethmold', 'nr_trebuchet',
   ];
 }
 
@@ -36,11 +37,33 @@ describe('deck validation', () => {
     const specials = [
       'neu_frost', 'neu_frost', 'neu_frost',
       'neu_fog', 'neu_fog', 'neu_fog',
-      'neu_rain', 'neu_rain', 'neu_rain',
-      'neu_clear', 'neu_clear', // 11 specials
+      'neu_rain', 'neu_rain',
+      'neu_clear', 'neu_clear',
+      'neu_horn', // 11 specials
     ];
     const deck: DeckList = { leaderId: 'nr_foltest', cardIds: [...legalUnits(), ...specials] };
-    expect(() => validateDeck(deck)).toThrowError(GwentError);
+    expect(() => validateDeck(deck)).toThrowError(/special cards/);
+  });
+
+  it('enforces the total deck size band (25–30)', () => {
+    // 24 cards: every unit/special rule satisfied, total too small.
+    expect(() =>
+      validateDeck({ leaderId: 'nr_foltest', cardIds: legalUnits().slice(0, 24) }),
+    ).toThrowError(/at least 25/);
+    // 31 cards: total too large.
+    expect(() =>
+      validateDeck({
+        leaderId: 'nr_foltest',
+        cardIds: [...legalUnits(), 'neu_frost', 'neu_fog', 'neu_rain', 'neu_clear', 'neu_horn', 'neu_scorch'],
+      }),
+    ).toThrowError(/at most 30/);
+    // 30 cards: fine.
+    expect(() =>
+      validateDeck({
+        leaderId: 'nr_foltest',
+        cardIds: [...legalUnits(), 'neu_frost', 'neu_fog', 'neu_rain', 'neu_clear', 'neu_horn'],
+      }),
+    ).not.toThrow();
   });
 
   it('rejects cards from a foreign faction', () => {
