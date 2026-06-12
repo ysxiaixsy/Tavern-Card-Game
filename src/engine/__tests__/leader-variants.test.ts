@@ -66,10 +66,10 @@ describe('Lord Commander of the North — clear weather', () => {
   });
 });
 
-describe('Son of Medell — on-demand melee scorch', () => {
-  it('burns the strongest non-hero melee unit(s) when the row totals 10+', () => {
+describe('scorch_row_leader variants', () => {
+  it('Queen of Dol Blathanna burns the strongest non-hero melee unit(s) at 10+', () => {
     const state = makeState({
-      p1: { leader: 'nr_foltest_medell', hand: ['nr_ves'] },
+      p1: { leader: 'st_francesca_queen', hand: ['st_dennis'] },
       p2: { hand: ['mon_ghoul'], rows: { melee: ['mon_fiend', 'mon_werewolf', 'mon_draug'] } }, // 6+5+hero10
     });
     const s = applyMove(state, leaderMove(state, 'p1') as Move);
@@ -80,17 +80,92 @@ describe('Son of Medell — on-demand melee scorch', () => {
     expect(graveyardDefs(s, 'p2')).toEqual(['mon_fiend']);
   });
 
+  it('the Steel-Forged hits the SIEGE row instead', () => {
+    const state = makeState({
+      p1: { leader: 'nr_foltest_steelforged', hand: ['nr_ves'] },
+      p2: {
+        hand: ['mon_ghoul'],
+        rows: { siege: ['mon_earth_elemental', 'mon_ice_giant'], melee: ['mon_fiend'] }, // siege 11
+      },
+    });
+    const s = applyMove(state, leaderMove(state, 'p1') as Move);
+    expect(s.players.p2.rows.siege.units.map((u) => u.defId)).toEqual(['mon_ice_giant']);
+    expect(s.players.p2.rows.melee.units).toHaveLength(1); // melee untouched
+    expect(graveyardDefs(s, 'p2')).toEqual(['mon_earth_elemental']);
+  });
+
   it('is not offered below the threshold or against hero-only rows', () => {
     const below = makeState({
-      p1: { leader: 'nr_foltest_medell', hand: ['nr_ves'] },
+      p1: { leader: 'st_francesca_queen', hand: ['st_dennis'] },
       p2: { hand: ['mon_ghoul'], rows: { melee: ['mon_werewolf'] } }, // 5 < 10
     });
     expect(leaderMove(below, 'p1')).toBeUndefined();
     const heroesOnly = makeState({
-      p1: { leader: 'nr_foltest_medell', hand: ['nr_ves'] },
+      p1: { leader: 'st_francesca_queen', hand: ['st_dennis'] },
       p2: { hand: ['mon_ghoul'], rows: { melee: ['mon_draug', 'mon_imlerith'] } }, // 20, all heroes
     });
     expect(leaderMove(heroesOnly, 'p1')).toBeUndefined();
+  });
+});
+
+describe('the Relentless — steal from the enemy graveyard', () => {
+  it('moves a chosen non-hero enemy casualty into your hand', () => {
+    const state = makeState({
+      p1: { leader: 'ng_emhyr_relentless', hand: ['ng_cynthia'] },
+      p2: { hand: ['mon_fiend'], graveyard: ['nr_stennis', 'mon_draug'] },
+    });
+    const moves = getLegalMoves(state, 'p1').filter((m) => m.type === 'USE_LEADER');
+    expect(moves).toHaveLength(1); // the hero Draug is not stealable
+    const s = applyMove(state, moves[0]);
+    expect(s.players.p1.hand.map((c) => c.defId).sort()).toEqual(['ng_cynthia', 'nr_stennis']);
+    expect(s.players.p2.graveyard.map((c) => c.defId)).toEqual(['mon_draug']);
+    expect(s.players.p1.leaderUsed).toBe(true);
+  });
+});
+
+describe('Destroyer of Worlds — discard 2, fetch 1', () => {
+  it('discards two hand cards to the graveyard and fetches the chosen deck card', () => {
+    const state = makeState({
+      p1: {
+        leader: 'mon_eredin_destroyer',
+        hand: ['mon_ghoul', 'mon_wyvern', 'mon_fiend'],
+        deck: ['mon_draug', 'mon_werewolf'],
+      },
+      p2: { hand: ['nr_ves'] },
+    });
+    const moves = getLegalMoves(state, 'p1').filter(
+      (m) => m.type === 'USE_LEADER' && m.drawDefId !== undefined,
+    );
+    // 3 hand pairs × 2 distinct deck defs.
+    expect(moves).toHaveLength(6);
+
+    const [ghoul, wyvern] = state.players.p1.hand;
+    const move = moves.find(
+      (m) =>
+        m.type === 'USE_LEADER' &&
+        m.drawDefId === 'mon_draug' &&
+        m.discardInstanceIds?.includes(ghoul.instanceId) &&
+        m.discardInstanceIds?.includes(wyvern.instanceId),
+    );
+    expect(move).toBeDefined();
+    const s = applyMove(state, move as Move);
+    expect(s.players.p1.hand.map((c) => c.defId).sort()).toEqual(['mon_draug', 'mon_fiend']);
+    expect(graveyardDefs(s, 'p1')).toEqual(['mon_ghoul', 'mon_wyvern']);
+    expect(s.players.p1.deck.map((c) => c.defId)).toEqual(['mon_werewolf']);
+    expect(s.turn).toBe('p2'); // using the leader consumed the turn
+  });
+
+  it('is not offered with fewer than 2 hand cards or an empty deck', () => {
+    const thinHand = makeState({
+      p1: { leader: 'mon_eredin_destroyer', hand: ['mon_ghoul'], deck: ['mon_fiend'] },
+      p2: { hand: ['nr_ves'] },
+    });
+    expect(leaderMove(thinHand, 'p1')).toBeUndefined();
+    const emptyDeck = makeState({
+      p1: { leader: 'mon_eredin_destroyer', hand: ['mon_ghoul', 'mon_wyvern'] },
+      p2: { hand: ['nr_ves'] },
+    });
+    expect(leaderMove(emptyDeck, 'p1')).toBeUndefined();
   });
 });
 
@@ -226,12 +301,13 @@ describe('King of the Wild Hunt — play from the graveyard, full effects', () =
 
 describe('deck building with leader variants', () => {
   it('any same-faction leader variant heads a legal deck', () => {
-    expect(() =>
-      validateDeck({ ...NORTHERN_REALMS_STARTER, leaderId: 'nr_foltest_medell' }),
-    ).not.toThrow();
-    expect(() =>
-      validateDeck({ ...NORTHERN_REALMS_STARTER, leaderId: 'nr_foltest_commander' }),
-    ).not.toThrow();
+    for (const leaderId of [
+      'nr_foltest_commander',
+      'nr_foltest_siegemaster',
+      'nr_foltest_steelforged',
+    ]) {
+      expect(() => validateDeck({ ...NORTHERN_REALMS_STARTER, leaderId })).not.toThrow();
+    }
   });
 
   it('the leader horn marker can never be decked', () => {

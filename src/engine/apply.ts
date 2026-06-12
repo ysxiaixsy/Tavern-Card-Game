@@ -247,7 +247,7 @@ function resolveUnitPlay(
   }
 
   if (def.abilities.includes('scorch_melee')) {
-    resolveMeleeScorch(s, actor);
+    resolveRowScorch(s, actor, 'melee');
   }
 
   // Medic last: it suspends the turn in a pendingChoice. If the graveyard has
@@ -306,18 +306,18 @@ function resolveGlobalScorch(s: GameState): void {
 }
 
 /**
- * Unit scorch (Villentretenmerth): if the opponent's Close Combat row totals
- * 10 or more (heroes count toward the total), destroy its strongest non-hero
- * unit(s). The scorch unit itself stays on the board.
+ * Row scorch: if the opponent's given row totals 10 or more (heroes count
+ * toward the total), destroy its strongest non-hero unit(s). Used by the
+ * Villentretenmerth unit ability (melee) and scorch_row_leader abilities.
  */
-function resolveMeleeScorch(s: GameState, actor: PlayerId): void {
+function resolveRowScorch(s: GameState, actor: PlayerId, rowKind: RowKind): void {
   const side = opponentOf(actor);
-  if (rowTotal(s, side, 'melee') < 10) {
+  if (rowTotal(s, side, rowKind) < 10) {
     return;
   }
   let highest = -1;
   const victims: { side: PlayerId; rowKind: RowKind; instanceId: string }[] = [];
-  for (const unit of rowUnitViews(s, side, 'melee')) {
+  for (const unit of rowUnitViews(s, side, rowKind)) {
     if (getCardDef(unit.defId).type !== 'unit') {
       continue;
     }
@@ -326,7 +326,7 @@ function resolveMeleeScorch(s: GameState, actor: PlayerId): void {
       victims.length = 0;
     }
     if (unit.effectiveStrength === highest) {
-      victims.push({ side, rowKind: 'melee', instanceId: unit.instanceId });
+      victims.push({ side, rowKind, instanceId: unit.instanceId });
     }
   }
   destroyUnits(s, victims);
@@ -453,12 +453,16 @@ function applyUseLeader(s: GameState, move: UseLeaderMove): void {
       clearAllWeather(s);
       break;
     }
-    case 'scorch_melee_leader': {
-      const opp = opponentOf(move.player);
-      if (rowTotal(s, opp, 'melee') < 10) {
-        throw new GwentError('LEADER_UNAVAILABLE', "opponent's melee row is below 10");
+    case 'scorch_row_leader': {
+      const row = leaderDef.leaderScorchRow;
+      if (!row) {
+        throw new GwentError('LEADER_UNAVAILABLE', 'leader has no scorch row configured');
       }
-      resolveMeleeScorch(s, move.player);
+      const opp = opponentOf(move.player);
+      if (rowTotal(s, opp, row) < 10) {
+        throw new GwentError('LEADER_UNAVAILABLE', `opponent's ${row} row is below 10`);
+      }
+      resolveRowScorch(s, move.player, row);
       break;
     }
     case 'row_horn': {
@@ -508,6 +512,48 @@ function applyUseLeader(s: GameState, move: UseLeaderMove): void {
       // Full effects, exactly like a medic revival (spies draw, musters
       // muster, a revived medic opens a pendingChoice chain).
       resolveUnitPlay(s, move.player, card, def, move.row);
+      break;
+    }
+    case 'steal_from_graveyard': {
+      // The Relentless: lift a non-hero unit out of the ENEMY discard pile.
+      const opp = s.players[opponentOf(move.player)];
+      if (!move.targetInstanceId) {
+        throw new GwentError('ILLEGAL_MOVE', 'choose a card in the enemy graveyard');
+      }
+      const index = opp.graveyard.findIndex((c) => c.instanceId === move.targetInstanceId);
+      if (index === -1) {
+        throw new GwentError('INVALID_TARGET', `${move.targetInstanceId} is not in the enemy graveyard`);
+      }
+      if (getCardDef(opp.graveyard[index].defId).type !== 'unit') {
+        throw new GwentError('INVALID_TARGET', 'only non-hero units can be stolen'); // VERIFY vs W3
+      }
+      const [stolen] = opp.graveyard.splice(index, 1);
+      ps.hand.push(stolen);
+      break;
+    }
+    case 'discard_draw': {
+      // Destroyer of Worlds: discard 2, then fetch any card from your deck.
+      const ids = move.discardInstanceIds;
+      if (!ids || ids.length !== 2 || new Set(ids).size !== 2) {
+        throw new GwentError('ILLEGAL_MOVE', 'discard exactly 2 distinct hand cards');
+      }
+      if (!move.drawDefId) {
+        throw new GwentError('ILLEGAL_MOVE', 'choose a card to fetch from your deck');
+      }
+      for (const id of ids) {
+        const handIndex = ps.hand.findIndex((c) => c.instanceId === id);
+        if (handIndex === -1) {
+          throw new GwentError('CARD_NOT_FOUND', `${id} is not in your hand`);
+        }
+        const [discarded] = ps.hand.splice(handIndex, 1);
+        ps.graveyard.push(discarded);
+      }
+      const deckIndex = ps.deck.findIndex((c) => c.defId === move.drawDefId);
+      if (deckIndex === -1) {
+        throw new GwentError('INVALID_TARGET', `no ${move.drawDefId} left in your deck`);
+      }
+      const [fetched] = ps.deck.splice(deckIndex, 1);
+      ps.hand.push(fetched);
       break;
     }
     case 'draw_extra_start':

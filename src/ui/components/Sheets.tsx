@@ -4,7 +4,7 @@
  * panels over a dimmed backdrop; no animation polish until M5.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { getCardDef } from '../../engine/data/cards';
 import type {
@@ -162,7 +162,9 @@ export function MedicSheet({
 }
 
 function defIdInGraveyard(view: PlayerView, instanceId: string): string {
-  const card = view.you.graveyard.find((c) => c.instanceId === instanceId);
+  const card =
+    view.you.graveyard.find((c) => c.instanceId === instanceId) ??
+    view.opponent.graveyard.find((c) => c.instanceId === instanceId); // steal_from_graveyard targets
   return card ? card.defId : 'neu_decoy'; // unreachable fallback keeps render safe
 }
 
@@ -189,6 +191,31 @@ export function LeaderSheet({
     side === 'you'
       ? view.legalMoves.filter((m): m is UseLeaderMove => m.type === 'USE_LEADER')
       : [];
+  const isDiscardDraw = def.leaderAbility === 'discard_draw' && leaderMoves.length > 0;
+
+  // discard_draw picker state: 2 hand cards out, 1 deck card in.
+  const [discardSel, setDiscardSel] = useState<string[]>([]);
+  const [fetchSel, setFetchSel] = useState<string | null>(null);
+  useEffect(() => {
+    if (!visible) {
+      setDiscardSel([]);
+      setFetchSel(null);
+    }
+  }, [visible]);
+
+  const fetchOptions = isDiscardDraw
+    ? [...new Set(leaderMoves.map((m) => m.drawDefId).filter((d): d is string => d !== undefined))]
+    : [];
+  const discardDrawMove =
+    isDiscardDraw && discardSel.length === 2 && fetchSel !== null
+      ? leaderMoves.find(
+          (m) =>
+            m.drawDefId === fetchSel &&
+            m.discardInstanceIds !== undefined &&
+            m.discardInstanceIds.length === 2 &&
+            m.discardInstanceIds.every((id) => discardSel.includes(id)),
+        )
+      : undefined;
 
   let status: string | null = null;
   if (sideView.leaderUsed) {
@@ -210,14 +237,14 @@ export function LeaderSheet({
         ))}
         {status !== null && <Text style={styles.dimText}>{status}</Text>}
 
-        {leaderMoves.length === 1 && leaderMoves[0].targetInstanceId === undefined && (
+        {!isDiscardDraw && leaderMoves.length === 1 && leaderMoves[0].targetInstanceId === undefined && (
           <Pressable style={styles.bigButton} onPress={() => onSubmit(leaderMoves[0])}>
             <Text style={styles.bigButtonText}>Use ability (ends your turn)</Text>
           </Pressable>
         )}
         {leaderMoves.length > 0 && leaderMoves[0].targetInstanceId !== undefined && (
           <>
-            <Text style={styles.typeLine}>Pick a unit to restore to your hand:</Text>
+            <Text style={styles.typeLine}>Pick a unit:</Text>
             <View style={styles.cardGrid}>
               {leaderMoves.map((move, i) => (
                 <CardView
@@ -228,6 +255,49 @@ export function LeaderSheet({
                 />
               ))}
             </View>
+          </>
+        )}
+        {isDiscardDraw && (
+          <>
+            <Text style={styles.typeLine}>1 · Choose 2 cards to discard ({discardSel.length}/2)</Text>
+            <View style={styles.cardGrid}>
+              {view.you.hand.map((card) => (
+                <CardView
+                  key={card.instanceId}
+                  defId={card.defId}
+                  size="board"
+                  selected={discardSel.includes(card.instanceId)}
+                  onPress={() =>
+                    setDiscardSel((current) =>
+                      current.includes(card.instanceId)
+                        ? current.filter((id) => id !== card.instanceId)
+                        : current.length < 2
+                          ? [...current, card.instanceId]
+                          : current,
+                    )
+                  }
+                />
+              ))}
+            </View>
+            <Text style={styles.typeLine}>2 · Fetch any card from your deck</Text>
+            <View style={styles.cardGrid}>
+              {fetchOptions.map((defId) => (
+                <CardView
+                  key={defId}
+                  defId={defId}
+                  size="board"
+                  selected={fetchSel === defId}
+                  onPress={() => setFetchSel(defId === fetchSel ? null : defId)}
+                />
+              ))}
+            </View>
+            <Pressable
+              style={[styles.bigButton, !discardDrawMove && { opacity: 0.4 }]}
+              disabled={!discardDrawMove}
+              onPress={() => discardDrawMove && onSubmit(discardDrawMove)}
+            >
+              <Text style={styles.bigButtonText}>Confirm (ends your turn)</Text>
+            </Pressable>
           </>
         )}
       </View>

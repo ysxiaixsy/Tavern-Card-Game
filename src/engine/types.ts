@@ -78,12 +78,14 @@ export type Ability =
 export type LeaderAbilityId =
   | 'weather_from_deck' // play this leader's weather kind straight from your deck (see CardDef.leaderWeather)
   | 'clear_weather' // remove all active weather
-  | 'scorch_melee_leader' // destroy enemy's strongest melee unit(s) if their melee row totals 10+
+  | 'scorch_row_leader' // destroy enemy's strongest unit(s) in leaderScorchRow if that row totals 10+
   | 'row_horn' // double one of YOUR rows like a Commander's Horn (see CardDef.leaderHornRow)
   | 'cancel_leader' // cancel the opponent's (unused) leader ability
   | 'peek_hand' // look at 3 random cards in the opponent's hand
   | 'restore_to_hand' // restore a non-hero unit from your graveyard to your hand
   | 'play_from_graveyard' // play a non-hero unit from your graveyard instantly, full effects
+  | 'steal_from_graveyard' // take a non-hero unit from the OPPONENT's graveyard into your hand
+  | 'discard_draw' // discard 2 cards, then draw 1 card of your choice from your deck
   | 'draw_extra_start'; // auto: draw an extra card at match start (never an on-demand move)
 
 /** Static card definition (see data/cards.ts). */
@@ -113,6 +115,8 @@ export interface CardDef {
   leaderWeather?: Exclude<WeatherKind, 'clear'>;
   /** row_horn leaders: which of your rows they double. */
   leaderHornRow?: RowKind;
+  /** scorch_row_leader leaders: which ENEMY row they scorch. */
+  leaderScorchRow?: RowKind;
 }
 
 /** A concrete copy of a card in one game. instanceIds are unique per game. */
@@ -260,10 +264,14 @@ export interface ResolveMedicMove {
 export interface UseLeaderMove {
   type: 'USE_LEADER';
   player: PlayerId;
-  /** Required for graveyard-targeting leaders (restore_to_hand, play_from_graveyard). */
+  /** Graveyard-targeting leaders (restore_to_hand, play_from_graveyard, steal_from_graveyard). */
   targetInstanceId?: string;
   /** Required when play_from_graveyard revives an agile unit. */
   row?: RowKind;
+  /** discard_draw: exactly 2 of your hand cards to discard. */
+  discardInstanceIds?: string[];
+  /** discard_draw: the card (by def id) to fetch from your deck. */
+  drawDefId?: string;
 }
 
 export interface PassMove {

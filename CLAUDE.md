@@ -53,9 +53,15 @@ Placeholder art only; never reference CDPR assets (see IP note in the brief).
   engine). The store runs the AI as p2 on a 600 ms timer loop.
 - **Bonus ✅** all four factions playable: NG + ST card sets and starter
   decks (pulled forward from M5); faction picker per seat on Home.
-- **Bonus ✅** leader variants: 3 per faction, data-driven via
-  `LeaderAbilityId` (+ `leaderWeather`/`leaderHornRow` CardDef params).
+- **Bonus ✅** leader variants: 4 per faction (16 total), data-driven via
+  `LeaderAbilityId` (+ `leaderWeather`/`leaderHornRow`/`leaderScorchRow`).
   row_horn leaders place a `leader_horn_marker` pseudo-card in the horn slot
   that evaporates at round end (never enters a graveyard, never deck-legal).
+  discard_draw (Destroyer of Worlds) enumerates complete moves: every hand
+  pair × every distinct deck def — large but finite, per the no-mid-move-
+  prompt rule.
+- **Card scope:** base game ONLY — the DLC exclusion list lives in the
+  cards.ts header (Skellige, O'Dimm/Darkness, Olgierd, Toad, Cow, Schirrú,
+  and the four DLC leaders). Don't re-add them without asking.
 - **M4 (next)** Supabase online play (Edge Functions run this same engine).
 - **M5** polish: deck builder, animations (Reanimated), sound, settings.

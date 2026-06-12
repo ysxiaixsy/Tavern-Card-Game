@@ -139,12 +139,16 @@ function leaderMoves(state: GameState, player: PlayerId): Move[] {
     case 'clear_weather':
       // Only offered while weather is actually on the board (no wasted uses).
       return state.weatherCards.length === 0 ? [] : [{ type: 'USE_LEADER', player }];
-    case 'scorch_melee_leader': {
+    case 'scorch_row_leader': {
+      const row = def.leaderScorchRow;
+      if (!row) {
+        return [];
+      }
       const opp = opponentOf(player);
-      const hasVictim = state.players[opp].rows.melee.units.some(
+      const hasVictim = state.players[opp].rows[row].units.some(
         (u) => getCardDef(u.defId).type === 'unit',
       );
-      return rowTotal(state, opp, 'melee') >= 10 && hasVictim
+      return rowTotal(state, opp, row) >= 10 && hasVictim
         ? [{ type: 'USE_LEADER', player }]
         : [];
     }
@@ -175,6 +179,34 @@ function leaderMoves(state: GameState, player: PlayerId): Move[] {
           }
         } else {
           moves.push({ type: 'USE_LEADER', player, targetInstanceId: target.instanceId });
+        }
+      }
+      return moves;
+    }
+    case 'steal_from_graveyard':
+      return medicTargets(state.players[opponentOf(player)]).map((target) => ({
+        type: 'USE_LEADER',
+        player,
+        targetInstanceId: target.instanceId,
+      }));
+    case 'discard_draw': {
+      // Every (pair of hand cards) × (distinct deck card): the move payload
+      // is complete, per the engine's no-mid-move-prompt rule.
+      if (ps.hand.length < 2 || ps.deck.length === 0) {
+        return [];
+      }
+      const deckDefIds = [...new Set(ps.deck.map((c) => c.defId))].sort();
+      const moves: Move[] = [];
+      for (let i = 0; i < ps.hand.length; i++) {
+        for (let j = i + 1; j < ps.hand.length; j++) {
+          for (const drawDefId of deckDefIds) {
+            moves.push({
+              type: 'USE_LEADER',
+              player,
+              discardInstanceIds: [ps.hand[i].instanceId, ps.hand[j].instanceId],
+              drawDefId,
+            });
+          }
         }
       }
       return moves;

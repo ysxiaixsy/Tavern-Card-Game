@@ -146,6 +146,22 @@ function determinize(view: PlayerView, rng: number): [GameState, number] {
       { instanceId: `sim:weather-${++simCounter}`, defId: weatherDefId },
     ];
   }
+  // Likewise for discard_draw: every drawDefId offered by the engine really
+  // is in the deck, so plant them in the sample to keep candidates legal.
+  if (leaderUsable && myLeader.leaderAbility === 'discard_draw') {
+    const wanted = [
+      ...new Set(
+        view.legalMoves
+          .filter((m) => m.type === 'USE_LEADER' && m.drawDefId !== undefined)
+          .map((m) => (m as { drawDefId: string }).drawDefId),
+      ),
+    ];
+    for (let i = 0; i < wanted.length && i < myDeck.length; i++) {
+      if (!myDeck.some((c) => c.defId === wanted[i])) {
+        myDeck[i] = { instanceId: `sim:fetch-${++simCounter}`, defId: wanted[i] };
+      }
+    }
+  }
 
   // Opponent hand: Emhyr-revealed cards are known; the rest is sampled.
   const oppPool = samplePool(view.opponent.faction);

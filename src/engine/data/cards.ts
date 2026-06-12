@@ -11,8 +11,11 @@
  * M5, but their leaders exist now because the engine supports all four
  * faction perks from day one.
  *
- * Hearts of Stone / Blood and Wine DLC neutrals (Olgierd, Gaunter O'Dimm,
- * Shani, the Skellige faction, …) are intentionally out of scope for v1.
+ * DLC cards are intentionally EXCLUDED (per project decision): the Skellige
+ * faction and Skellige Storm, Olgierd von Everec, Gaunter O'Dimm + the three
+ * Darkness cards, Toad, Cow, Schirrú, and the DLC leaders (Eredin the
+ * Treacherous, Francesca Hope of the Aen Seidhe, Foltest Son of Medell,
+ * Emhyr Invader of the North). Base-game cards only.
  */
 
 import type { CardDef } from '../types.ts';
@@ -197,12 +200,22 @@ export const CARD_DEFS: readonly CardDef[] = [
     leaderAbility: 'clear_weather',
   },
   {
-    id: 'nr_foltest_medell',
-    name: 'Foltest, Son of Medell',
+    id: 'nr_foltest_siegemaster',
+    name: 'Foltest, the Siegemaster',
     faction: 'northern_realms',
     type: 'leader',
     abilities: [],
-    leaderAbility: 'scorch_melee_leader', // VERIFY: melee variant (Steel-Forged is the siege one)
+    leaderAbility: 'row_horn',
+    leaderHornRow: 'siege',
+  },
+  {
+    id: 'nr_foltest_steelforged',
+    name: 'Foltest, the Steel-Forged',
+    faction: 'northern_realms',
+    type: 'leader',
+    abilities: [],
+    leaderAbility: 'scorch_row_leader',
+    leaderScorchRow: 'siege',
   },
   {
     id: 'nr_vernon',
@@ -227,7 +240,7 @@ export const CARD_DEFS: readonly CardDef[] = [
     name: 'Esterad Thyssen',
     faction: 'northern_realms',
     type: 'hero',
-    row: 'melee',
+    row: 'siege', // VERIFY: corrected from melee — Esterad is the NR siege hero.
     strength: 10,
     abilities: [],
   },
@@ -427,6 +440,16 @@ export const CARD_DEFS: readonly CardDef[] = [
     strength: 6,
     abilities: [],
   },
+  {
+    id: 'nr_foot_soldier',
+    name: 'Redanian Foot Soldier',
+    faction: 'northern_realms',
+    type: 'unit',
+    row: 'melee',
+    strength: 1,
+    abilities: [],
+    maxCopiesPerDeck: 2,
+  },
 
   // -------------------------------------------------------------------------
   // Monsters
@@ -457,6 +480,14 @@ export const CARD_DEFS: readonly CardDef[] = [
     abilities: [],
     leaderAbility: 'row_horn',
     leaderHornRow: 'melee',
+  },
+  {
+    id: 'mon_eredin_destroyer',
+    name: 'Eredin, Destroyer of Worlds',
+    faction: 'monsters',
+    type: 'leader',
+    abilities: [],
+    leaderAbility: 'discard_draw',
   },
   {
     id: 'mon_draug',
@@ -526,6 +557,16 @@ export const CARD_DEFS: readonly CardDef[] = [
     abilities: ['muster'],
     musterGroup: 'arachas',
     maxCopiesPerDeck: 3,
+  },
+  {
+    id: 'mon_arachas_behemoth',
+    name: 'Arachas Behemoth',
+    faction: 'monsters',
+    type: 'unit',
+    row: 'siege', // VERIFY: base-game behemoth — siege row, musters with Arachas.
+    strength: 6,
+    abilities: ['muster'],
+    musterGroup: 'arachas',
   },
   // The three Crones have different names but muster as one group.
   {
@@ -774,6 +815,14 @@ export const CARD_DEFS: readonly CardDef[] = [
     leaderAbility: 'cancel_leader',
   },
   {
+    id: 'ng_emhyr_relentless',
+    name: 'Emhyr var Emreis, the Relentless',
+    faction: 'nilfgaard',
+    type: 'leader',
+    abilities: [],
+    leaderAbility: 'steal_from_graveyard',
+  },
+  {
     id: 'ng_letho',
     name: 'Letho of Gulet',
     faction: 'nilfgaard',
@@ -958,6 +1007,69 @@ export const CARD_DEFS: readonly CardDef[] = [
     strength: 6,
     abilities: [],
   },
+  {
+    id: 'ng_cahir',
+    name: 'Cahir Mawr Dyffryn aep Ceallach',
+    faction: 'nilfgaard',
+    type: 'unit',
+    row: 'melee',
+    strength: 6,
+    abilities: [],
+  },
+  {
+    id: 'ng_albrich',
+    name: 'Albrich',
+    faction: 'nilfgaard',
+    type: 'unit',
+    row: 'ranged',
+    strength: 2,
+    abilities: [],
+  },
+  {
+    id: 'ng_sweers',
+    name: 'Sweers',
+    faction: 'nilfgaard',
+    type: 'unit',
+    row: 'ranged',
+    strength: 2,
+    abilities: [],
+  },
+  {
+    id: 'ng_puttkammer',
+    name: 'Puttkammer',
+    faction: 'nilfgaard',
+    type: 'unit',
+    row: 'ranged',
+    strength: 3,
+    abilities: [],
+  },
+  {
+    id: 'ng_morteisen',
+    name: 'Morteisen',
+    faction: 'nilfgaard',
+    type: 'unit',
+    row: 'melee',
+    strength: 3,
+    abilities: [],
+  },
+  {
+    id: 'ng_mangonel',
+    name: 'Rotten Mangonel',
+    faction: 'nilfgaard',
+    type: 'unit',
+    row: 'siege',
+    strength: 3,
+    abilities: [],
+  },
+  {
+    id: 'ng_siege_technician',
+    name: 'Siege Technician',
+    faction: 'nilfgaard',
+    type: 'unit',
+    row: 'siege',
+    strength: 0,
+    abilities: ['medic'], // VERIFY: 0-strength siege medic in W3.
+  },
 
   // -------------------------------------------------------------------------
   // Scoia'tael — the agile faction (decides who goes first)
@@ -989,6 +1101,15 @@ export const CARD_DEFS: readonly CardDef[] = [
     abilities: [],
     leaderAbility: 'row_horn',
     leaderHornRow: 'ranged',
+  },
+  {
+    id: 'st_francesca_queen',
+    name: 'Francesca Findabair, Queen of Dol Blathanna',
+    faction: 'scoiatael',
+    type: 'leader',
+    abilities: [],
+    leaderAbility: 'scorch_row_leader',
+    leaderScorchRow: 'melee',
   },
   {
     id: 'st_eithne',
@@ -1152,13 +1273,41 @@ export const CARD_DEFS: readonly CardDef[] = [
     abilities: [],
   },
   {
-    id: 'st_schirru',
-    name: 'Schirrú',
+    id: 'st_vrihedd_recruit',
+    name: 'Vrihedd Brigade Recruit',
+    faction: 'scoiatael',
+    type: 'unit',
+    row: 'agile',
+    strength: 4,
+    abilities: ['agile'],
+  },
+  {
+    id: 'st_dol_archer',
+    name: 'Dol Blathanna Archer',
+    faction: 'scoiatael',
+    type: 'unit',
+    row: 'ranged',
+    strength: 6,
+    abilities: [],
+  },
+  {
+    id: 'st_riordain',
+    name: 'Riordain',
+    faction: 'scoiatael',
+    type: 'unit',
+    row: 'ranged',
+    strength: 1,
+    abilities: [],
+  },
+  {
+    id: 'st_mahakaman',
+    name: 'Mahakaman Defender',
     faction: 'scoiatael',
     type: 'unit',
     row: 'melee',
-    strength: 8,
-    abilities: ['scorch_melee'], // VERIFY: Schirrú carries Scorch–Close Combat.
+    strength: 5,
+    abilities: [],
+    maxCopiesPerDeck: 5, // VERIFY: W3 ships five obtainable copies.
   },
 
   // -------------------------------------------------------------------------

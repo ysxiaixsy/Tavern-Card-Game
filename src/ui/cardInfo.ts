@@ -35,8 +35,8 @@ const WEATHER_NAME: Record<string, string> = {
 const leaderText: Record<string, string> = {
   weather_from_deck: 'Once per match: play {weather} straight from your deck.',
   clear_weather: 'Once per match: clear every weather effect from the board.',
-  scorch_melee_leader:
-    'Once per match: destroy the enemy’s strongest Close Combat unit(s) if that row totals 10 or more.',
+  scorch_row_leader:
+    'Once per match: destroy the enemy’s strongest {row} unit(s) if that row totals 10 or more.',
   row_horn:
     'Once per match: double the strength of your {row} row, as if by a Commander’s Horn (does not stack with one).',
   cancel_leader: 'Once per match: cancel your opponent’s leader ability before they use it.',
@@ -44,6 +44,8 @@ const leaderText: Record<string, string> = {
   restore_to_hand: 'Once per match: restore a non-hero unit from your graveyard to your hand.',
   play_from_graveyard:
     'Once per match: play a non-hero unit from your graveyard instantly, with its full effect.',
+  steal_from_graveyard: 'Once per match: take a non-hero unit from the ENEMY graveyard into your hand.',
+  discard_draw: 'Once per match: discard 2 cards, then draw any card of your choice from your deck.',
   draw_extra_start: 'Automatic: draw an extra card at the start of the match.',
 };
 
@@ -52,9 +54,10 @@ export function leaderAbilityText(def: CardDef): string {
   if (!def.leaderAbility) {
     return '';
   }
+  const rowFill = def.leaderHornRow ?? def.leaderScorchRow;
   let text = leaderText[def.leaderAbility] ?? '';
   text = text.replace('{weather}', def.leaderWeather ? WEATHER_NAME[def.leaderWeather] : 'weather');
-  text = text.replace('{row}', def.leaderHornRow ? rowLabel[def.leaderHornRow] : 'chosen');
+  text = text.replace('{row}', rowFill ? rowLabel[rowFill] : 'chosen');
   return text;
 }
 

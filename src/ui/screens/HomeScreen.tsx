@@ -205,11 +205,13 @@ const styles = StyleSheet.create({
   },
   leaderRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: sp(1),
     marginTop: sp(1),
   },
   leaderChip: {
-    flex: 1,
+    flexBasis: '48%',
+    flexGrow: 1,
     borderWidth: 1,
     borderRadius: 10,
     paddingVertical: sp(1),

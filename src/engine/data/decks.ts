@@ -59,7 +59,7 @@ export const NORTHERN_REALMS_STARTER: DeckList = {
   ],
 };
 
-/** Monsters — Eredin. 29 units, 8 specials. */
+/** Monsters — Eredin. 30 units, 8 specials. */
 export const MONSTERS_STARTER: DeckList = {
   leaderId: 'mon_eredin',
   cardIds: [
@@ -81,6 +81,7 @@ export const MONSTERS_STARTER: DeckList = {
     'mon_arachas',
     'mon_arachas',
     'mon_arachas',
+    'mon_arachas_behemoth',
     'mon_crone_brewess',
     'mon_crone_weavess',
     'mon_crone_whispess',
@@ -107,7 +108,7 @@ export const MONSTERS_STARTER: DeckList = {
   ],
 };
 
-/** Nilfgaard — Emhyr. 25 units, 8 specials. Spies and ties. */
+/** Nilfgaard — Emhyr. 26 units, 8 specials. Spies and ties. */
 export const NILFGAARD_STARTER: DeckList = {
   leaderId: 'ng_emhyr',
   cardIds: [
@@ -135,6 +136,7 @@ export const NILFGAARD_STARTER: DeckList = {
     // Bodies
     'ng_arbalest',
     'ng_arbalest',
+    'ng_cahir',
     'ng_assire',
     'ng_fringilla',
     'ng_renuald',
@@ -153,7 +155,7 @@ export const NILFGAARD_STARTER: DeckList = {
   ],
 };
 
-/** Scoia'tael — Francesca. 26 units, 8 specials. Agility and ambushes. */
+/** Scoia'tael — Francesca. 27 units, 8 specials. Agility and ambushes. */
 export const SCOIATAEL_STARTER: DeckList = {
   leaderId: 'st_francesca',
   cardIds: [
@@ -187,7 +189,8 @@ export const SCOIATAEL_STARTER: DeckList = {
     'st_ida',
     'st_dennis',
     'st_toruviel',
-    'st_schirru', // unit-scorch
+    'st_mahakaman',
+    'st_mahakaman',
     // Specials (8)
     'neu_horn',
     'neu_horn',

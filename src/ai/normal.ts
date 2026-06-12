@@ -143,9 +143,9 @@ export function hornGain(view: PlayerView, rowKind: RowKind): number {
   return gain;
 }
 
-/** Villentretenmerth value: total strength it would burn off the enemy melee row. */
-export function meleeScorchGain(view: PlayerView): number {
-  const row = view.opponent.rows.melee;
+/** Row-scorch value: strength it would burn off the given enemy row (10+ rule). */
+export function rowScorchGain(view: PlayerView, rowKind: RowKind): number {
+  const row = view.opponent.rows[rowKind];
   if (row.total < 10) {
     return 0;
   }
@@ -175,8 +175,8 @@ export function estimateGain(view: PlayerView, move: Move): number {
         return leader.leaderWeather ? weatherNetGain(view, leader.leaderWeather) : 0;
       case 'clear_weather':
         return clearWeatherNetGain(view);
-      case 'scorch_melee_leader':
-        return meleeScorchGain(view);
+      case 'scorch_row_leader':
+        return leader.leaderScorchRow ? rowScorchGain(view, leader.leaderScorchRow) : 0;
       case 'row_horn':
         return leader.leaderHornRow ? hornGain(view, leader.leaderHornRow) : 0;
       case 'play_from_graveyard': {
@@ -411,8 +411,8 @@ export function scoreMoves(view: PlayerView): ScoredMove[] {
         const gain = clearWeatherNetGain(view) + 6;
         return gain >= 9 ? 60 + gain : 2;
       }
-      case 'scorch_melee_leader': {
-        const gain = meleeScorchGain(view);
+      case 'scorch_row_leader': {
+        const gain = leader.leaderScorchRow ? rowScorchGain(view, leader.leaderScorchRow) : 0;
         return gain >= 6 ? 65 + gain : 3;
       }
       case 'row_horn': {
@@ -443,6 +443,40 @@ export function scoreMoves(view: PlayerView): ScoredMove[] {
           return 180; // instant revive: the spy redraws immediately
         }
         return (def.strength ?? 0) >= 8 ? 55 : 16;
+      }
+      case 'steal_from_graveyard': {
+        const card = view.opponent.graveyard.find((c) => c.instanceId === move.targetInstanceId);
+        const def = card ? getCardDef(card.defId) : null;
+        if (!def) {
+          return 0;
+        }
+        if (def.abilities.includes('spy')) {
+          return 150; // their dead spy becomes OUR spy
+        }
+        return 12 + (def.strength ?? 0) * 2;
+      }
+      case 'discard_draw': {
+        // Convert two duds into the best card in the deck.
+        const fetched = move.drawDefId ? getCardDef(move.drawDefId) : null;
+        if (!fetched || !move.discardInstanceIds) {
+          return 0;
+        }
+        let fetchValue = fetched.strength ?? 0;
+        if (fetched.abilities.includes('spy')) {
+          fetchValue += 25;
+        }
+        if (fetched.abilities.includes('medic')) {
+          fetchValue += 10;
+        }
+        if (fetched.abilities.includes('muster')) {
+          fetchValue += 8;
+        }
+        let discardCost = 0;
+        for (const id of move.discardInstanceIds) {
+          const card = view.you.hand.find((c) => c.instanceId === id);
+          discardCost += card ? cardWorth(getCardDef(card.defId)) * 0.35 : 99;
+        }
+        return fetchValue - discardCost - 8;
       }
       default:
         return 0;
@@ -524,7 +558,7 @@ export function scoreMoves(view: PlayerView): ScoredMove[] {
       }
       case 'unit': {
         if (def.abilities.includes('scorch_melee')) {
-          const g = meleeScorchGain(view);
+          const g = rowScorchGain(view, 'melee');
           return g >= 6 ? 60 + g : bodyScore(def) - 2;
         }
         if (def.abilities.includes('medic')) {
