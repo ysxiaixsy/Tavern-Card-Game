@@ -15,8 +15,8 @@ Hot-seat first, then vs-AI, then online play via Supabase room codes.
 | M1 — game engine, tests, simulator | ✅ done |
 | M2 — hot-seat UI in Expo | ✅ done |
 | M3 — AI opponent (easy/normal/hard) | ✅ done (97 tests green) |
-| M4 — online play (Supabase) | next |
-| M5 — polish, deck builder, animations | planned |
+| M4 — online play (Supabase room codes) | ✅ done |
+| M5 — polish, animations, sound | planned |
 | Bonus — all four factions playable (NG + ST pulled forward from M5) | ✅ done |
 | Bonus — leader variants (4 per faction, pickable per seat) | ✅ done |
 | Bonus — full base-game card audit (no DLC: Skellige, O'Dimm, Olgierd, Schirrú, …) | ✅ done |
@@ -50,6 +50,28 @@ npm run usb
 ```
 
 Re-run `npm run usb` after unplugging/replugging the phone.
+
+## Online play (M4)
+
+Room-code matchmaking on the Supabase free tier. The full GameState lives
+ONLY on the server (`game_states` is service-role-only under RLS); clients
+fetch `PlayerView`s from the `gwent` edge function, which validates every
+move with the same engine the app runs. Sync = Realtime UPDATEs on your
+`games` row + a slow poll + refetch-on-foreground (that's also reconnect;
+"Resume game" on the online menu survives app restarts via the persisted
+anonymous session).
+
+Setup (one time):
+1. `.env` ← `EXPO_PUBLIC_SUPABASE_URL` + `EXPO_PUBLIC_SUPABASE_ANON_KEY`
+   (see .env.example; already configured for the GWENT project).
+2. Supabase Dashboard → Authentication → enable **Allow anonymous sign-ins**.
+3. Deploy pieces (already done; for future changes):
+   `npm run sync:engine` → apply `supabase/migrations/` → deploy
+   `supabase/functions/gwent`.
+
+Verify the whole stack from a terminal: `npm run smoke:online` — two
+anonymous users play a complete random match through the real backend,
+including RLS and seat-enforcement probes.
 
 ## What to verify manually after M2 (on a phone, in Expo Go)
 

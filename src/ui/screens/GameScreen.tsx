@@ -3,18 +3,17 @@
  * opponent strip → opponent siege/ranged/melee → weather strip → your
  * melee/ranged/siege → totals → hand carousel → Pass (with confirmation).
  *
- * Interaction model: tapping a hand card selects it and the action bar offers
- * the legal plays for it (rows for agile/horn, target mode for decoy). Medic
- * revives arrive as an undismissable picker driven by state.pendingChoice.
- * Long-press anything for the zoomed view; tap either graveyard to browse.
+ * BattleScreen is purely presentational over a PlayerView — the hot-seat /
+ * vs-AI wrapper (GameScreen) feeds it from the local store, while online
+ * play feeds it server-fetched views. All play options derive from
+ * view.legalMoves; the UI never re-implements rules.
  */
 
 import React, { useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { getView } from '../../engine/view';
 import type { Move, PlayerView, RowKind } from '../../engine/types';
-import { playerLabel } from '../cardInfo';
-import { palette, sp, weatherIcon } from '../theme';
+import { factionTheme, palette, sp, weatherIcon } from '../theme';
 import { useAppStore } from '../store';
 import { BoardRow } from '../components/BoardRow';
 import { HandBar } from '../components/HandBar';
@@ -35,24 +34,32 @@ interface Targeting {
   targets: ReadonlyMap<string, Move>;
 }
 
-export function GameScreen(): React.JSX.Element | null {
-  const session = useAppStore((s) => s.session);
-  const dispatchMove = useAppStore((s) => s.dispatchMove);
-  const quitToHome = useAppStore((s) => s.quitToHome);
+export interface BattleScreenProps {
+  view: PlayerView;
+  notice: string | null;
+  headerText: string;
+  yourName: string;
+  opponentName: string;
+  onMove: (move: Move) => void;
+  onQuit: () => void;
+  quitPrompt: string;
+}
 
+export function BattleScreen({
+  view,
+  notice,
+  headerText,
+  yourName,
+  opponentName,
+  onMove,
+  onQuit,
+  quitPrompt,
+}: BattleScreenProps): React.JSX.Element {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [targeting, setTargeting] = useState<Targeting | null>(null);
   const [zoomDefId, setZoomDefId] = useState<string | null>(null);
   const [graveyardSide, setGraveyardSide] = useState<'you' | 'opponent' | null>(null);
   const [leaderSide, setLeaderSide] = useState<'you' | 'opponent' | null>(null);
-
-  const view: PlayerView | null = useMemo(
-    () => (session ? getView(session.state, session.viewer) : null),
-    [session],
-  );
-  if (session === null || view === null) {
-    return null;
-  }
 
   const myAction = view.legalMoves.length > 0;
   const canPass = view.legalMoves.some((m) => m.type === 'PASS');
@@ -68,7 +75,7 @@ export function GameScreen(): React.JSX.Element | null {
     setSelectedId(null);
     setTargeting(null);
     setLeaderSide(null);
-    dispatchMove(move);
+    onMove(move);
   };
 
   const confirmPass = (): void => {
@@ -79,9 +86,9 @@ export function GameScreen(): React.JSX.Element | null {
   };
 
   const confirmQuit = (): void => {
-    Alert.alert('Leave the match?', 'The hot-seat game will be lost.', [
+    Alert.alert('Leave the match?', quitPrompt, [
       { text: 'Stay', style: 'cancel' },
-      { text: 'Leave', style: 'destructive', onPress: quitToHome },
+      { text: 'Leave', style: 'destructive', onPress: onQuit },
     ]);
   };
 
@@ -92,19 +99,16 @@ export function GameScreen(): React.JSX.Element | null {
     <View style={styles.screen}>
       {/* header */}
       <View style={styles.header}>
-        <Text style={styles.headerText}>
-          Round {Math.max(view.round, 1)} · {playerLabel(session.state, view.player)}
-          {session.mode === 'ai' && !myAction && view.result === null ? '   🤖 thinking…' : ''}
-        </Text>
+        <Text style={styles.headerText}>{headerText}</Text>
         <Pressable onPress={confirmQuit} hitSlop={8}>
           <Text style={styles.quit}>✕</Text>
         </Pressable>
       </View>
-      {session.notice !== null && <Text style={styles.notice}>{session.notice}</Text>}
+      {notice !== null && <Text style={styles.notice}>{notice}</Text>}
 
       <PlayerStrip
         side={view.opponent}
-        name={playerLabel(session.state, view.player === 'p1' ? 'p2' : 'p1')}
+        name={opponentName}
         handCount={view.opponent.handCount}
         onGraveyard={() => setGraveyardSide('opponent')}
         onLeader={() => setLeaderSide('opponent')}
@@ -179,7 +183,7 @@ export function GameScreen(): React.JSX.Element | null {
 
       <PlayerStrip
         side={view.you}
-        name={playerLabel(session.state, view.player)}
+        name={yourName}
         leaderUsable={view.legalMoves.some((m) => m.type === 'USE_LEADER')}
         onGraveyard={() => setGraveyardSide('you')}
         onLeader={() => setLeaderSide('you')}
@@ -223,6 +227,43 @@ export function GameScreen(): React.JSX.Element | null {
       />
       <ChooseFirstSheet view={view} onSubmit={submit} />
     </View>
+  );
+}
+
+/** Store-connected wrapper for hot-seat and vs-AI sessions. */
+export function GameScreen(): React.JSX.Element | null {
+  const session = useAppStore((s) => s.session);
+  const dispatchMove = useAppStore((s) => s.dispatchMove);
+  const quitToHome = useAppStore((s) => s.quitToHome);
+
+  const view: PlayerView | null = useMemo(
+    () => (session ? getView(session.state, session.viewer) : null),
+    [session],
+  );
+  if (session === null || view === null) {
+    return null;
+  }
+
+  const seatName = (seat: 'you' | 'opponent'): string => {
+    const sideView = seat === 'you' ? view.you : view.opponent;
+    const playerNo = (seat === 'you') === (view.player === 'p1') ? 'Player 1' : 'Player 2';
+    return `${playerNo} (${factionTheme[sideView.faction].label})`;
+  };
+
+  const aiThinking =
+    session.mode === 'ai' && view.legalMoves.length === 0 && view.result === null;
+
+  return (
+    <BattleScreen
+      view={view}
+      notice={session.notice}
+      headerText={`Round ${Math.max(view.round, 1)} · ${seatName('you')}${aiThinking ? '   🤖 thinking…' : ''}`}
+      yourName={seatName('you')}
+      opponentName={session.mode === 'ai' ? `AI (${factionTheme[view.opponent.faction].label})` : seatName('opponent')}
+      onMove={dispatchMove}
+      onQuit={quitToHome}
+      quitPrompt="The local game will be lost."
+    />
   );
 }
 

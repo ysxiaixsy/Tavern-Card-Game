@@ -17,7 +17,7 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { applyMove } from '../engine/apply';
-import { createGame } from '../engine/game';
+import { actorOf, createGame } from '../engine/game';
 import { getView } from '../engine/view';
 import { getCardDef } from '../engine/data/cards';
 import { STARTER_DECKS } from '../engine/data/decks';
@@ -61,18 +61,15 @@ const AI_PLAYER: PlayerId = 'p2';
 const AI_THINK_MS = 600;
 
 export type GameMode = 'hotseat' | 'ai';
-export type Screen = 'home' | 'decks' | 'setup' | 'game';
+export type Screen = 'home' | 'decks' | 'setup' | 'game' | 'online';
 
-/** Whose input is the game waiting for right now? */
-export function actorOf(state: GameState): PlayerId {
-  if (state.pendingChoice) {
-    return state.pendingChoice.player;
-  }
-  if (state.phase === 'mulligan') {
-    return state.players.p1.mulliganDone ? 'p2' : 'p1';
-  }
-  return state.turn;
+/** Pointer to the most recent online game, persisted for reconnects. */
+export interface LastOnlineGame {
+  gameId: string;
+  roomCode: string;
 }
+
+export { actorOf };
 
 function freshSeed(): string {
   // UI layer may use wall-clock/Math.random — the engine only sees the string.
@@ -93,10 +90,13 @@ interface AppStore {
   setupMode: GameMode;
   customDecks: SavedDeck[];
   session: Session | null;
+  lastOnlineGame: LastOnlineGame | null;
   // navigation
   goHome(): void;
   openDecks(): void;
+  openOnline(): void;
   beginSetup(mode: GameMode): void;
+  setLastOnlineGame(game: LastOnlineGame | null): void;
   // deck management
   saveDeck(deck: SavedDeck): void;
   deleteDeck(id: string): void;
@@ -169,9 +169,18 @@ export const useAppStore = create<AppStore>()(
         setupMode: 'hotseat' as GameMode,
         customDecks: [],
         session: null,
+        lastOnlineGame: null,
 
         goHome() {
           set({ screen: 'home', session: null });
+        },
+
+        openOnline() {
+          set({ screen: 'online' });
+        },
+
+        setLastOnlineGame(game: LastOnlineGame | null) {
+          set({ lastOnlineGame: game });
         },
 
         quitToHome() {
@@ -302,8 +311,8 @@ export const useAppStore = create<AppStore>()(
     {
       name: 'gwent-app',
       storage: createJSONStorage(() => AsyncStorage),
-      // Only the deck collection persists; sessions are ephemeral.
-      partialize: (s) => ({ customDecks: s.customDecks }),
+      // Decks and the reconnect pointer persist; sessions are ephemeral.
+      partialize: (s) => ({ customDecks: s.customDecks, lastOnlineGame: s.lastOnlineGame }),
     },
   ),
 );

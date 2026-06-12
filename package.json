@@ -4,6 +4,7 @@
   "main": "index.ts",
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",
+    "@supabase/supabase-js": "^2.108.1",
     "expo": "~56.0.11",
     "expo-status-bar": "~56.0.4",
     "react": "19.2.3",
@@ -13,6 +14,7 @@
   "devDependencies": {
     "@expo/ngrok": "^4.1.3",
     "@types/react": "~19.2.2",
+    "esbuild": "^0.28.1",
     "tsx": "^4.22.4",
     "typescript": "~6.0.3",
     "vitest": "^4.1.8"
@@ -27,6 +29,8 @@
     "typecheck": "tsc --noEmit",
     "simulate": "tsx scripts/simulate.ts",
     "cards": "tsx scripts/list-cards.ts",
+    "sync:engine": "tsx scripts/sync-engine.ts",
+    "smoke:online": "tsx scripts/online-smoke.ts",
     "usb": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/usb-play.ps1"
   },
   "private": true

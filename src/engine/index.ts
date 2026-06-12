@@ -17,6 +17,7 @@ export {
   STARTER_DECKS,
 } from './data/decks.ts';
 export {
+  actorOf,
   createGame,
   isTerminal,
   MAX_DECK_CARDS,

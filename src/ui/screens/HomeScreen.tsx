@@ -7,10 +7,12 @@ import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { palette, sp } from '../theme';
 import { useAppStore } from '../store';
+import { isOnlineConfigured } from '../../online/supabase';
 
 export function HomeScreen(): React.JSX.Element {
   const beginSetup = useAppStore((s) => s.beginSetup);
   const openDecks = useAppStore((s) => s.openDecks);
+  const openOnline = useAppStore((s) => s.openOnline);
   const deckCount = useAppStore((s) => s.customDecks.length);
 
   return (
@@ -31,9 +33,15 @@ export function HomeScreen(): React.JSX.Element {
             🃏 Deck builder{deckCount > 0 ? `  (${deckCount} custom)` : ''}
           </Text>
         </Pressable>
-        <View style={[styles.button, styles.buttonDisabled]}>
-          <Text style={styles.buttonDisabledText}>🌐 Online (room code) — arrives in M4</Text>
-        </View>
+        {isOnlineConfigured ? (
+          <Pressable style={styles.button} onPress={openOnline}>
+            <Text style={styles.buttonText}>🌐 Online — play a friend by room code</Text>
+          </Pressable>
+        ) : (
+          <View style={[styles.button, styles.buttonDisabled]}>
+            <Text style={styles.buttonDisabledText}>🌐 Online — add Supabase keys to .env</Text>
+          </View>
+        )}
       </View>
 
       <Text style={styles.footer}>

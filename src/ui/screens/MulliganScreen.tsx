@@ -1,40 +1,39 @@
 /**
- * Opening redraw: each player may swap up to 2 of their 10 dealt cards. Tap
- * to mark cards for redraw, then confirm. The 10 cards must last the whole
- * match — this screen says so, loudly.
+ * Opening redraw: swap up to 2 of the 10 dealt cards. MulliganView is
+ * presentational over a PlayerView (shared by local and online play);
+ * MulliganScreen is the store-connected wrapper for hot-seat / vs AI.
  */
 
 import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { getView } from '../../engine/view';
+import type { Move, PlayerView } from '../../engine/types';
 import { playerLabel } from '../cardInfo';
 import { palette, sp } from '../theme';
 import { useAppStore } from '../store';
 import { CardView } from '../components/CardView';
 import { CardZoomSheet, ChooseFirstSheet } from '../components/Sheets';
 
-export function MulliganScreen(): React.JSX.Element | null {
-  const session = useAppStore((s) => s.session);
-  const dispatchMove = useAppStore((s) => s.dispatchMove);
+export interface MulliganViewProps {
+  view: PlayerView;
+  title: string;
+  /** Shown instead of the picker when it is not this player's input. */
+  waitingText: string | null;
+  onMove: (move: Move) => void;
+}
+
+export function MulliganView({ view, title, waitingText, onMove }: MulliganViewProps): React.JSX.Element {
   const [selected, setSelected] = useState<string[]>([]);
   const [zoomDefId, setZoomDefId] = useState<string | null>(null);
 
-  const view = useMemo(
-    () => (session ? getView(session.state, session.viewer) : null),
-    [session],
-  );
-  if (session === null || view === null) {
-    return null;
-  }
-
   const choicePending = view.pendingChoice !== null;
 
-  // Vs AI: after submitting your own mulligan you briefly wait for theirs.
-  if (view.you.mulliganDone) {
+  if (waitingText !== null) {
     return (
       <View style={[styles.screen, styles.waiting]}>
-        <Text style={styles.title}>Opponent is choosing their cards…</Text>
+        <Text style={styles.title}>{waitingText}</Text>
         <Text style={styles.subtitle}>The battle begins in a moment.</Text>
+        <ChooseFirstSheet view={view} onSubmit={onMove} />
       </View>
     );
   }
@@ -51,12 +50,12 @@ export function MulliganScreen(): React.JSX.Element | null {
 
   const submit = (cardInstanceIds: string[]): void => {
     setSelected([]);
-    dispatchMove({ type: 'MULLIGAN', player: view.player, cardInstanceIds });
+    onMove({ type: 'MULLIGAN', player: view.player, cardInstanceIds });
   };
 
   return (
     <View style={styles.screen}>
-      <Text style={styles.title}>{playerLabel(session.state, view.player)}</Text>
+      <Text style={styles.title}>{title}</Text>
       <Text style={styles.subtitle}>
         Swap up to 2 cards. There is no draw step — these cards must last all three rounds.
       </Text>
@@ -94,8 +93,31 @@ export function MulliganScreen(): React.JSX.Element | null {
       </View>
 
       <CardZoomSheet defId={zoomDefId} onClose={() => setZoomDefId(null)} />
-      <ChooseFirstSheet view={view} onSubmit={(move) => dispatchMove(move)} />
+      <ChooseFirstSheet view={view} onSubmit={onMove} />
     </View>
+  );
+}
+
+/** Store-connected wrapper for hot-seat and vs-AI sessions. */
+export function MulliganScreen(): React.JSX.Element | null {
+  const session = useAppStore((s) => s.session);
+  const dispatchMove = useAppStore((s) => s.dispatchMove);
+
+  const view: PlayerView | null = useMemo(
+    () => (session ? getView(session.state, session.viewer) : null),
+    [session],
+  );
+  if (session === null || view === null) {
+    return null;
+  }
+
+  return (
+    <MulliganView
+      view={view}
+      title={playerLabel(session.state, view.player)}
+      waitingText={view.you.mulliganDone ? 'Opponent is choosing their cards…' : null}
+      onMove={dispatchMove}
+    />
   );
 }
 

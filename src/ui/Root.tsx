@@ -13,6 +13,7 @@ import { GameScreen } from './screens/GameScreen';
 import { GameSetupScreen } from './screens/GameSetupScreen';
 import { HomeScreen } from './screens/HomeScreen';
 import { MulliganScreen } from './screens/MulliganScreen';
+import { OnlineScreen } from './screens/OnlineScreen';
 import { PrivacyScreen } from './screens/PrivacyScreen';
 import { ResultScreen } from './screens/ResultScreen';
 
@@ -25,6 +26,8 @@ export function Root(): React.JSX.Element {
     content = <DeckBuilderScreen />;
   } else if (screen === 'setup') {
     content = <GameSetupScreen />;
+  } else if (screen === 'online') {
+    content = <OnlineScreen />;
   } else if (screen === 'home' || session === null) {
     content = <HomeScreen />;
   } else if (session.state.phase === 'finished') {

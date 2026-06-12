@@ -71,5 +71,18 @@ Placeholder art only; never reference CDPR assets (see IP note in the brief).
   of truth. Custom decks persist via zustand persist + AsyncStorage
   (`gwent-app` key, customDecks only). All four starters are exactly 30
   cards and double as immutable builder templates.
-- **M4 (next)** Supabase online play (Edge Functions run this same engine).
-- **M5** polish: deck builder, animations (Reanimated), sound, settings.
+- **M4 ✅** online play. Supabase project `ntzwhhezdwehuwwvlyip` (GWENT,
+  ap-southeast-1). One edge function `gwent` with action routing
+  (create_game/join_game/get_view/submit_move) — it imports `engine.js`, an
+  esbuild bundle of src/engine produced by `npm run sync:engine` (regenerate
+  + redeploy whenever the engine changes). Tables: games (participant
+  SELECT only), game_states (NO RLS policies — service-role only; holds the
+  full GameState; pre-join it holds a `{lobby:true,decks}` payload), moves
+  (append-only log). Optimistic concurrency via games.version. Client:
+  src/online/ + OnlineScreen (anonymous auth persisted in AsyncStorage,
+  Realtime postgres_changes on the games row + poll + foreground refetch,
+  `lastOnlineGame` persisted for resume). BattleScreen/MulliganView are
+  presentational and shared by local and online play. E2E:
+  `npm run smoke:online`. NOTE: "Allow anonymous sign-ins" must be ON in
+  the dashboard (auth config is not reachable via MCP/SQL).
+- **M5** polish: animations (Reanimated), sound, settings.

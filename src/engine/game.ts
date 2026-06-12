@@ -194,3 +194,14 @@ export function createGame(config: GameConfig, seed: string): GameState {
 export function isTerminal(state: GameState): MatchResult | null {
   return state.result;
 }
+
+/** Whose input is the game waiting for right now? */
+export function actorOf(state: GameState): PlayerId {
+  if (state.pendingChoice) {
+    return state.pendingChoice.player;
+  }
+  if (state.phase === 'mulligan') {
+    return state.players.p1.mulliganDone ? 'p2' : 'p1';
+  }
+  return state.turn;
+}
