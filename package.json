@@ -25,6 +25,7 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "simulate": "tsx scripts/simulate.ts",
+    "cards": "tsx scripts/list-cards.ts",
     "usb": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/usb-play.ps1"
   },
   "private": true
