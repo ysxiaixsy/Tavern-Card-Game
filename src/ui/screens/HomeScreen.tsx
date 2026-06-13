@@ -7,34 +7,48 @@ import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { palette, sp } from '../theme';
 import { useAppStore } from '../store';
+import { feedback } from '../feedback';
+import { Appear } from '../components/anim';
 import { isOnlineConfigured } from '../../online/supabase';
 
 export function HomeScreen(): React.JSX.Element {
   const beginSetup = useAppStore((s) => s.beginSetup);
   const openDecks = useAppStore((s) => s.openDecks);
   const openOnline = useAppStore((s) => s.openOnline);
+  const openSettings = useAppStore((s) => s.openSettings);
   const deckCount = useAppStore((s) => s.customDecks.length);
+
+  const go = (action: () => void): (() => void) => () => {
+    feedback.tap();
+    action();
+  };
 
   return (
     <View style={styles.screen}>
-      <Text style={styles.kicker}>THE WITCHER 3 TAVERN GAME</Text>
-      <Text style={styles.title}>GWENT</Text>
-      <Text style={styles.sub}>best of 3 · 10 cards · no draw step</Text>
+      <Pressable style={styles.settingsButton} onPress={go(openSettings)} hitSlop={10}>
+        <Text style={styles.settingsIcon}>⚙️</Text>
+      </Pressable>
 
-      <View style={styles.menu}>
-        <Pressable style={styles.button} onPress={() => beginSetup('hotseat')}>
+      <Appear distance={4} duration={400} style={styles.titleBlock}>
+        <Text style={styles.kicker}>THE WITCHER 3 TAVERN GAME</Text>
+        <Text style={styles.title}>GWENT</Text>
+        <Text style={styles.sub}>best of 3 · 10 cards · no draw step</Text>
+      </Appear>
+
+      <Appear delay={120} style={styles.menu}>
+        <Pressable style={styles.button} onPress={go(() => beginSetup('hotseat'))}>
           <Text style={styles.buttonText}>⚔️ Hot-seat — two players, one phone</Text>
         </Pressable>
-        <Pressable style={styles.button} onPress={() => beginSetup('ai')}>
+        <Pressable style={styles.button} onPress={go(() => beginSetup('ai'))}>
           <Text style={styles.buttonText}>🤖 Versus AI</Text>
         </Pressable>
-        <Pressable style={[styles.button, styles.buttonGhost]} onPress={openDecks}>
+        <Pressable style={[styles.button, styles.buttonGhost]} onPress={go(openDecks)}>
           <Text style={styles.buttonGhostText}>
             🃏 Deck builder{deckCount > 0 ? `  (${deckCount} custom)` : ''}
           </Text>
         </Pressable>
         {isOnlineConfigured ? (
-          <Pressable style={styles.button} onPress={openOnline}>
+          <Pressable style={styles.button} onPress={go(openOnline)}>
             <Text style={styles.buttonText}>🌐 Online — play a friend by room code</Text>
           </Pressable>
         ) : (
@@ -42,7 +56,7 @@ export function HomeScreen(): React.JSX.Element {
             <Text style={styles.buttonDisabledText}>🌐 Online — add Supabase keys to .env</Text>
           </View>
         )}
-      </View>
+      </Appear>
 
       <Text style={styles.footer}>
         Fan-made, non-commercial. Placeholder art only — no CDPR assets.
@@ -58,6 +72,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: sp(6),
+  },
+  settingsButton: {
+    position: 'absolute',
+    top: sp(3),
+    right: sp(4),
+    padding: sp(2),
+  },
+  settingsIcon: {
+    fontSize: 22,
+  },
+  titleBlock: {
+    alignItems: 'center',
+    alignSelf: 'stretch',
   },
   kicker: {
     color: palette.textDim,

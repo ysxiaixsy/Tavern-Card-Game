@@ -9,12 +9,14 @@
  * view.legalMoves; the UI never re-implements rules.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { getView } from '../../engine/view';
 import type { Move, PlayerView, RowKind } from '../../engine/types';
 import { factionTheme, palette, sp, weatherIcon } from '../theme';
 import { useAppStore } from '../store';
+import { feedback } from '../feedback';
+import { Appear, Pulse } from '../components/anim';
 import { BoardRow } from '../components/BoardRow';
 import { HandBar } from '../components/HandBar';
 import { PlayerStrip } from '../components/PlayerStrip';
@@ -60,6 +62,30 @@ export function BattleScreen({
   const [zoomDefId, setZoomDefId] = useState<string | null>(null);
   const [graveyardSide, setGraveyardSide] = useState<'you' | 'opponent' | null>(null);
   const [leaderSide, setLeaderSide] = useState<'you' | 'opponent' | null>(null);
+  const confirmPassPref = useAppStore((s) => s.prefs.confirmPass);
+
+  // Haptics on round / match results, fired once per new result.
+  const roundsSeen = useRef(view.roundHistory.length);
+  const matchDone = useRef(view.result !== null);
+  useEffect(() => {
+    if (view.roundHistory.length > roundsSeen.current) {
+      const r = view.roundHistory[view.roundHistory.length - 1];
+      if (r.winner === view.player) {
+        feedback.success();
+      } else if (r.winner === null) {
+        feedback.warning();
+      } else {
+        feedback.warning();
+      }
+      roundsSeen.current = view.roundHistory.length;
+    }
+    if (view.result !== null && !matchDone.current) {
+      matchDone.current = true;
+      if (view.result.winner === view.player) {
+        feedback.success();
+      }
+    }
+  }, [view]);
 
   const myAction = view.legalMoves.length > 0;
   const canPass = view.legalMoves.some((m) => m.type === 'PASS');
@@ -75,13 +101,24 @@ export function BattleScreen({
     setSelectedId(null);
     setTargeting(null);
     setLeaderSide(null);
+    if (move.type === 'PASS') {
+      feedback.pass();
+    } else if (move.type === 'PLAY_CARD' || move.type === 'USE_LEADER' || move.type === 'RESOLVE_MEDIC') {
+      feedback.play();
+    }
     onMove(move);
   };
 
+  const doPass = (): void => submit({ type: 'PASS', player: view.player });
+
   const confirmPass = (): void => {
+    if (!confirmPassPref) {
+      doPass();
+      return;
+    }
     Alert.alert('Pass this round?', 'After passing you take no further actions until the round ends.', [
       { text: 'Keep playing', style: 'cancel' },
-      { text: 'Pass', style: 'destructive', onPress: () => submit({ type: 'PASS', player: view.player }) },
+      { text: 'Pass', style: 'destructive', onPress: doPass },
     ]);
   };
 
@@ -104,7 +141,11 @@ export function BattleScreen({
           <Text style={styles.quit}>✕</Text>
         </Pressable>
       </View>
-      {notice !== null && <Text style={styles.notice}>{notice}</Text>}
+      {notice !== null && (
+        <Appear key={notice} distance={0}>
+          <Text style={styles.notice}>{notice}</Text>
+        </Appear>
+      )}
 
       <PlayerStrip
         side={view.opponent}
@@ -173,11 +214,15 @@ export function BattleScreen({
         </View>
       ) : (
         <View style={styles.totalsBar}>
-          <Text style={[styles.total, youLead && styles.totalLead]}>You {view.you.total}</Text>
+          <Pulse trigger={view.you.total}>
+            <Text style={[styles.total, youLead && styles.totalLead]}>You {view.you.total}</Text>
+          </Pulse>
           <Text style={styles.totalVs}>vs</Text>
-          <Text style={[styles.total, oppLead && styles.totalLead]}>
-            {view.opponent.total} Opponent
-          </Text>
+          <Pulse trigger={view.opponent.total}>
+            <Text style={[styles.total, oppLead && styles.totalLead]}>
+              {view.opponent.total} Opponent
+            </Text>
+          </Pulse>
         </View>
       )}
 
@@ -193,7 +238,12 @@ export function BattleScreen({
         view={view}
         myAction={myAction}
         selectedId={selectedId}
-        onSelect={setSelectedId}
+        onSelect={(id) => {
+          if (id !== null) {
+            feedback.tap();
+          }
+          setSelectedId(id);
+        }}
         onSubmit={submit}
         onEnterTargeting={(cardInstanceId, targets) => setTargeting({ cardInstanceId, targets })}
         onZoom={setZoomDefId}

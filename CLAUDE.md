@@ -89,4 +89,11 @@ Placeholder art only; never reference CDPR assets (see IP note in the brief).
   cancel_game action for the lobby's Cancel button, and migration 0002's
   pg_cron job `gwent_cleanup_hourly` expires waiting>2h / stale-active>48h
   / finished>7d (cascade cleans game_states + moves).
-- **M5** polish: animations (Reanimated), sound, settings.
+- **M5 ✅** polish: SettingsScreen + persisted `prefs` (animations, haptics,
+  confirmPass, aiSpeed) in the store; `src/ui/feedback.ts` centralizes haptics
+  (expo-haptics) gated by the pref, with `// sound:` seams where authored audio
+  would slot in (sound itself out of scope — placeholder-only project, no
+  assets authored); `src/ui/components/anim.tsx` has `Appear`/`Pulse` built on
+  RN's Animated (not Reanimated — zero-config, bundles cleanly, collapses to
+  instant when animations are off). Wired into Home/Result/Privacy/Battle.
+  All four milestones + bonuses now complete.

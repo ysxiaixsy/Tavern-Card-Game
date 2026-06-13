@@ -58,10 +58,28 @@ export const STARTER_SAVED_DECKS: SavedDeck[] = (
 }));
 
 const AI_PLAYER: PlayerId = 'p2';
-const AI_THINK_MS = 600;
+
+/** How long the AI "thinks" before each move, by preference. */
+export type AiSpeed = 'fast' | 'normal' | 'slow';
+const AI_THINK_MS: Record<AiSpeed, number> = { fast: 250, normal: 600, slow: 1100 };
+
+/** User preferences (persisted). See SettingsScreen. */
+export interface Prefs {
+  animations: boolean;
+  haptics: boolean;
+  confirmPass: boolean;
+  aiSpeed: AiSpeed;
+}
+
+export const DEFAULT_PREFS: Prefs = {
+  animations: true,
+  haptics: true,
+  confirmPass: true,
+  aiSpeed: 'normal',
+};
 
 export type GameMode = 'hotseat' | 'ai';
-export type Screen = 'home' | 'decks' | 'setup' | 'game' | 'online';
+export type Screen = 'home' | 'decks' | 'setup' | 'game' | 'online' | 'settings';
 
 /** Pointer to the most recent online game, persisted for reconnects. */
 export interface LastOnlineGame {
@@ -91,12 +109,15 @@ interface AppStore {
   customDecks: SavedDeck[];
   session: Session | null;
   lastOnlineGame: LastOnlineGame | null;
+  prefs: Prefs;
   // navigation
   goHome(): void;
   openDecks(): void;
   openOnline(): void;
+  openSettings(): void;
   beginSetup(mode: GameMode): void;
   setLastOnlineGame(game: LastOnlineGame | null): void;
+  setPref<K extends keyof Prefs>(key: K, value: Prefs[K]): void;
   // deck management
   saveDeck(deck: SavedDeck): void;
   deleteDeck(id: string): void;
@@ -161,7 +182,7 @@ export const useAppStore = create<AppStore>()(
           }
           const view = getView(current.state, AI_PLAYER);
           get().dispatchMove(chooseMove(view, current.aiDifficulty));
-        }, AI_THINK_MS);
+        }, AI_THINK_MS[get().prefs.aiSpeed]);
       }
 
       return {
@@ -170,6 +191,7 @@ export const useAppStore = create<AppStore>()(
         customDecks: [],
         session: null,
         lastOnlineGame: null,
+        prefs: DEFAULT_PREFS,
 
         goHome() {
           set({ screen: 'home', session: null });
@@ -179,8 +201,16 @@ export const useAppStore = create<AppStore>()(
           set({ screen: 'online' });
         },
 
+        openSettings() {
+          set({ screen: 'settings' });
+        },
+
         setLastOnlineGame(game: LastOnlineGame | null) {
           set({ lastOnlineGame: game });
+        },
+
+        setPref(key, value) {
+          set((s) => ({ prefs: { ...s.prefs, [key]: value } }));
         },
 
         quitToHome() {
@@ -311,8 +341,21 @@ export const useAppStore = create<AppStore>()(
     {
       name: 'gwent-app',
       storage: createJSONStorage(() => AsyncStorage),
-      // Decks and the reconnect pointer persist; sessions are ephemeral.
-      partialize: (s) => ({ customDecks: s.customDecks, lastOnlineGame: s.lastOnlineGame }),
+      // Decks, prefs and the reconnect pointer persist; sessions are ephemeral.
+      partialize: (s) => ({
+        customDecks: s.customDecks,
+        lastOnlineGame: s.lastOnlineGame,
+        prefs: s.prefs,
+      }),
+      // Merge persisted prefs over defaults so new keys aren't undefined.
+      merge: (persisted, current) => {
+        const saved = (persisted ?? {}) as Partial<AppStore>;
+        return {
+          ...current,
+          ...saved,
+          prefs: { ...DEFAULT_PREFS, ...(saved.prefs ?? {}) },
+        };
+      },
     },
   ),
 );

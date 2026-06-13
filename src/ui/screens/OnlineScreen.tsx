@@ -26,6 +26,7 @@ import {
   useAppStore,
   type SavedDeck,
 } from '../store';
+import { feedback } from '../feedback';
 import { ensureSignedIn, isOnlineConfigured, supabase } from '../../online/supabase';
 import {
   cancelRoom,
@@ -63,6 +64,7 @@ export function OnlineScreen(): React.JSX.Element {
 
   const channelRef = useRef<ReturnType<NonNullable<typeof supabase>['channel']> | null>(null);
   const roundsSeen = useRef(0);
+  const matchDone = useRef(false);
 
   // ---------------------------------------------------------------------
   // Sync plumbing
@@ -150,8 +152,21 @@ export function OnlineScreen(): React.JSX.Element {
         `Round ${r.round} (${r.totals.p1}:${r.totals.p2}) ${outcome}` +
           `${r.tieBrokenByNilfgaard ? ' — Nilfgaard wins ties' : ''}.`,
       );
+      if (r.winner === snapshot.seat) {
+        feedback.success();
+      } else {
+        feedback.warning();
+      }
     }
     roundsSeen.current = view.roundHistory.length;
+    if (view.result !== null && !matchDone.current) {
+      matchDone.current = true;
+      if (view.result.winner === snapshot.seat) {
+        feedback.success();
+      } else if (view.result.winner === null) {
+        feedback.warning();
+      }
+    }
   }, [snapshot]);
 
   // ---------------------------------------------------------------------
@@ -238,6 +253,7 @@ export function OnlineScreen(): React.JSX.Element {
       setSnapshot(snap);
       setNotice(null);
     } catch (error) {
+      feedback.error();
       setNotice(error instanceof Error ? error.message : 'Move rejected.');
       void refresh(phase.gameId);
     } finally {

@@ -9,6 +9,8 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { playerLabel } from '../cardInfo';
 import { GEM, palette, sp } from '../theme';
 import { useAppStore } from '../store';
+import { feedback } from '../feedback';
+import { Appear } from '../components/anim';
 
 export function PrivacyScreen(): React.JSX.Element | null {
   const session = useAppStore((s) => s.session);
@@ -24,8 +26,13 @@ export function PrivacyScreen(): React.JSX.Element | null {
       ? 'Opening hand — swap up to 2 cards'
       : `Round ${state.round} of 3`;
 
+  const reveal = (): void => {
+    feedback.tap();
+    confirmHandoff();
+  };
+
   return (
-    <View style={styles.screen}>
+    <Appear key={session.handoffTo} style={styles.screen}>
       <Text style={styles.eyebrow}>HOT-SEAT</Text>
       <Text style={styles.title}>Pass the phone</Text>
       <Text style={styles.to}>{toLabel}</Text>
@@ -41,11 +48,11 @@ export function PrivacyScreen(): React.JSX.Element | null {
         <Text style={styles.phase}>{phaseLine}</Text>
       </View>
 
-      <Pressable style={styles.button} onPress={confirmHandoff}>
+      <Pressable style={styles.button} onPress={reveal}>
         <Text style={styles.buttonText}>I’m {session.handoffTo === 'p1' ? 'Player 1' : 'Player 2'} — show my cards</Text>
       </Pressable>
       <Text style={styles.smallprint}>No peeking. Witchers always know.</Text>
-    </View>
+    </Appear>
   );
 }
 

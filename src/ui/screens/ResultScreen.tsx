@@ -2,16 +2,30 @@
  * Match over: winner (or draw), the round-by-round score, rematch / home.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { playerLabel } from '../cardInfo';
 import { palette, sp } from '../theme';
 import { useAppStore } from '../store';
+import { feedback } from '../feedback';
+import { Appear } from '../components/anim';
 
 export function ResultScreen(): React.JSX.Element | null {
   const session = useAppStore((s) => s.session);
   const rematch = useAppStore((s) => s.rematch);
   const quitToHome = useAppStore((s) => s.quitToHome);
+  const isDraw = session?.state.result?.winner === null;
+
+  useEffect(() => {
+    if (session?.state.result) {
+      if (isDraw) {
+        feedback.warning();
+      } else {
+        feedback.success();
+      }
+    }
+  }, [session?.state.result, isDraw]);
+
   if (session === null || session.state.result === null) {
     return null;
   }
@@ -23,7 +37,7 @@ export function ResultScreen(): React.JSX.Element | null {
   }
 
   return (
-    <View style={styles.screen}>
+    <Appear style={styles.screen}>
       <Text style={styles.eyebrow}>MATCH OVER</Text>
       <Text style={styles.title}>
         {result.winner === null ? 'A draw!' : `${playerLabel(state, result.winner)} wins!`}
@@ -55,7 +69,7 @@ export function ResultScreen(): React.JSX.Element | null {
       <Pressable style={[styles.button, styles.buttonGhost]} onPress={quitToHome}>
         <Text style={styles.buttonGhostText}>Back to the tavern</Text>
       </Pressable>
-    </View>
+    </Appear>
   );
 }
 

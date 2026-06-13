@@ -16,7 +16,7 @@ Hot-seat first, then vs-AI, then online play via Supabase room codes.
 | M2 — hot-seat UI in Expo | ✅ done |
 | M3 — AI opponent (easy/normal/hard) | ✅ done (97 tests green) |
 | M4 — online play (Supabase room codes) | ✅ done |
-| M5 — polish, animations, sound | planned |
+| M5 — polish: settings, haptics, animations | ✅ done |
 | Bonus — all four factions playable (NG + ST pulled forward from M5) | ✅ done |
 | Bonus — leader variants (4 per faction, pickable per seat) | ✅ done |
 | Bonus — full base-game card audit (no DLC: Skellige, O'Dimm, Olgierd, Schirrú, …) | ✅ done |
@@ -103,6 +103,10 @@ real backend.
 
 ## What to verify manually (on the phone)
 
+0. **Settings** (⚙️ on Home): toggle Animations / Haptics / Confirm-before-pass
+   and set AI speed; all persist across an app restart. Turning Haptics off
+   silences the vibration on plays/passes/results; Animations off makes every
+   transition instant. "Confirm before passing" off makes PASS immediate.
 1. **Home is mode-only**: Hot-seat, Versus AI, Deck builder, Online (M4).
    Tapping a mode opens the **setup screen**: assign a deck (starter or
    custom) to each seat, pick AI difficulty when relevant, start.
