@@ -32,6 +32,12 @@
           "backgroundColor": "#16100b"
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "b71ad7c3-8c92-42d9-b959-ba79660bb8c1"
+      }
+    },
+    "owner": "jp_gaultier"
   }
 }
