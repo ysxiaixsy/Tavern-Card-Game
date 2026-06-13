@@ -92,6 +92,10 @@ real backend.
    try stealing a spy the opponent planted on you), a Medic (undismissable
    graveyard picker; chain two medics), a spy (lands on the enemy side, you
    draw 2 — check the hand count).
+4b. **Drag to play**: grab a hand card and pull it upward — a hint appears;
+   release to play a simple card outright, or (for agile/horn/decoy) to open
+   the same choice flow. Horizontal swipes still scroll the hand. Built on
+   core PanResponder + Animated (no Reanimated), so it runs everywhere.
 5. **Leader button** — preview text, confirm use (Foltest pulls fog from deck;
    Eredin lists graveyard units), chip greys out after use.
 6. **Long-press any card** (hand, board, graveyard) → zoom with ability text;

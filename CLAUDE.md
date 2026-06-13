@@ -97,3 +97,13 @@ Placeholder art only; never reference CDPR assets (see IP note in the brief).
   RN's Animated (not Reanimated — zero-config, bundles cleanly, collapses to
   instant when animations are off). Wired into Home/Result/Privacy/Battle.
   All four milestones + bonuses now complete.
+- **Safe area:** App.tsx wraps in `SafeAreaProvider`; Root uses
+  `react-native-safe-area-context` SafeAreaView with all edges so the Android
+  nav bar / status bar never cover controls. Don't go back to manual
+  status-bar padding.
+- **Card drag:** "pull up to play" in `HandBar` (`DraggableHandCard`) on core
+  PanResponder + Animated — NOT Reanimated. Reanimated 4 was tried and
+  removed: its worklet Babel plugin isn't wired here (no resolvable
+  babel-preset-expo / worklets plugin) and a misconfig crashes the battle
+  screen, unverifiable without a device. If revisiting, confirm
+  `react-native-worklets/plugin` is in the Babel config first.
