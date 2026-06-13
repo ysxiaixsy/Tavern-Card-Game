@@ -1,10 +1,13 @@
 /**
- * Screen router (store-driven; no navigation library needed for four screens).
- * Priority: home → result → privacy gate → mulligan → battle.
+ * Screen router (store-driven; no navigation library needed). Wraps content
+ * in a safe-area view so the OS status bar (top) and navigation bar (bottom)
+ * never cover the UI — the PASS button and other bottom controls sit above
+ * the Android nav bar.
  */
 
 import React from 'react';
-import { Platform, SafeAreaView, StatusBar as RNStatusBar, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { palette } from './theme';
 import { useAppStore } from './store';
@@ -44,7 +47,7 @@ export function Root(): React.JSX.Element {
   }
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom', 'left', 'right']}>
       <StatusBar style="light" />
       {content}
     </SafeAreaView>
@@ -55,6 +58,5 @@ const styles = StyleSheet.create({
   safe: {
     flex: 1,
     backgroundColor: palette.bg,
-    paddingTop: Platform.OS === 'android' ? RNStatusBar.currentHeight : 0,
   },
 });
