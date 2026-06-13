@@ -81,6 +81,33 @@ anonymous users exercise room lifecycle (auto-retire + cancel), RLS and
 seat-enforcement probes, then play a complete random match through the
 real backend.
 
+## Building an installable app (standalone APK)
+
+Expo Go is dev-only. To get a real app you tap to install, build a standalone
+binary with EAS (Expo's free cloud builder — no Android Studio needed). The
+Supabase keys travel into the binary via `eas.json` build profiles (the anon
+key is publishable; all authority is behind RLS + the edge function).
+
+One-time:
+```sh
+npx eas-cli@latest login        # free Expo account
+npx eas-cli@latest init         # links the project (writes extra.eas.projectId)
+```
+Build a shareable APK (sideload onto any Android phone):
+```sh
+npx eas-cli@latest build -p android --profile preview
+```
+EAS returns a download link; install the APK directly (no Play Store, no
+Metro, works offline for hot-seat/AI, online needs internet). Bump
+`android.versionCode` in app.json for each new build.
+
+> **IP note:** this is a non-commercial fan project using CDPR's card names.
+> Sideloading for yourself/friends is the intended use. Public store
+> distribution under Witcher/Gwent branding is a trademark/copyright risk and
+> would require rebranding (generic name, no CDPR card text) plus a privacy
+> policy (anonymous accounts are stored in Supabase). The `production`
+> app-bundle profile exists for that path but isn't recommended as-is.
+
 ## What to verify manually after M2 (on a phone, in Expo Go)
 
 1. **Start a hot-seat game** — privacy screen appears before anyone sees cards.
