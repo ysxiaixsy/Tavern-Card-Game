@@ -34,6 +34,10 @@ yarn-error.*
 .env
 .env*.local
 
+# Card art assets — kept OUT of git (CDPR IP, private/non-distributed use only).
+# Drop PNGs in assets/cards/ and run `npm run gen:art` to build the map.
+/assets/cards/
+
 # typescript
 *.tsbuildinfo
 

@@ -32,6 +32,8 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "gen:icons": "tsx scripts/gen-icons.ts",
+    "gen:art": "tsx scripts/gen-card-art.ts",
+    "optimize:art": "tsx scripts/optimize-art.ts",
     "simulate": "tsx scripts/simulate.ts",
     "cards": "tsx scripts/list-cards.ts",
     "sync:engine": "tsx scripts/sync-engine.ts",

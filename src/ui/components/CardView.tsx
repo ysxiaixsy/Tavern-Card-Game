@@ -5,8 +5,9 @@
  */
 
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { getCardDef } from '../../engine/data/cards';
+import { CARD_ART } from '../cardArt';
 import {
   abilityIcon,
   CARD_SIZE,
@@ -82,6 +83,58 @@ function CardViewInner({
       : isHero
         ? palette.gold
         : faction.frame;
+
+  // Real card art (private, gitignored — see cardArt.ts). The art's printed
+  // strength is static, so units get a live effective-strength badge overlaid
+  // top-left; selection/target state stays on the border.
+  const art = CARD_ART[defId];
+  if (art) {
+    return (
+      <Pressable
+        onPress={onPress}
+        onLongPress={onLongPress}
+        delayLongPress={250}
+        disabled={!onPress && !onLongPress}
+        style={[
+          styles.frame,
+          {
+            width: dims.width,
+            height: dims.height,
+            borderColor: frameColor,
+            borderWidth: selected || highlighted ? 2.5 : 1.5,
+            opacity: dimmed ? 0.4 : 1,
+            transform: selected && size === 'hand' ? [{ translateY: -8 }] : [],
+          },
+        ]}
+      >
+        <Image source={art} resizeMode="cover" style={StyleSheet.absoluteFill} />
+        {isUnit && (
+          <View
+            style={[
+              styles.artBadge,
+              {
+                width: dims.badge,
+                height: dims.badge,
+                borderRadius: dims.badge / 2,
+                backgroundColor: isHero ? '#3a2d14' : palette.surface,
+                borderColor: frameColor,
+              },
+            ]}
+          >
+            <Text
+              style={{
+                color: strengthColor(shown, printed, isHero),
+                fontSize: dims.badge * 0.58,
+                fontWeight: '700',
+              }}
+            >
+              {shown}
+            </Text>
+          </View>
+        )}
+      </Pressable>
+    );
+  }
 
   return (
     <Pressable
@@ -176,6 +229,14 @@ const styles = StyleSheet.create({
     padding: 2,
   },
   badge: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+  },
+  artBadge: {
+    position: 'absolute',
+    top: 3,
+    left: 3,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
