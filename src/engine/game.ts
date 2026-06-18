@@ -163,6 +163,7 @@ export function createGame(config: GameConfig, seed: string): GameState {
     roundLeader: flipWinner,
     players,
     weatherCards: [],
+    pendingSummons: [],
     pendingChoice: null,
     roundHistory: [],
     result: null,

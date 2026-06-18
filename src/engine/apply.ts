@@ -338,6 +338,20 @@ function resolveRowScorch(s: GameState, actor: PlayerId, rowKind: RowKind): void
   destroyUnits(s, victims);
 }
 
+/**
+ * Queue a Summon-Avenger card's avenger to enter at the start of the next
+ * round. Called wherever a unit leaves the board into a graveyard.
+ */
+function queueAvenger(s: GameState, player: PlayerId, dead: CardInstance): void {
+  const avenger = getCardDef(dead.defId).summonAvenger;
+  if (avenger) {
+    s.pendingSummons.push({
+      player,
+      card: { instanceId: `${dead.instanceId}:avenger`, defId: avenger },
+    });
+  }
+}
+
 /** Remove units from the board into the graveyard of the side they were on. */
 function destroyUnits(
   s: GameState,
@@ -349,6 +363,7 @@ function destroyUnits(
     if (index !== -1) {
       const [dead] = row.units.splice(index, 1);
       s.players[victim.side].graveyard.push(dead);
+      queueAvenger(s, victim.side, dead);
     }
   }
 }
@@ -690,6 +705,7 @@ function resolveRound(s: GameState): void {
           surviving.push(unit);
         } else {
           ps.graveyard.push(unit);
+          queueAvenger(s, p, unit);
         }
       }
       row.units = surviving;
@@ -724,4 +740,14 @@ function resolveRound(s: GameState): void {
   s.turn = s.roundLeader;
   s.players.p1.passed = false;
   s.players.p2.passed = false;
+
+  // Summon Avengers (Cow → Bovine Defense Force, Kambi → Hemdall): cards
+  // queued when their source left the board now enter the new round.
+  for (const { player, card } of s.pendingSummons) {
+    const def = getCardDef(card.defId);
+    const row: RowKind =
+      def.row === 'melee' || def.row === 'ranged' || def.row === 'siege' ? def.row : 'melee';
+    s.players[player].rows[row].units.push(card);
+  }
+  s.pendingSummons = [];
 }

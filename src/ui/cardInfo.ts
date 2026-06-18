@@ -96,6 +96,11 @@ export function describeCard(defId: string): string[] {
     }
     lines.push(abilityText[ability]);
   }
+  if (def.summonAvenger) {
+    lines.push(
+      `Summon Avenger: when it leaves the battlefield, ${getCardDef(def.summonAvenger).name} takes its place next round.`,
+    );
+  }
   if (lines.length === 0) {
     lines.push('No special ability. Pure, dependable strength.');
   }

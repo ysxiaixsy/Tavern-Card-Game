@@ -113,6 +113,12 @@ export interface CardDef {
   summonsGroup?: string;
   /** scorch_row units: which ENEMY row they scorch (≥10). */
   scorchRow?: RowKind;
+  /**
+   * Summon Avenger: when this unit leaves the board into a graveyard (killed
+   * or cleared at round end), the named card is placed on its owner's board at
+   * the start of the NEXT round. Cow → Bovine Defense Force, Kambi → Hemdall.
+   */
+  summonAvenger?: string;
   /** Deck-building copy limit. Default 1. */
   maxCopiesPerDeck?: number;
   /** Weather cards only. */
@@ -225,6 +231,8 @@ export interface GameState {
   players: Record<PlayerId, PlayerState>;
   /** Shared weather area covering both sides. Active kinds derive from this. */
   weatherCards: WeatherCardOnBoard[];
+  /** Avengers queued by Summon-Avenger cards, placed at the next round start. */
+  pendingSummons: { player: PlayerId; card: CardInstance }[];
   pendingChoice: PendingChoice | null;
   roundHistory: RoundResult[];
   /** Non-null exactly when phase === 'finished'. */

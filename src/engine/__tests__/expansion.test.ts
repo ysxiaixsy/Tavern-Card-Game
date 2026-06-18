@@ -3,7 +3,7 @@ import { applyMove } from '../apply.ts';
 import { getLegalMoves } from '../legal.ts';
 import { rowTotal } from '../strength.ts';
 import type { Move } from '../types.ts';
-import { graveyardDefs, makeState, play } from './testkit.ts';
+import { graveyardDefs, makeState, pass, play } from './testkit.ts';
 
 describe('Hearts of Stone — Gaunter O\'Dimm muster (one-directional)', () => {
   it('Gaunter O\'Dimm summons every Darkness from hand AND deck', () => {
@@ -79,6 +79,49 @@ describe('Hearts of Stone — Olgierd (agile + morale)', () => {
     // Keira 5 + 1 (Olgierd morale) = 6; Olgierd 6 (no self-morale) → row 12.
     expect(rowTotal(after, 'p1', 'ranged')).toBe(12);
     expect(after.players.p1.rows.melee.units).toHaveLength(0); // chose ranged, not melee
+  });
+});
+
+describe('Summon Avenger — Cow → Bovine Defense Force (shared with Kambi → Hemdall)', () => {
+  it('a Cow cleared at round end summons the Bovine Defense Force next round', () => {
+    const state = makeState({
+      p1: { rows: { melee: ['neu_cow'] }, hand: ['nr_ves'] },
+      p2: { hand: ['mon_fiend'] },
+      turn: 'p1',
+    });
+    let s = pass(state, 'p1');
+    s = pass(s, 'p2'); // round 1 ends, board clears, Cow leaves → Bovine queued
+    expect(s.round).toBe(2);
+    expect(s.players.p1.rows.melee.units.map((u) => u.defId)).toEqual(['neu_bovine']);
+    expect(graveyardDefs(s, 'p1')).toContain('neu_cow');
+    expect(s.pendingSummons).toHaveLength(0); // queue drained
+  });
+
+  it('a Cow killed mid-round by Scorch still summons the Bovine next round', () => {
+    const state = makeState({
+      p1: { hand: ['neu_scorch', 'nr_yarpen'], rows: { melee: ['neu_cow'] } }, // Cow is highest (0) → burns
+      p2: { hand: ['mon_fiend'] },
+      turn: 'p1',
+    });
+    let s = play(state, 'p1', 'neu_scorch');
+    expect(s.players.p1.rows.melee.units).toHaveLength(0);
+    expect(s.pendingSummons).toHaveLength(1); // queued, not yet placed (still round 1)
+    s = pass(s, 'p2');
+    s = pass(s, 'p1');
+    expect(s.round).toBe(2);
+    expect(s.players.p1.rows.melee.units.map((u) => u.defId)).toEqual(['neu_bovine']);
+  });
+
+  it('a Cow returned to hand by Decoy does NOT summon (it did not die)', () => {
+    const state = makeState({
+      p1: { hand: ['neu_decoy', 'nr_yarpen'], rows: { melee: ['neu_cow'] } },
+      p2: { hand: ['mon_fiend'] },
+      turn: 'p1',
+    });
+    const cow = state.players.p1.rows.melee.units[0];
+    const s = play(state, 'p1', 'neu_decoy', { targetInstanceId: cow.instanceId });
+    expect(s.pendingSummons).toHaveLength(0);
+    expect(s.players.p1.hand.map((c) => c.defId)).toContain('neu_cow');
   });
 });
 

@@ -190,6 +190,7 @@ function determinize(view: PlayerView, rng: number): [GameState, number] {
     roundLeader: me, // approximation; only affects post-tie leads inside the rollout
     players,
     weatherCards: view.weather.cards.map((w) => ({ ...w })),
+    pendingSummons: [],
     pendingChoice: null,
     roundHistory: view.roundHistory.slice(),
     result: null,

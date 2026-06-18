@@ -106,6 +106,7 @@ export function makeState(spec: StateSpec = {}): GameState {
     roundLeader: spec.roundLeader ?? turn,
     players: { p1, p2 },
     weatherCards: (spec.weather ?? []).map(({ defId, owner }) => ({ ...inst(defId), owner })),
+    pendingSummons: [],
     pendingChoice: spec.pendingChoice ?? null,
     roundHistory: [],
     result: null,

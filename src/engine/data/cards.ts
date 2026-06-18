@@ -12,10 +12,12 @@
  *   Phase 1 (done): HoS neutrals (Gaunter O'Dimm + Darkness, Olgierd) and
  *     faction cards (Toad, Schirrú) and the Son of Medell leader — all reuse
  *     existing mechanics (muster / one-directional summon / row-scorch).
- *   Phase 2: Cow + Bovine Defense Force (summon-avenger) and the remaining
- *     HoS leaders.
+ *   Phase 2 (done): Cow + Bovine Defense Force — the Summon-Avenger system
+ *     (CardDef.summonAvenger + GameState.pendingSummons), reused by
+ *     Kambi → Hemdall in Phase 3.
  *   Phase 3: the Skellige faction (new faction, Skellige Storm, Mardroeme
- *     transforms, Kambi/Hemdall, faction perk).
+ *     transforms, Kambi/Hemdall, faction perk) AND the new leaders (3 HoS +
+ *     2 Skellige), after a dedicated stat-verification pass.
  */
 
 import type { CardDef } from '../types.ts';
@@ -148,6 +150,26 @@ export const CARD_DEFS: readonly CardDef[] = [
     row: 'agile',
     strength: 6,
     abilities: ['agile', 'moral'],
+  },
+  {
+    id: 'neu_cow',
+    name: 'Cow',
+    faction: 'neutral',
+    type: 'unit',
+    row: 'melee',
+    strength: 0,
+    abilities: [],
+    summonAvenger: 'neu_bovine', // turns into the Bovine Defense Force next round
+  },
+  {
+    id: 'neu_bovine',
+    name: 'Bovine Defense Force',
+    faction: 'neutral',
+    type: 'unit',
+    row: 'melee',
+    strength: 8,
+    abilities: [],
+    maxCopiesPerDeck: 0, // summon-only: never built into a deck, only via the Cow
   },
 
   // -------------------------------------------------------------------------
