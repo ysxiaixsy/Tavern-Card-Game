@@ -78,18 +78,14 @@ Placeholder art only; never reference CDPR assets (see IP note in the brief).
   (`<base><1..N>.png`), then `npm run optimize:art` (sharp → 700px WebP, ~668MB
   to ~16MB) and `npm run gen:art` (`scripts/gen-card-art.ts` matches filename →
   defId by normalized name; OVERRIDES table for spelling stragglers; prints a
-  coverage report). `assets/cards/` is gitignored; `src/ui/cardArt.ts` is
-  committed EMPTY (so clones/EAS build clean) and the populated local copy is
-  hidden via `git update-index --skip-worktree src/ui/cardArt.ts`. `CardView`
+  coverage report). **`assets/cards/` and the populated `src/ui/cardArt.ts` are
+  COMMITTED** (user decision 2026-06-19) so EAS cloud builds ship the art — the
+  repo has NO remote; if one is ever added keep it PRIVATE (CDPR IP). `CardView`
   renders the WebP when `CARD_ART[defId]` exists (live effective-strength badge
   overlaid top-left since the printed number is static) else the programmatic
   frame. Current coverage: 142/171 deckable; no-art fallbacks = all Skellige
   (no folder yet), the new HoS/BaW neutrals (Gaunter/Olgierd/Cow/Toad/Schirru),
-  Son of Medell, Katakan. **Build caveat:** art shows in local dev (Metro reads
-  the working tree). A standalone APK *with* art needs a LOCAL build
-  (`npx expo run:android`) — EAS cloud archives only git-tracked files, so its
-  APK has programmatic frames unless the repo is private and the assets are
-  committed.
+  Son of Medell, Katakan — these keep the programmatic frame until art exists.
 - **Bonus ✅** deck builder (pulled forward from M5): faction/leader/cards
   chosen in `DeckBuilderScreen`, seat assignment in `GameSetupScreen`, Home
   is mode-only. Deck rules: W3's ≥22 units & ≤10 specials PLUS a project
