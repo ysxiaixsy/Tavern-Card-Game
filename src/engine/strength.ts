@@ -12,9 +12,10 @@
  * three bonded 6-strength units, one moral-boost unit and a horn ⇒ each
  * bonded unit = ((1 × 3) + 1) × 2 = 8.
  *
- * Decoys on the board are always 0. Judgment call (noted): a horn-ability
- * unit (Dandelion) doubles its own row including itself — the brief defines
- * horn as "×2 if the row is horned" with no self-exclusion, unlike moral.
+ * Decoys on the board are always 0. A horn doubles its row at most once and
+ * never buffs its OWN source card: a lone Dandelion doubles the rest of his
+ * row but not himself, while a separate Commander's Horn card (or a second
+ * horn unit) still doubles him. (Same self-exclusion principle as moral.)
  */
 
 import { getCardDef } from './data/cards.ts';
@@ -28,9 +29,12 @@ export function rowUnitViews(state: GameState, side: PlayerId, rowKind: RowKind)
 
   // Row-wide modifiers, computed once. Heroes can PROVIDE row effects (e.g.
   // Isengrim's moral boost) — immunity only means they never RECEIVE them.
-  const hornActive =
-    row.horn !== null ||
-    row.units.some((u) => getCardDef(u.defId).abilities.includes('horn'));
+  // Horn sources on the row. The Horn special card in the slot is always an
+  // "other" source; horn-ability units (Dandelion) must exclude themselves.
+  const hornCardPresent = row.horn !== null;
+  const hornAbilityCount = row.units.filter((u) =>
+    getCardDef(u.defId).abilities.includes('horn'),
+  ).length;
   const moralCount = row.units.filter((u) =>
     getCardDef(u.defId).abilities.includes('moral'),
   ).length;
@@ -62,7 +66,10 @@ export function rowUnitViews(state: GameState, side: PlayerId, rowKind: RowKind)
     }
     const moralFromOthers = moralCount - (def.abilities.includes('moral') ? 1 : 0);
     strength += moralFromOthers;
-    if (hornActive) {
+    // Doubled if any horn source other than this card itself is on the row.
+    const hornFromOthers =
+      hornCardPresent || hornAbilityCount - (def.abilities.includes('horn') ? 1 : 0) > 0;
+    if (hornFromOthers) {
       strength *= 2;
     }
     return { ...unit, effectiveStrength: strength };

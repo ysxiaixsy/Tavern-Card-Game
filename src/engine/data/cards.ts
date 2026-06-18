@@ -98,7 +98,7 @@ export const CARD_DEFS: readonly CardDef[] = [
     id: 'neu_regis',
     name: 'Emiel Regis Rohellec Terzieff-Godefroy',
     faction: 'neutral',
-    type: 'hero',
+    type: 'unit', // non-hero (project choice): now subject to weather/scorch/decoy/horn/moral
     row: 'melee',
     strength: 5,
     abilities: [],

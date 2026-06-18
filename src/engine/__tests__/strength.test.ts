@@ -76,8 +76,37 @@ describe('strength calculation order', () => {
     state.players.p1.rows.melee.horn = inst('neu_horn');
     const views = rowUnitViews(state, 'p1', 'melee');
     expect(views[0].effectiveStrength).toBe(12); // 6 × 2, NOT × 4
-    // Judgment call: a horn-ability unit is doubled by its own horn.
-    expect(views[1].effectiveStrength).toBe(4);
+    // Dandelion IS doubled here — by the separate Horn card, not by himself.
+    expect(views[1].effectiveStrength).toBe(4); // 2 × 2
+  });
+
+  it('a lone Dandelion doubles the rest of the row but NOT himself', () => {
+    const state = makeState({
+      p1: { rows: { melee: ['neu_vesemir', 'neu_dandelion'] } }, // no Horn card
+    });
+    const views = rowUnitViews(state, 'p1', 'melee');
+    expect(views[0].effectiveStrength).toBe(12); // Vesemir 6 × 2 by Dandelion
+    expect(views[1].effectiveStrength).toBe(2); // Dandelion 2, not self-doubled
+  });
+
+  it('two Dandelions double each other', () => {
+    const state = makeState({
+      p1: { rows: { melee: ['neu_dandelion', 'neu_dandelion'] } },
+    });
+    const views = rowUnitViews(state, 'p1', 'melee');
+    expect(views.map((u) => u.effectiveStrength)).toEqual([4, 4]); // each doubled by the other
+  });
+
+  it('Regis is a normal unit now (no hero immunity): weather floors him to 1, horn doubles him', () => {
+    const frosted = makeState({
+      p1: { rows: { melee: ['neu_regis'] } }, // printed 5
+      weather: [{ defId: 'neu_frost', owner: 'p2' }],
+    });
+    expect(rowUnitViews(frosted, 'p1', 'melee')[0].effectiveStrength).toBe(1);
+
+    const horned = makeState({ p1: { rows: { melee: ['neu_regis'] } } });
+    horned.players.p1.rows.melee.horn = inst('neu_horn');
+    expect(rowUnitViews(horned, 'p1', 'melee')[0].effectiveStrength).toBe(10); // 5 × 2
   });
 
   it('heroes are immune to weather, bond, moral and horn', () => {

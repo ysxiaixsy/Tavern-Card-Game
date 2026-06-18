@@ -42,6 +42,16 @@ describe('Scorch (special card)', () => {
     expect(after.players.p2.rows.melee.units).toHaveLength(1);
     expect(graveyardDefs(after, 'p1')).toEqual(['neu_scorch']);
   });
+
+  it('Regis is now a valid Scorch target (no longer a hero)', () => {
+    const state = makeState({
+      p1: { hand: ['neu_scorch', 'nr_yarpen'] },
+      p2: { rows: { melee: ['neu_regis'] } }, // 5-strength normal unit, highest on board
+    });
+    const after = play(state, 'p1', 'neu_scorch');
+    expect(after.players.p2.rows.melee.units).toHaveLength(0);
+    expect(graveyardDefs(after, 'p2')).toContain('neu_regis');
+  });
 });
 
 describe('Villentretenmerth (unit scorch)', () => {
