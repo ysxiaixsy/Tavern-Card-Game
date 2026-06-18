@@ -15,8 +15,8 @@ export const abilityText: Record<Ability, string> = {
   moral: 'Moral Boost: +1 strength to every other unit in this row.',
   horn: 'Commander’s Horn: doubles unit strengths in this row (applies at most once per row).',
   agile: 'Agile: can be played in Close Combat or Ranged; choose on every play.',
-  scorch_melee:
-    'Scorch – Close Combat: on play, if the opponent’s Close Combat row totals 10 or more, destroys its strongest non-hero unit(s).',
+  scorch_row:
+    'Scorch (row): on play, if the opponent’s matching row totals 10 or more, destroys its strongest non-hero unit(s).',
 };
 
 const weatherText: Record<WeatherKind, string> = {
@@ -88,6 +88,12 @@ export function describeCard(defId: string): string[] {
     lines.push(leaderAbilityText(def));
   }
   for (const ability of def.abilities) {
+    // summonsGroup cards carry the 'muster' icon but summon a DIFFERENT group
+    // one-directionally, so describe that instead of the generic muster text.
+    if (ability === 'muster' && def.summonsGroup) {
+      lines.push('On play: summons all of its linked cards from your hand and deck (one-way).');
+      continue;
+    }
     lines.push(abilityText[ability]);
   }
   if (lines.length === 0) {

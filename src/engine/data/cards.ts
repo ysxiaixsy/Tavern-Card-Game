@@ -6,14 +6,16 @@
  * from game files; individual numbers may be off by a point or a row.
  * Anything I am notably unsure about carries an inline `// VERIFY:` comment.
  *
- * Scope: the complete base-game pool for all four factions + neutrals,
- * cross-checked against the player's card checklist (copy counts included).
- *
- * DLC cards are intentionally EXCLUDED (per project decision): the Skellige
- * faction and Skellige Storm, Olgierd von Everec, Gaunter O'Dimm + the three
- * Darkness cards, Toad, Cow, Schirrú, and the DLC leaders (Eredin the
- * Treacherous, Francesca Hope of the Aen Seidhe, Foltest Son of Medell,
- * Emhyr Invader of the North). Base-game cards only.
+ * Scope: the COMPLETE in-game Witcher 3 Gwent pool — base game plus the
+ * Hearts of Stone and Blood and Wine expansion cards (project decision,
+ * 2026). Being added in phases:
+ *   Phase 1 (done): HoS neutrals (Gaunter O'Dimm + Darkness, Olgierd) and
+ *     faction cards (Toad, Schirrú) and the Son of Medell leader — all reuse
+ *     existing mechanics (muster / one-directional summon / row-scorch).
+ *   Phase 2: Cow + Bovine Defense Force (summon-avenger) and the remaining
+ *     HoS leaders.
+ *   Phase 3: the Skellige faction (new faction, Skellige Storm, Mardroeme
+ *     transforms, Kambi/Hemdall, faction perk).
  */
 
 import type { CardDef } from '../types.ts';
@@ -110,7 +112,42 @@ export const CARD_DEFS: readonly CardDef[] = [
     type: 'unit',
     row: 'melee',
     strength: 7,
-    abilities: ['scorch_melee'],
+    abilities: ['scorch_row'],
+    scorchRow: 'melee',
+  },
+
+  // -------------------------------------------------------------------------
+  // Neutral — Hearts of Stone additions
+  // -------------------------------------------------------------------------
+  {
+    id: 'neu_godimm',
+    name: "Gaunter O'Dimm",
+    faction: 'neutral',
+    type: 'unit',
+    row: 'siege',
+    strength: 2,
+    abilities: ['muster'], // icon; summons the Darkness group one-directionally
+    summonsGroup: 'odimm_darkness',
+  },
+  {
+    id: 'neu_godimm_darkness',
+    name: "Gaunter O'Dimm: Darkness",
+    faction: 'neutral',
+    type: 'unit',
+    row: 'ranged',
+    strength: 4,
+    abilities: ['muster'],
+    musterGroup: 'odimm_darkness', // Darkness cards muster each other; Gaunter is NOT a member
+    maxCopiesPerDeck: 3,
+  },
+  {
+    id: 'neu_olgierd',
+    name: 'Olgierd von Everec',
+    faction: 'neutral',
+    type: 'unit',
+    row: 'agile',
+    strength: 6,
+    abilities: ['agile', 'moral'],
   },
 
   // -------------------------------------------------------------------------
@@ -214,6 +251,15 @@ export const CARD_DEFS: readonly CardDef[] = [
     abilities: [],
     leaderAbility: 'scorch_row_leader',
     leaderScorchRow: 'siege',
+  },
+  {
+    id: 'nr_foltest_medell',
+    name: 'Foltest, Son of Medell',
+    faction: 'northern_realms',
+    type: 'leader',
+    abilities: [],
+    leaderAbility: 'scorch_row_leader',
+    leaderScorchRow: 'ranged', // Hearts of Stone leader
   },
   {
     id: 'nr_vernon',
@@ -809,6 +855,16 @@ export const CARD_DEFS: readonly CardDef[] = [
     strength: 5, // VERIFY
     abilities: [],
   },
+  {
+    id: 'mon_toad',
+    name: 'Toad',
+    faction: 'monsters',
+    type: 'unit',
+    row: 'ranged',
+    strength: 7,
+    abilities: ['scorch_row'],
+    scorchRow: 'ranged', // Hearts of Stone
+  },
 
   // -------------------------------------------------------------------------
   // Nilfgaard — the spy faction (wins tied rounds)
@@ -1360,6 +1416,16 @@ export const CARD_DEFS: readonly CardDef[] = [
     strength: 5,
     abilities: [],
     maxCopiesPerDeck: 5, // VERIFY: W3 ships five obtainable copies.
+  },
+  {
+    id: 'st_schirru',
+    name: 'Schirrú',
+    faction: 'scoiatael',
+    type: 'unit',
+    row: 'siege',
+    strength: 8,
+    abilities: ['scorch_row'],
+    scorchRow: 'siege', // Hearts of Stone
   },
 
   // -------------------------------------------------------------------------

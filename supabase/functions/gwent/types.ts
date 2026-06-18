@@ -73,7 +73,7 @@ export type Ability =
   | 'moral' // Moral Boost
   | 'horn' // Commander's Horn as a unit ability (e.g. Dandelion)
   | 'agile'
-  | 'scorch_melee'; // unit-scorch (Villentretenmerth): on play, scorch opponent melee if its total ≥ 10
+  | 'scorch_row'; // unit-scorch (Villentretenmerth/Toad/Schirru): on play, scorch the opponent row named by CardDef.scorchRow if its total ≥ 10
 
 export type LeaderAbilityId =
   | 'weather_from_deck' // play this leader's weather kind straight from your deck (see CardDef.leaderWeather)
@@ -105,6 +105,14 @@ export interface CardDef {
    * Crones and the "Vampire:" cards have different names but one group.
    */
   musterGroup?: string;
+  /**
+   * One-directional summon: on play, also muster every card of this group
+   * from hand AND deck — without this card being a member of that group.
+   * Gaunter O'Dimm summons the "Darkness" cards but is never summoned by them.
+   */
+  summonsGroup?: string;
+  /** scorch_row units: which ENEMY row they scorch (≥10). */
+  scorchRow?: RowKind;
   /** Deck-building copy limit. Default 1. */
   maxCopiesPerDeck?: number;
   /** Weather cards only. */

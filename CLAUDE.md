@@ -60,9 +60,13 @@ Placeholder art only; never reference CDPR assets (see IP note in the brief).
   discard_draw (Destroyer of Worlds) enumerates complete moves: every hand
   pair × every distinct deck def — large but finite, per the no-mid-move-
   prompt rule.
-- **Card scope:** base game ONLY — the DLC exclusion list lives in the
-  cards.ts header (Skellige, O'Dimm/Darkness, Olgierd, Toad, Cow, Schirrú,
-  and the four DLC leaders). Don't re-add them without asking.
+- **Card scope (2026 decision — reversed the earlier base-only rule):** the
+  COMPLETE in-game W3 Gwent pool, base + Hearts of Stone + Blood and Wine.
+  Added in phases (see cards.ts header). Phase 1 DONE: Gaunter O'Dimm +
+  Darkness, Olgierd, Toad, Schirrú, Foltest Son of Medell. Phase 2: Cow +
+  Bovine Defense Force (summon-avenger), remaining HoS leaders. Phase 3:
+  the Skellige faction. Unit-scorch is now generic (`scorch_row` +
+  `scorchRow`); one-directional summon is `summonsGroup`.
 - **Bonus ✅** deck builder (pulled forward from M5): faction/leader/cards
   chosen in `DeckBuilderScreen`, seat assignment in `GameSetupScreen`, Home
   is mode-only. Deck rules: W3's ≥22 units & ≤10 specials PLUS a project

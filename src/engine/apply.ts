@@ -246,8 +246,14 @@ function resolveUnitPlay(
     resolveMuster(s, actor, def.musterGroup);
   }
 
-  if (def.abilities.includes('scorch_melee')) {
-    resolveRowScorch(s, actor, 'melee');
+  // One-directional summon (Gaunter O'Dimm → the Darkness group). The source
+  // card is not a member of the group, so the group never summons it back.
+  if (def.summonsGroup) {
+    resolveMuster(s, actor, def.summonsGroup);
+  }
+
+  if (def.abilities.includes('scorch_row') && def.scorchRow) {
+    resolveRowScorch(s, actor, def.scorchRow);
   }
 
   // Medic last: it suspends the turn in a pendingChoice. If the graveyard has

@@ -573,8 +573,8 @@ export function scoreMoves(view: PlayerView): ScoredMove[] {
         return 26 + (def.strength ?? 0) * 0.5;
       }
       case 'unit': {
-        if (def.abilities.includes('scorch_melee')) {
-          const g = rowScorchGain(view, 'melee');
+        if (def.abilities.includes('scorch_row') && def.scorchRow) {
+          const g = rowScorchGain(view, def.scorchRow);
           return g >= 6 ? 60 + g : bodyScore(def) - 2;
         }
         if (def.abilities.includes('medic')) {

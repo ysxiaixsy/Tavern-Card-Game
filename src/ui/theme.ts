@@ -59,7 +59,7 @@ export const abilityIcon: Record<Ability, string> = {
   moral: '🚩',
   horn: '📯',
   agile: '↔️',
-  scorch_melee: '🔥',
+  scorch_row: '🔥',
 };
 
 /** Glyphs for special card types (shown where a unit shows its strength). */
