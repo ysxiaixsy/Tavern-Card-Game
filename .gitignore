@@ -34,9 +34,10 @@ yarn-error.*
 .env
 .env*.local
 
-# Card art assets — kept OUT of git (CDPR IP, private/non-distributed use only).
-# Drop PNGs in assets/cards/ and run `npm run gen:art` to build the map.
-/assets/cards/
+# Card art (assets/cards/) is COMMITTED for private, non-distributed use so EAS
+# cloud builds include it. This repo has no remote; if you ever add one, keep it
+# PRIVATE — these are CDPR card faces. Drop images in assets/cards/, then run
+# `npm run optimize:art` and `npm run gen:art`.
 
 # typescript
 *.tsbuildinfo
