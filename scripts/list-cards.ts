@@ -12,6 +12,7 @@ const FACTIONS: { key: Faction; label: string }[] = [
   { key: 'nilfgaard', label: 'NILFGAARD' },
   { key: 'monsters', label: 'MONSTERS' },
   { key: 'scoiatael', label: "SCOIA'TAEL" },
+  { key: 'skellige', label: 'SKELLIGE' },
 ];
 
 function describe(def: CardDef): string {

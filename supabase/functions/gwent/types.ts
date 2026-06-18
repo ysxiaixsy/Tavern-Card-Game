@@ -42,7 +42,8 @@ export type Faction =
   | 'northern_realms'
   | 'nilfgaard'
   | 'monsters'
-  | 'scoiatael';
+  | 'scoiatael'
+  | 'skellige';
 
 export type CardType =
   | 'unit'
@@ -86,6 +87,7 @@ export type LeaderAbilityId =
   | 'play_from_graveyard' // play a non-hero unit from your graveyard instantly, full effects
   | 'steal_from_graveyard' // take a non-hero unit from the OPPONENT's graveyard into your hand
   | 'discard_draw' // discard 2 cards, then draw 1 card of your choice from your deck
+  | 'reshuffle_graveyards' // Crach an Craite: shuffle both players' graveyards back into their decks
   | 'draw_extra_start'; // auto: draw an extra card at match start (never an on-demand move)
 
 /** Static card definition (see data/cards.ts). */

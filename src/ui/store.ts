@@ -44,6 +44,7 @@ const FACTION_NAMES: Record<PlayableFaction, string> = {
   nilfgaard: 'Nilfgaard',
   monsters: 'Monsters',
   scoiatael: "Scoia'tael",
+  skellige: 'Skellige',
 };
 
 export const STARTER_SAVED_DECKS: SavedDeck[] = (

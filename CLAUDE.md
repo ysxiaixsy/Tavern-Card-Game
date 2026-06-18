@@ -62,11 +62,19 @@ Placeholder art only; never reference CDPR assets (see IP note in the brief).
   prompt rule.
 - **Card scope (2026 decision — reversed the earlier base-only rule):** the
   COMPLETE in-game W3 Gwent pool, base + Hearts of Stone + Blood and Wine.
-  Added in phases (see cards.ts header). Phase 1 DONE: Gaunter O'Dimm +
-  Darkness, Olgierd, Toad, Schirrú, Foltest Son of Medell. Phase 2: Cow +
-  Bovine Defense Force (summon-avenger), remaining HoS leaders. Phase 3:
-  the Skellige faction. Unit-scorch is now generic (`scorch_row` +
-  `scorchRow`); one-directional summon is `summonsGroup`.
+  Phased (see cards.ts header). DONE: Phase 1 (HoS neutrals/faction cards +
+  Son of Medell), Phase 2 (Cow + Bovine = Summon-Avenger system), Phase 3a
+  (Skellige faction: roster, Crach leader `reshuffle_graveyards`, round-3
+  faction perk in resolveRound, Kambi→Hemdall). REMAINING: 3b Skellige Storm
+  (halve two rows, 1 copy — user's balance call) + King Bran (half-weather);
+  3c Mardroeme + Berserker/Vildkaarl transform; 3d HoS leaders (Emhyr
+  Invader, Eredin Treacherous = passive spy-double both sides, Francesca
+  Hope). Mechanics added: `scorch_row`+`scorchRow`, `summonsGroup`,
+  `summonAvenger`+`GameState.pendingSummons`. Many Skellige stats carry
+  `VERIFY` (fandom blocks fetch; user to confirm from his checklist).
+- **Assets/IP:** user will add real CDPR card art later for PRIVATE,
+  non-distributed use only. Keep assets OUT of any public repo (gitignore /
+  private repo / runtime-local); art stays in one swappable module.
 - **Bonus ✅** deck builder (pulled forward from M5): faction/leader/cards
   chosen in `DeckBuilderScreen`, seat assignment in `GameSetupScreen`, Home
   is mode-only. Deck rules: W3's ≥22 units & ≤10 specials PLUS a project

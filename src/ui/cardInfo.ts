@@ -46,6 +46,7 @@ const leaderText: Record<string, string> = {
     'Once per match: play a non-hero unit from your graveyard instantly, with its full effect.',
   steal_from_graveyard: 'Once per match: take a non-hero unit from the ENEMY graveyard into your hand.',
   discard_draw: 'Once per match: discard 2 cards, then draw any card of your choice from your deck.',
+  reshuffle_graveyards: "Once per match: shuffle both players' graveyards back into their decks.",
   draw_extra_start: 'Automatic: draw an extra card at the start of the match.',
 };
 

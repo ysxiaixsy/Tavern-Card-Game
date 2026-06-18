@@ -211,6 +211,11 @@ function leaderMoves(state: GameState, player: PlayerId): Move[] {
       }
       return moves;
     }
+    case 'reshuffle_graveyards':
+      // Crach an Craite: only worth offering when there's something to recycle.
+      return state.players.p1.graveyard.length + state.players.p2.graveyard.length > 0
+        ? [{ type: 'USE_LEADER', player }]
+        : [];
     case 'draw_extra_start':
       // Auto-triggered at match start; never an on-demand move.
       return [];

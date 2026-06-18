@@ -41,6 +41,8 @@ const FACTION_ALIAS: Record<string, PlayableFaction> = {
   monsters: 'monsters',
   st: 'scoiatael',
   scoiatael: 'scoiatael',
+  sk: 'skellige',
+  skellige: 'skellige',
 };
 function parseFaction(arg: string | undefined, fallback: PlayableFaction): PlayableFaction {
   return FACTION_ALIAS[(arg ?? '').toLowerCase()] ?? fallback;
@@ -55,6 +57,7 @@ const FACTION_TAG: Record<string, string> = {
   nilfgaard: 'NG ',
   monsters: 'MON',
   scoiatael: 'ST ',
+  skellige: 'SK ',
   neutral: 'NEU',
 };
 

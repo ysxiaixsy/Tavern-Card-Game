@@ -577,6 +577,19 @@ function applyUseLeader(s: GameState, move: UseLeaderMove): void {
       ps.hand.push(fetched);
       break;
     }
+    case 'reshuffle_graveyards': {
+      // Crach an Craite: each player's graveyard returns to their own deck,
+      // which is then reshuffled.
+      for (const p of PLAYER_IDS) {
+        const pp = s.players[p];
+        pp.deck.push(...pp.graveyard);
+        pp.graveyard = [];
+        const [shuffled, rngState] = rngShuffle(s.rngState, pp.deck);
+        pp.deck = shuffled;
+        s.rngState = rngState;
+      }
+      break;
+    }
     case 'draw_extra_start':
       // Auto-resolved at match start (extra card already drawn).
       throw new GwentError('LEADER_UNAVAILABLE', 'this ability triggers automatically');
@@ -750,4 +763,33 @@ function resolveRound(s: GameState): void {
     s.players[player].rows[row].units.push(card);
   }
   s.pendingSummons = [];
+
+  // Skellige faction perk: at the start of round 3, two random units from
+  // your graveyard return to the board (raw — no on-play effects re-fire).
+  if (s.round === 3) {
+    for (const p of PLAYER_IDS) {
+      if (s.players[p].faction !== 'skellige') {
+        continue;
+      }
+      const ps = s.players[p];
+      for (let n = 0; n < 2; n++) {
+        const revivable = ps.graveyard
+          .map((card, index) => ({ card, index }))
+          .filter(({ card }) => {
+            const t = getCardDef(card.defId).type;
+            return t === 'unit' || t === 'hero';
+          });
+        if (revivable.length === 0) {
+          break;
+        }
+        const [pick, rngState] = rngInt(s.rngState, revivable.length);
+        s.rngState = rngState;
+        const [card] = ps.graveyard.splice(revivable[pick].index, 1);
+        const def = getCardDef(card.defId);
+        const row: RowKind =
+          def.row === 'melee' || def.row === 'ranged' || def.row === 'siege' ? def.row : 'melee';
+        ps.rows[row].units.push(card);
+      }
+    }
+  }
 }

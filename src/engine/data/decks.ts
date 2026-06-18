@@ -180,9 +180,54 @@ export const SCOIATAEL_STARTER: DeckList = {
   ],
 };
 
+/** Skellige — Crach an Craite. 25 units + 5 specials. Resilience + recursion. */
+export const SKELLIGE_STARTER: DeckList = {
+  leaderId: 'sk_crach',
+  cardIds: [
+    // Heroes
+    'sk_hjalmar',
+    'sk_cerys',
+    'sk_ermion',
+    'neu_geralt',
+    // Summon avenger
+    'sk_kambi', // → Hemdall next round
+    // Medic
+    'sk_birna',
+    // Tight bond
+    'sk_shieldmaiden',
+    'sk_shieldmaiden',
+    'sk_shieldmaiden',
+    'sk_craite_warrior',
+    'sk_craite_warrior',
+    'sk_craite_warrior',
+    'sk_war_longship',
+    'sk_war_longship',
+    // Muster
+    'sk_light_longship',
+    'sk_light_longship',
+    'sk_light_longship',
+    // Bodies
+    'sk_skald',
+    'sk_brokvar',
+    'sk_dimun',
+    'sk_armorsmith',
+    'sk_donar',
+    'sk_holger',
+    'sk_madman_lugos',
+    'sk_vabjorn',
+    // Specials (5)
+    'neu_horn',
+    'neu_decoy',
+    'neu_scorch',
+    'neu_frost',
+    'neu_fog',
+  ],
+};
+
 export const STARTER_DECKS = {
   northern_realms: NORTHERN_REALMS_STARTER,
   nilfgaard: NILFGAARD_STARTER,
   monsters: MONSTERS_STARTER,
   scoiatael: SCOIATAEL_STARTER,
+  skellige: SKELLIGE_STARTER,
 } as const;
