@@ -515,6 +515,38 @@ export function scoreMoves(view: PlayerView): ScoredMove[] {
         }
         return fetchValue - discardCost - 8;
       }
+      case 'halve_weather': {
+        // King Bran: how much strength my weathered units would recover.
+        let gain = 0;
+        for (const r of ROW_KINDS) {
+          if (!view.weather.kinds.some((k) => WEATHER_ROWS[k].includes(r))) {
+            continue;
+          }
+          for (const u of view.you.rows[r].units) {
+            const d = getCardDef(u.defId);
+            if (d.type === 'unit') {
+              gain += Math.max(0, Math.ceil((d.strength ?? 0) / 2) - u.effectiveStrength);
+            }
+          }
+        }
+        return gain >= 5 ? 50 + gain : 3;
+      }
+      case 'realign_agile': {
+        // Francesca: mainly worth it to pull agile units out of weather.
+        let gain = 0;
+        for (const r of ROW_KINDS) {
+          if (!view.weather.kinds.some((k) => WEATHER_ROWS[k].includes(r))) {
+            continue;
+          }
+          for (const u of view.you.rows[r].units) {
+            const d = getCardDef(u.defId);
+            if (d.row === 'agile' && d.type === 'unit') {
+              gain += Math.max(0, (d.strength ?? 0) - u.effectiveStrength);
+            }
+          }
+        }
+        return gain >= 4 ? 30 + gain : 3;
+      }
       default:
         return 0;
     }

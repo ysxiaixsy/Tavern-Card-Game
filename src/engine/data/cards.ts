@@ -1735,6 +1735,36 @@ export const CARD_DEFS: readonly CardDef[] = [
   },
 
   // -------------------------------------------------------------------------
+  // Hearts of Stone leaders (Phase 3d) — one extra leader per base faction.
+  // (Northern Realms' HoS leader, Foltest Son of Medell, shipped in Phase 1.)
+  // Appended here so the existing leaders keep their data-order art mapping.
+  // -------------------------------------------------------------------------
+  {
+    id: 'ng_emhyr_invader',
+    name: 'Emhyr var Emreis, Invader of the North',
+    faction: 'nilfgaard',
+    type: 'leader',
+    abilities: [],
+    leaderAbility: 'restore_random_passive',
+  },
+  {
+    id: 'mon_eredin_treacherous',
+    name: 'Eredin, the Treacherous',
+    faction: 'monsters',
+    type: 'leader',
+    abilities: [],
+    leaderAbility: 'spy_double_passive',
+  },
+  {
+    id: 'st_francesca_hope',
+    name: 'Francesca, Hope of the Aen Seidhe',
+    faction: 'scoiatael',
+    type: 'leader',
+    abilities: [],
+    leaderAbility: 'realign_agile',
+  },
+
+  // -------------------------------------------------------------------------
   // Internal pseudo-cards (never deck-legal)
   // -------------------------------------------------------------------------
   {

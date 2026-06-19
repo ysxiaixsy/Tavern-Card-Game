@@ -10,6 +10,7 @@ import {
   decoyTargets,
   medicTargets,
   opponentOf,
+  restoreToFieldIsRandom,
   ROW_KINDS,
   weatherIndexInDeck,
 } from './helpers.ts';
@@ -174,6 +175,11 @@ function leaderMoves(state: GameState, player: PlayerId): Move[] {
         targetInstanceId: target.instanceId,
       }));
     case 'play_from_graveyard': {
+      // Under Emhyr Invader of the North the engine picks the target at random,
+      // so it collapses to a single, payload-free move.
+      if (restoreToFieldIsRandom(state)) {
+        return medicTargets(ps).length > 0 ? [{ type: 'USE_LEADER', player }] : [];
+      }
       const moves: Move[] = [];
       for (const target of medicTargets(ps)) {
         if (getCardDef(target.defId).row === 'agile') {
@@ -186,6 +192,17 @@ function leaderMoves(state: GameState, player: PlayerId): Move[] {
       }
       return moves;
     }
+    case 'realign_agile': {
+      const hasAgile = ([...AGILE_ROWS] as RowKind[]).some((r) =>
+        ps.rows[r].units.some((u) => getCardDef(u.defId).row === 'agile'),
+      );
+      return hasAgile ? [{ type: 'USE_LEADER', player }] : [];
+    }
+    case 'spy_double_passive':
+    case 'restore_random_passive':
+      // Passive leaders: their effect is always on (read in strength.ts /
+      // restoreToFieldIsRandom); they are never an on-demand move.
+      return [];
     case 'steal_from_graveyard':
       return medicTargets(state.players[opponentOf(player)]).map((target) => ({
         type: 'USE_LEADER',

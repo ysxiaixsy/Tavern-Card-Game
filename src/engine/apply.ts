@@ -20,6 +20,7 @@ import {
   medicTargets,
   opponentOf,
   PLAYER_IDS,
+  restoreToFieldIsRandom,
   ROW_KINDS,
   weatherIndexInDeck,
 } from './helpers.ts';
@@ -264,10 +265,78 @@ function resolveUnitPlay(
 
   // Medic last: it suspends the turn in a pendingChoice. If the graveyard has
   // no legal target the medic resolves as a plain body (auto-skip — skipping
-  // is only allowed when there is nothing to revive).
+  // is only allowed when there is nothing to revive). Under Emhyr Invader of
+  // the North, the revive target is chosen at random instead of prompting.
   if (def.abilities.includes('medic') && medicTargets(s.players[actor]).length > 0) {
-    s.pendingChoice = { kind: 'medic_revive', player: actor, medicInstanceId: card.instanceId };
+    if (restoreToFieldIsRandom(s)) {
+      resolveRandomMedic(s, actor);
+    } else {
+      s.pendingChoice = { kind: 'medic_revive', player: actor, medicInstanceId: card.instanceId };
+    }
   }
+}
+
+/** Pick a random melee/ranged row for an agile unit being restored. */
+function randomAgileRow(s: GameState): RowKind {
+  const [coin, rng] = rngInt(s.rngState, 2);
+  s.rngState = rng;
+  return coin === 0 ? 'melee' : 'ranged';
+}
+
+/**
+ * Emhyr Invader of the North: revive a RANDOM non-hero unit from the actor's
+ * graveyard with full effects (a revived medic chains — again randomly).
+ */
+function resolveRandomMedic(s: GameState, actor: PlayerId): void {
+  const targets = medicTargets(s.players[actor]);
+  if (targets.length === 0) {
+    return;
+  }
+  const [index, rng] = rngInt(s.rngState, targets.length);
+  s.rngState = rng;
+  const chosen = targets[index];
+  const graveIndex = s.players[actor].graveyard.findIndex(
+    (c) => c.instanceId === chosen.instanceId,
+  );
+  const [card] = s.players[actor].graveyard.splice(graveIndex, 1);
+  const def = getCardDef(card.defId);
+  resolveUnitPlay(s, actor, card, def, def.row === 'agile' ? randomAgileRow(s) : undefined);
+}
+
+/**
+ * Francesca, Hope of the Aen Seidhe: gather the actor's agile units and move
+ * them all to whichever row (melee/ranged) maximizes the actor's total.
+ */
+function realignAgile(s: GameState, player: PlayerId): void {
+  const ps = s.players[player];
+  const movable: RowKind[] = ['melee', 'ranged'];
+  const agiles: CardInstance[] = [];
+  for (const rowKind of movable) {
+    const keep: CardInstance[] = [];
+    for (const unit of ps.rows[rowKind].units) {
+      if (getCardDef(unit.defId).row === 'agile') {
+        agiles.push(unit);
+      } else {
+        keep.push(unit);
+      }
+    }
+    ps.rows[rowKind].units = keep;
+  }
+  if (agiles.length === 0) {
+    throw new GwentError('LEADER_UNAVAILABLE', 'no agile units to move');
+  }
+  let best: RowKind = 'melee';
+  let bestTotal = -Infinity;
+  for (const rowKind of movable) {
+    ps.rows[rowKind].units.push(...agiles);
+    const total = sideTotal(s, player);
+    ps.rows[rowKind].units.splice(ps.rows[rowKind].units.length - agiles.length, agiles.length);
+    if (total > bestTotal) {
+      bestTotal = total;
+      best = rowKind;
+    }
+  }
+  ps.rows[best].units.push(...agiles);
 }
 
 /**
@@ -553,10 +622,29 @@ function applyUseLeader(s: GameState, move: UseLeaderMove): void {
       break;
     }
     case 'play_from_graveyard': {
+      if (restoreToFieldIsRandom(s)) {
+        // Emhyr Invader of the North: the engine picks the unit at random.
+        const targets = medicTargets(ps);
+        if (targets.length === 0) {
+          throw new GwentError('LEADER_UNAVAILABLE', 'no non-hero unit in your graveyard');
+        }
+        const [index, rng] = rngInt(s.rngState, targets.length);
+        s.rngState = rng;
+        const chosen = targets[index];
+        const graveIndex = ps.graveyard.findIndex((c) => c.instanceId === chosen.instanceId);
+        const [card] = ps.graveyard.splice(graveIndex, 1);
+        const def = getCardDef(card.defId);
+        resolveUnitPlay(s, move.player, card, def, def.row === 'agile' ? randomAgileRow(s) : undefined);
+        break;
+      }
       const { card, def } = takeGraveyardUnit(s, move.player, move.targetInstanceId);
       // Full effects, exactly like a medic revival (spies draw, musters
       // muster, a revived medic opens a pendingChoice chain).
       resolveUnitPlay(s, move.player, card, def, move.row);
+      break;
+    }
+    case 'realign_agile': {
+      realignAgile(s, move.player);
       break;
     }
     case 'steal_from_graveyard': {

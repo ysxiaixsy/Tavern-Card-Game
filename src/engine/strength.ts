@@ -10,6 +10,8 @@
  *   4. Moral Boost   → +1 per OTHER moral-boost unit in the same row
  *   5. Horn          → ×2 if the row is horned, at most once per row no
  *                      matter how many horn sources are present
+ *   6. Eredin spy    → ×2 if the unit is a SPY and either leader is Eredin the
+ *                      Treacherous (heroes already stopped at step 1)
  *
  * Worked example (encoded as a test): a row under Biting Frost containing
  * three bonded 6-strength units, one moral-boost unit and a horn ⇒ each
@@ -22,7 +24,7 @@
  */
 
 import { getCardDef } from './data/cards.ts';
-import { isRowUnderHardWeather, isRowUnderStorm, ROW_KINDS } from './helpers.ts';
+import { isRowUnderHardWeather, isRowUnderStorm, ROW_KINDS, spiesAreDoubled } from './helpers.ts';
 import type { GameState, PlayerId, RowKind, UnitView } from './types.ts';
 
 /** How weather reduces a unit's base strength on this side+row. */
@@ -47,6 +49,7 @@ function weatherModeFor(state: GameState, side: PlayerId, rowKind: RowKind): Wea
 export function rowUnitViews(state: GameState, side: PlayerId, rowKind: RowKind): UnitView[] {
   const row = state.players[side].rows[rowKind];
   const weatherMode = weatherModeFor(state, side, rowKind);
+  const spyDouble = spiesAreDoubled(state);
 
   // Row-wide modifiers, computed once. Heroes can PROVIDE row effects (e.g.
   // Isengrim's moral boost) — immunity only means they never RECEIVE them.
@@ -93,6 +96,10 @@ export function rowUnitViews(state: GameState, side: PlayerId, rowKind: RowKind)
     const hornFromOthers =
       hornCardPresent || hornAbilityCount - (def.abilities.includes('horn') ? 1 : 0) > 0;
     if (hornFromOthers) {
+      strength *= 2;
+    }
+    // Eredin the Treacherous: spies count double (heroes already returned).
+    if (spyDouble && def.abilities.includes('spy')) {
       strength *= 2;
     }
     return { ...unit, effectiveStrength: strength };

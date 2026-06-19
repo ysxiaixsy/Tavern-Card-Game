@@ -28,6 +28,28 @@ export function opponentOf(player: PlayerId): PlayerId {
 }
 
 /**
+ * Does either player have an active passive leader of `ability`? A passive is
+ * "active" until cancelled — Emhyr White Flame's cancel_leader sets leaderUsed,
+ * which switches the passive off (the only thing that ever marks these used).
+ */
+function passiveActive(state: GameState, ability: string): boolean {
+  return PLAYER_IDS.some((p) => {
+    const ps = state.players[p];
+    return getCardDef(ps.leader.defId).leaderAbility === ability && !ps.leaderUsed;
+  });
+}
+
+/** Eredin the Treacherous (passive): is spy doubling active? (either leader). */
+export function spiesAreDoubled(state: GameState): boolean {
+  return passiveActive(state, 'spy_double_passive');
+}
+
+/** Emhyr Invader of the North (passive): do restore-to-field effects pick randomly? */
+export function restoreToFieldIsRandom(state: GameState): boolean {
+  return passiveActive(state, 'restore_random_passive');
+}
+
+/**
  * Deep-clone a GameState. GameState is plain JSON by contract, so a JSON
  * round-trip is a correct clone and works in every runtime we target
  * (Hermes, V8, Deno) without depending on structuredClone.

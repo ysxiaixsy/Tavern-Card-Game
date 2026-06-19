@@ -51,6 +51,10 @@ const leaderText: Record<string, string> = {
   reshuffle_graveyards: "Once per match: shuffle both players' graveyards back into their decks.",
   halve_weather:
     'Once per match: from now on your units lose only half their strength to weather (rounded up) instead of dropping to 1.',
+  realign_agile: 'Once per match: move your agile units to whichever row gives you the most strength.',
+  spy_double_passive: 'Passive: every spy unit on the board (both sides) has double strength. Heroes are immune.',
+  restore_random_passive:
+    'Passive: for both players, abilities that restore a unit to the battlefield (medics, leaders) revive a random unit instead of a chosen one.',
   draw_extra_start: 'Automatic: draw an extra card at the start of the match.',
 };
 

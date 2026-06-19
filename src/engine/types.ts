@@ -91,6 +91,9 @@ export type LeaderAbilityId =
   | 'discard_draw' // discard 2 cards, then draw 1 card of your choice from your deck
   | 'reshuffle_graveyards' // Crach an Craite: shuffle both players' graveyards back into their decks
   | 'halve_weather' // King Bran: once tapped, YOUR units only lose half their strength to weather (ceil, min 1) instead of dropping to 1
+  | 'realign_agile' // Francesca Hope of the Aen Seidhe: move your agile units to whichever row maximizes your total
+  | 'spy_double_passive' // Eredin the Treacherous: PASSIVE — every spy unit on both sides has doubled strength (heroes immune)
+  | 'restore_random_passive' // Emhyr Invader of the North: PASSIVE — restore-to-field abilities (medic, play-from-graveyard) pick a random target, for BOTH players
   | 'draw_extra_start'; // auto: draw an extra card at match start (never an on-demand move)
 
 /** Static card definition (see data/cards.ts). */
