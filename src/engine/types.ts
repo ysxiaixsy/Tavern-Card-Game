@@ -62,9 +62,10 @@ export type UnitRow = RowKind | 'agile';
 
 /**
  * Weather card kinds. 'clear' exists only on Clear Weather cards; it is never
- * an *active* weather. frost→melee, fog→ranged, rain→siege.
+ * an *active* weather. frost→melee, fog→ranged, rain→siege; Skellige Storm
+ * covers ranged AND siege and HALVES (ceil, min 1) rather than nuking to 1.
  */
-export type WeatherKind = 'frost' | 'fog' | 'rain' | 'clear';
+export type WeatherKind = 'frost' | 'fog' | 'rain' | 'storm' | 'clear';
 
 export type Ability =
   | 'spy'
@@ -88,6 +89,7 @@ export type LeaderAbilityId =
   | 'steal_from_graveyard' // take a non-hero unit from the OPPONENT's graveyard into your hand
   | 'discard_draw' // discard 2 cards, then draw 1 card of your choice from your deck
   | 'reshuffle_graveyards' // Crach an Craite: shuffle both players' graveyards back into their decks
+  | 'halve_weather' // King Bran: once tapped, YOUR units only lose half their strength to weather (ceil, min 1) instead of dropping to 1
   | 'draw_extra_start'; // auto: draw an extra card at match start (never an on-demand move)
 
 /** Static card definition (see data/cards.ts). */

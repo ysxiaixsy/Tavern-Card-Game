@@ -23,6 +23,8 @@ const weatherText: Record<WeatherKind, string> = {
   frost: 'Biting Frost: every Close Combat unit’s strength becomes 1 (both sides). Heroes are immune.',
   fog: 'Impenetrable Fog: every Ranged unit’s strength becomes 1 (both sides). Heroes are immune.',
   rain: 'Torrential Rain: every Siege unit’s strength becomes 1 (both sides). Heroes are immune.',
+  storm:
+    'Skellige Storm: every Ranged and Siege unit is halved (rounded up, min 1) on both sides. Heroes are immune.',
   clear: 'Clear Weather: removes all weather effects from the board.',
 };
 
@@ -47,6 +49,8 @@ const leaderText: Record<string, string> = {
   steal_from_graveyard: 'Once per match: take a non-hero unit from the ENEMY graveyard into your hand.',
   discard_draw: 'Once per match: discard 2 cards, then draw any card of your choice from your deck.',
   reshuffle_graveyards: "Once per match: shuffle both players' graveyards back into their decks.",
+  halve_weather:
+    'Once per match: from now on your units lose only half their strength to weather (rounded up) instead of dropping to 1.',
   draw_extra_start: 'Automatic: draw an extra card at the start of the match.',
 };
 

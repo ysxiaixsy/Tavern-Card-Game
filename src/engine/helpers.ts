@@ -15,11 +15,12 @@ import type {
 export const ROW_KINDS: readonly RowKind[] = ['melee', 'ranged', 'siege'];
 export const PLAYER_IDS: readonly PlayerId[] = ['p1', 'p2'];
 
-/** Which row each weather kind shuts down (on BOTH sides of the board). */
-export const WEATHER_ROW: Record<Exclude<WeatherKind, 'clear'>, RowKind> = {
-  frost: 'melee',
-  fog: 'ranged',
-  rain: 'siege',
+/** Which row(s) each weather kind affects (on BOTH sides of the board). */
+export const WEATHER_ROWS: Record<Exclude<WeatherKind, 'clear'>, readonly RowKind[]> = {
+  frost: ['melee'],
+  fog: ['ranged'],
+  rain: ['siege'],
+  storm: ['ranged', 'siege'], // Skellige Storm hits both
 };
 
 export function opponentOf(player: PlayerId): PlayerId {
@@ -47,9 +48,21 @@ export function activeWeatherKinds(state: GameState): Exclude<WeatherKind, 'clea
   return kinds;
 }
 
-/** Is `rowKind` currently under weather (applies to both sides equally)? */
+/** Is `rowKind` under ANY weather, classic or storm (both sides equally)? */
 export function isRowUnderWeather(state: GameState, rowKind: RowKind): boolean {
-  return activeWeatherKinds(state).some((kind) => WEATHER_ROW[kind] === rowKind);
+  return activeWeatherKinds(state).some((kind) => WEATHER_ROWS[kind].includes(rowKind));
+}
+
+/** Is `rowKind` under classic frost/fog/rain (the "nuke to 1" weathers)? */
+export function isRowUnderHardWeather(state: GameState, rowKind: RowKind): boolean {
+  return activeWeatherKinds(state).some(
+    (kind) => kind !== 'storm' && WEATHER_ROWS[kind].includes(rowKind),
+  );
+}
+
+/** Is `rowKind` under Skellige Storm (the "halve" weather)? */
+export function isRowUnderStorm(state: GameState, rowKind: RowKind): boolean {
+  return activeWeatherKinds(state).includes('storm') && WEATHER_ROWS.storm.includes(rowKind);
 }
 
 /** Locate a card among a player's three rows. */

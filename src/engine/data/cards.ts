@@ -1451,8 +1451,8 @@ export const CARD_DEFS: readonly CardDef[] = [
   },
 
   // -------------------------------------------------------------------------
-  // Skellige (Blood and Wine) — Phase 3a roster. Skellige Storm + King Bran
-  // land in 3b; Berserker/Vildkaarl + Mardroeme in 3c. Several stats VERIFY.
+  // Skellige (Blood and Wine) — Phase 3a roster + 3b (King Bran leader,
+  // Skellige Storm). Berserker/Vildkaarl + Mardroeme land in 3c. Stats VERIFY.
   // -------------------------------------------------------------------------
   {
     id: 'sk_crach',
@@ -1461,6 +1461,25 @@ export const CARD_DEFS: readonly CardDef[] = [
     type: 'leader',
     abilities: [],
     leaderAbility: 'reshuffle_graveyards',
+  },
+  {
+    id: 'sk_bran',
+    name: 'King Bran',
+    faction: 'skellige',
+    type: 'leader',
+    abilities: [],
+    leaderAbility: 'halve_weather',
+  },
+  {
+    // Skellige Storm: house balance — instead of W3's nuke-to-1 on ranged AND
+    // siege, it HALVES both rows (ceil, min 1). One copy. (See strength.ts.)
+    id: 'sk_storm',
+    name: 'Skellige Storm',
+    faction: 'skellige',
+    type: 'weather',
+    weather: 'storm',
+    abilities: [],
+    maxCopiesPerDeck: 1,
   },
   {
     id: 'sk_hjalmar',

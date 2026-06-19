@@ -2,7 +2,10 @@
  * Strength calculation. Applied per unit, in this exact order (per the brief):
  *
  *   1. printed strength — heroes stop here, immune to everything below
- *   2. weather       → strength becomes 1 if the unit's row is under weather
+ *   2. weather       → classic weather sets the strength to 1; Skellige Storm
+ *                      (ranged+siege) halves it to ceil(s/2), min 1. A King
+ *                      Bran player who has tapped his leader halves ALL weather
+ *                      for his side (so even frost/fog/rain only halve).
  *   3. Tight Bond    → current × n (n = same-named bond units in the row)
  *   4. Moral Boost   → +1 per OTHER moral-boost unit in the same row
  *   5. Horn          → ×2 if the row is horned, at most once per row no
@@ -19,13 +22,31 @@
  */
 
 import { getCardDef } from './data/cards.ts';
-import { isRowUnderWeather, ROW_KINDS } from './helpers.ts';
+import { isRowUnderHardWeather, isRowUnderStorm, ROW_KINDS } from './helpers.ts';
 import type { GameState, PlayerId, RowKind, UnitView } from './types.ts';
+
+/** How weather reduces a unit's base strength on this side+row. */
+type WeatherMode = 'none' | 'nuke' | 'halve';
+
+function weatherModeFor(state: GameState, side: PlayerId, rowKind: RowKind): WeatherMode {
+  const hard = isRowUnderHardWeather(state, rowKind);
+  const storm = isRowUnderStorm(state, rowKind);
+  if (!hard && !storm) {
+    return 'none';
+  }
+  // King Bran (once tapped) softens ALL weather on his side to a halving.
+  const leaderDef = getCardDef(state.players[side].leader.defId);
+  const kingBran = state.players[side].leaderUsed && leaderDef.leaderAbility === 'halve_weather';
+  if (kingBran) {
+    return 'halve';
+  }
+  return hard ? 'nuke' : 'halve'; // hard weather wins over storm
+}
 
 /** Effective strengths for every card in one row, in placement order. */
 export function rowUnitViews(state: GameState, side: PlayerId, rowKind: RowKind): UnitView[] {
   const row = state.players[side].rows[rowKind];
-  const underWeather = isRowUnderWeather(state, rowKind);
+  const weatherMode = weatherModeFor(state, side, rowKind);
 
   // Row-wide modifiers, computed once. Heroes can PROVIDE row effects (e.g.
   // Isengrim's moral boost) — immunity only means they never RECEIVE them.
@@ -58,8 +79,10 @@ export function rowUnitViews(state: GameState, side: PlayerId, rowKind: RowKind)
     }
 
     let strength = def.strength ?? 0;
-    if (underWeather) {
+    if (weatherMode === 'nuke') {
       strength = 1;
+    } else if (weatherMode === 'halve') {
+      strength = Math.max(1, Math.ceil(strength / 2));
     }
     if (def.abilities.includes('bond')) {
       strength *= bondCounts[unit.defId] ?? 1;

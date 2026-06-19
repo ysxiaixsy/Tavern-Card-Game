@@ -94,7 +94,8 @@ export function BattleScreen({
       (k) =>
         (k === 'frost' && rowKind === 'melee') ||
         (k === 'fog' && rowKind === 'ranged') ||
-        (k === 'rain' && rowKind === 'siege'),
+        (k === 'rain' && rowKind === 'siege') ||
+        (k === 'storm' && (rowKind === 'ranged' || rowKind === 'siege')),
     );
 
   const submit = (move: Move): void => {

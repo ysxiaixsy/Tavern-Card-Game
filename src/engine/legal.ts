@@ -216,6 +216,10 @@ function leaderMoves(state: GameState, player: PlayerId): Move[] {
       return state.players.p1.graveyard.length + state.players.p2.graveyard.length > 0
         ? [{ type: 'USE_LEADER', player }]
         : [];
+    case 'halve_weather':
+      // King Bran: only offered while weather is on the board (it does nothing
+      // otherwise, and persists once tapped — see strength.ts).
+      return state.weatherCards.length === 0 ? [] : [{ type: 'USE_LEADER', player }];
     case 'draw_extra_start':
       // Auto-triggered at match start; never an on-demand move.
       return [];

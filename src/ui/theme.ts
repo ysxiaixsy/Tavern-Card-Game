@@ -49,6 +49,7 @@ export const weatherIcon: Record<WeatherKind, string> = {
   frost: '❄️',
   fog: '🌫️',
   rain: '🌧️',
+  storm: '⛈️',
   clear: '☀️',
 };
 

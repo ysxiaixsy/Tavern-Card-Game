@@ -215,12 +215,12 @@ export const SKELLIGE_STARTER: DeckList = {
     'sk_holger',
     'sk_madman_lugos',
     'sk_vabjorn',
-    // Specials (5)
+    // Specials (5) — Skellige Storm is the faction's signature weather
     'neu_horn',
     'neu_decoy',
     'neu_scorch',
     'neu_frost',
-    'neu_fog',
+    'sk_storm',
   ],
 };
 

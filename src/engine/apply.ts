@@ -577,6 +577,14 @@ function applyUseLeader(s: GameState, move: UseLeaderMove): void {
       ps.hand.push(fetched);
       break;
     }
+    case 'halve_weather': {
+      // King Bran: no immediate mutation — the halving is read in strength.ts
+      // from leaderUsed (set below). Guard against a wasted tap with no weather.
+      if (s.weatherCards.length === 0) {
+        throw new GwentError('LEADER_UNAVAILABLE', 'no weather to halve');
+      }
+      break;
+    }
     case 'reshuffle_graveyards': {
       // Crach an Craite: each player's graveyard returns to their own deck,
       // which is then reshuffled.

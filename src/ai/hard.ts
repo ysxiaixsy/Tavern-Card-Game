@@ -138,7 +138,7 @@ function determinize(view: PlayerView, rng: number): [GameState, number] {
     myDeck.length > 0 &&
     !myDeck.some((c) => getCardDef(c.defId).weather === myLeader.leaderWeather)
   ) {
-    const weatherDefId = { frost: 'neu_frost', fog: 'neu_fog', rain: 'neu_rain' }[
+    const weatherDefId = { frost: 'neu_frost', fog: 'neu_fog', rain: 'neu_rain', storm: 'sk_storm' }[
       myLeader.leaderWeather
     ];
     myDeck = [

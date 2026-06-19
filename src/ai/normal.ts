@@ -16,7 +16,7 @@
  */
 
 import { getCardDef } from '../engine/data/cards.ts';
-import { WEATHER_ROW } from '../engine/helpers.ts';
+import { WEATHER_ROWS } from '../engine/helpers.ts';
 import type {
   CardDef,
   Move,
@@ -69,16 +69,25 @@ export function weatherNetGain(view: PlayerView, kind: Exclude<WeatherKind, 'cle
   if (view.weather.kinds.includes(kind)) {
     return 0;
   }
-  const row = WEATHER_ROW[kind];
-  return rowWeatherLoss(view.opponent, row) - rowWeatherLoss(view.you, row);
+  let gain = 0;
+  for (const row of WEATHER_ROWS[kind]) {
+    gain += rowWeatherLoss(view.opponent, row) - rowWeatherLoss(view.you, row);
+  }
+  return gain;
 }
 
 /** Margin shift from lifting all active weather (my recovery − theirs). */
 export function clearWeatherNetGain(view: PlayerView): number {
   let mine = 0;
   let theirs = 0;
+  // Each affected row counted once even if several weathers overlap it.
+  const rows = new Set<RowKind>();
   for (const kind of view.weather.kinds) {
-    const row = WEATHER_ROW[kind];
+    for (const row of WEATHER_ROWS[kind]) {
+      rows.add(row);
+    }
+  }
+  for (const row of rows) {
     for (const unit of view.you.rows[row].units) {
       const def = getCardDef(unit.defId);
       if (def.type === 'unit') {
@@ -196,7 +205,7 @@ export function estimateGain(view: PlayerView, move: Move): number {
         return -printed; // strengthens THEIR side
       }
       const rowKind = (move.row ?? def.row) as RowKind;
-      const weathered = view.weather.kinds.some((k) => WEATHER_ROW[k] === rowKind);
+      const weathered = view.weather.kinds.some((k) => WEATHER_ROWS[k].includes(rowKind));
       if (weathered && def.type === 'unit') {
         return 1;
       }
@@ -627,7 +636,7 @@ export function scoreMoves(view: PlayerView): ScoredMove[] {
     }
     // Don't drop bodies into active weather.
     const rowKind = def.row;
-    if (rowKind && rowKind !== 'agile' && view.weather.kinds.some((k) => WEATHER_ROW[k] === rowKind)) {
+    if (rowKind && rowKind !== 'agile' && view.weather.kinds.some((k) => WEATHER_ROWS[k].includes(rowKind))) {
       score -= (def.strength ?? 0) * 2.5;
     }
     return score;
@@ -637,7 +646,8 @@ export function scoreMoves(view: PlayerView): ScoredMove[] {
     if (def.row !== 'agile' || !move.row) {
       return 0;
     }
-    const weathered = view.weather.kinds.some((k) => WEATHER_ROW[k] === move.row);
+    const targetRow = move.row;
+    const weathered = view.weather.kinds.some((k) => WEATHER_ROWS[k].includes(targetRow));
     return weathered ? -8 : move.row === 'ranged' ? 1 : 0;
   }
 
