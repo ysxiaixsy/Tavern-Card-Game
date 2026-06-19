@@ -70,6 +70,7 @@ export const specialIcon = {
   horn: '📯',
   scorch: '🔥',
   decoy: '🎭',
+  mardroeme: '🍄',
   leader: '👑',
 } as const;
 

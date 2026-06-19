@@ -52,6 +52,7 @@ export type CardType =
   | 'horn'
   | 'scorch'
   | 'decoy'
+  | 'mardroeme' // Skellige special: transforms Berserkers into Vildkaarls
   | 'leader';
 
 /** The three physical rows on each player's side of the board. */
@@ -123,6 +124,13 @@ export interface CardDef {
    * the start of the NEXT round. Cow → Bovine Defense Force, Kambi → Hemdall.
    */
   summonAvenger?: string;
+  /**
+   * Berserker marker: when a Mardroeme is played, every unit with a
+   * transformsTo on the board (both sides) becomes that card in place — same
+   * slot, same instanceId. Berserker → Vildkaarl, Young Berserker → Young
+   * Vildkaarl. The transform targets carry maxCopiesPerDeck: 0 (summon-only).
+   */
+  transformsTo?: string;
   /** Deck-building copy limit. Default 1. */
   maxCopiesPerDeck?: number;
   /** Weather cards only. */

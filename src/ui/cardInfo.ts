@@ -89,6 +89,16 @@ export function describeCard(defId: string): string[] {
       'Decoy: swap with a non-hero unit on your side of the board — it returns to your hand (enemy spies included).',
     );
   }
+  if (def.type === 'mardroeme') {
+    lines.push(
+      'Mardroeme: transforms every Berserker on the board (both sides) into its stronger Vildkaarl form.',
+    );
+  }
+  if (def.transformsTo) {
+    lines.push(
+      `Berserker: transforms into ${getCardDef(def.transformsTo).name} when a Mardroeme is played.`,
+    );
+  }
   if (def.type === 'leader' && def.leaderAbility) {
     lines.push(leaderAbilityText(def));
   }

@@ -72,6 +72,8 @@ function CardViewInner({
     centerGlyph = specialIcon.scorch;
   } else if (def.type === 'decoy') {
     centerGlyph = specialIcon.decoy;
+  } else if (def.type === 'mardroeme') {
+    centerGlyph = specialIcon.mardroeme;
   } else if (def.type === 'leader') {
     centerGlyph = specialIcon.leader;
   }

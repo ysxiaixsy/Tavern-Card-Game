@@ -1452,7 +1452,8 @@ export const CARD_DEFS: readonly CardDef[] = [
 
   // -------------------------------------------------------------------------
   // Skellige (Blood and Wine) — Phase 3a roster + 3b (King Bran leader,
-  // Skellige Storm). Berserker/Vildkaarl + Mardroeme land in 3c. Stats VERIFY.
+  // Skellige Storm) + 3c (Berserker/Young Berserker → Vildkaarl via Mardroeme).
+  // Several stats VERIFY.
   // -------------------------------------------------------------------------
   {
     id: 'sk_crach',
@@ -1480,6 +1481,61 @@ export const CARD_DEFS: readonly CardDef[] = [
     weather: 'storm',
     abilities: [],
     maxCopiesPerDeck: 1,
+  },
+  // Berserker transform package (Phase 3c). A plain body until a Mardroeme is
+  // played, then it becomes its Vildkaarl form (which carries the real ability).
+  {
+    id: 'sk_berserker',
+    name: 'Berserker',
+    faction: 'skellige',
+    type: 'unit',
+    row: 'melee',
+    strength: 4, // VERIFY
+    abilities: [],
+    transformsTo: 'sk_vildkaarl',
+    maxCopiesPerDeck: 3, // VERIFY
+  },
+  {
+    id: 'sk_vildkaarl',
+    name: 'Vildkaarl',
+    faction: 'skellige',
+    type: 'unit',
+    row: 'melee',
+    strength: 14, // VERIFY
+    abilities: ['moral'],
+    maxCopiesPerDeck: 0, // transform-only (Berserker + Mardroeme)
+  },
+  {
+    id: 'sk_young_berserker',
+    name: 'Young Berserker',
+    faction: 'skellige',
+    type: 'unit',
+    row: 'ranged',
+    strength: 2, // VERIFY
+    abilities: [],
+    transformsTo: 'sk_young_vildkaarl',
+    maxCopiesPerDeck: 3, // VERIFY
+  },
+  {
+    id: 'sk_young_vildkaarl',
+    name: 'Young Vildkaarl',
+    faction: 'skellige',
+    type: 'unit',
+    row: 'ranged',
+    strength: 8, // VERIFY
+    abilities: ['bond'],
+    maxCopiesPerDeck: 0, // transform-only (Young Berserker + Mardroeme)
+  },
+  {
+    // Mardroeme: on play, transforms every Berserker on BOTH sides (all rows)
+    // into its Vildkaarl form. (One source says same-row only; both-sides is
+    // the chosen house ruling.) See resolveMardroeme in apply.ts.
+    id: 'sk_mardroeme',
+    name: 'Mardroeme',
+    faction: 'skellige',
+    type: 'mardroeme',
+    abilities: [],
+    maxCopiesPerDeck: 3, // VERIFY
   },
   {
     id: 'sk_hjalmar',

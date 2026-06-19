@@ -77,7 +77,10 @@ let simCounter = 0;
 /** Plausible hidden cards for a side: its faction pool plus neutrals. */
 function samplePool(faction: Faction): string[] {
   return CARD_DEFS.filter(
-    (def) => def.type !== 'leader' && (def.faction === faction || def.faction === 'neutral'),
+    (def) =>
+      def.type !== 'leader' &&
+      (def.maxCopiesPerDeck ?? 1) > 0 && // skip summon/transform-only cards (Hemdall, Vildkaarls…)
+      (def.faction === faction || def.faction === 'neutral'),
   ).map((def) => def.id);
 }
 

@@ -180,7 +180,7 @@ export const SCOIATAEL_STARTER: DeckList = {
   ],
 };
 
-/** Skellige — Crach an Craite. 25 units + 5 specials. Resilience + recursion. */
+/** Skellige — Crach an Craite. 24 units + 6 specials. Resilience + recursion. */
 export const SKELLIGE_STARTER: DeckList = {
   leaderId: 'sk_crach',
   cardIds: [
@@ -212,15 +212,16 @@ export const SKELLIGE_STARTER: DeckList = {
     'sk_dimun',
     'sk_armorsmith',
     'sk_donar',
-    'sk_holger',
-    'sk_madman_lugos',
-    'sk_vabjorn',
-    // Specials (5) — Skellige Storm is the faction's signature weather
+    // Berserker package — play them, then Mardroeme flips both to Vildkaarls
+    'sk_berserker',
+    'sk_berserker',
+    // Specials (6) — Skellige Storm is the faction's signature weather
     'neu_horn',
     'neu_decoy',
     'neu_scorch',
     'neu_frost',
     'sk_storm',
+    'sk_mardroeme',
   ],
 };
 

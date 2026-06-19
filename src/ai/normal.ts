@@ -104,6 +104,20 @@ export function clearWeatherNetGain(view: PlayerView): number {
   return mine - theirs;
 }
 
+/** Strength my side gains right now if a Mardroeme transforms my Berserkers. */
+export function mardroemeGain(view: PlayerView): number {
+  let gain = 0;
+  for (const rowKind of ROW_KINDS) {
+    for (const unit of view.you.rows[rowKind].units) {
+      const def = getCardDef(unit.defId);
+      if (def.transformsTo) {
+        gain += (getCardDef(def.transformsTo).strength ?? 0) - unit.effectiveStrength;
+      }
+    }
+  }
+  return gain;
+}
+
 /** Margin shift of a global Scorch right now (opponent losses − own losses). */
 export function scorchNetGain(view: PlayerView): number {
   let highest = -1;
@@ -221,6 +235,8 @@ export function estimateGain(view: PlayerView, move: Move): number {
       return move.row ? hornGain(view, move.row) : 0;
     case 'scorch':
       return scorchNetGain(view);
+    case 'mardroeme':
+      return mardroemeGain(view);
     case 'decoy': {
       const target = ROW_KINDS.flatMap((r) => view.you.rows[r].units).find(
         (u) => u.instanceId === move.targetInstanceId,
@@ -556,6 +572,10 @@ export function scoreMoves(view: PlayerView): ScoredMove[] {
           return 80 + dampened;
         }
         return dampened >= 5 ? 30 : 3;
+      }
+      case 'mardroeme': {
+        const g = mardroemeGain(view);
+        return g >= 8 ? 60 + g : g > 0 ? 20 + g : 2;
       }
       case 'horn': {
         const g = move.row ? hornGain(view, move.row) : 0;

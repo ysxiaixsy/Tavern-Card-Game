@@ -106,6 +106,9 @@ function playCardMoves(state: GameState, player: PlayerId, card: CardInstance): 
     case 'scorch':
       // Legal even with no non-hero units on the board (it simply fizzles).
       return [base];
+    case 'mardroeme':
+      // Legal even with no Berserkers out (it simply fizzles, like Scorch).
+      return [base];
     case 'horn': {
       const moves: Move[] = [];
       for (const row of ROW_KINDS) {

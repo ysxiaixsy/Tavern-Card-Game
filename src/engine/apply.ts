@@ -198,6 +198,12 @@ function applyPlayCard(s: GameState, move: PlayCardMove): void {
       ps.graveyard.push(card);
       break;
     }
+    case 'mardroeme': {
+      ps.hand.splice(handIndex, 1);
+      resolveMardroeme(s);
+      ps.graveyard.push(card);
+      break;
+    }
     case 'decoy': {
       resolveDecoy(s, move.player, handIndex, move.targetInstanceId);
       break;
@@ -336,6 +342,24 @@ function resolveRowScorch(s: GameState, actor: PlayerId, rowKind: RowKind): void
     }
   }
   destroyUnits(s, victims);
+}
+
+/**
+ * Mardroeme: every Berserker on the board (both sides, all rows) becomes its
+ * Vildkaarl form in place — same slot, same instanceId, new defId (and thus new
+ * strength/abilities). Non-berserkers are untouched.
+ */
+function resolveMardroeme(s: GameState): void {
+  for (const side of PLAYER_IDS) {
+    for (const rowKind of ROW_KINDS) {
+      for (const unit of s.players[side].rows[rowKind].units) {
+        const into = getCardDef(unit.defId).transformsTo;
+        if (into) {
+          unit.defId = into;
+        }
+      }
+    }
+  }
 }
 
 /**
