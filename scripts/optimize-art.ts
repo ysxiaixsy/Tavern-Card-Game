@@ -7,6 +7,8 @@
  *
  * Operates IN PLACE on assets/cards/ — these are throwaway copies of the
  * originals on your Desktop, so re-copy + re-run if you need to redo it.
+ * Already-converted .webp files are left untouched, so re-running only
+ * processes newly-dropped PNGs (no quality loss from re-encoding).
  * Run: npm run optimize:art  (then npm run gen:art)
  */
 
@@ -16,7 +18,7 @@ import sharp from 'sharp';
 
 const MAX_WIDTH = 700;
 const QUALITY = 80;
-const IMAGE_RE = /\.(png|jpe?g|webp)$/i;
+const IMAGE_RE = /\.(png|jpe?g)$/i; // already-webp files are skipped
 const cardsDir = join(import.meta.dirname ?? '.', '..', 'assets', 'cards');
 
 function walk(dir: string): string[] {

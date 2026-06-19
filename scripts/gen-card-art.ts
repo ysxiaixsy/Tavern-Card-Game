@@ -35,6 +35,44 @@ const LEADER_BASE: Record<string, Faction> = {
   francesca: 'scoiatael',
 };
 
+/** Leader files whose name isn't `<base><N>` (Skellige's two leaders). */
+const LEADER_OVERRIDES: Record<string, string> = {
+  // filename stem: defId
+  crach1: 'sk_crach',
+  bran: 'sk_bran',
+};
+
+/**
+ * The Skellige/ folder uses its own `skellige_<name>.png` naming with clan
+ * abbreviations, so it gets an explicit filename-stem → defId map rather than
+ * the normalized-name matcher used for the other faction folders.
+ */
+const SKELLIGE_MAP: Record<string, string> = {
+  skellige_berseker: 'sk_berserker',
+  skellige_young_berserker: 'sk_young_berserker',
+  skellige_mardroeme: 'sk_mardroeme',
+  skellige_hjalmar: 'sk_hjalmar',
+  skellige_cerys: 'sk_cerys',
+  skellige_ermion: 'sk_ermion',
+  skellige_kambi: 'sk_kambi',
+  skellige_birna_bran: 'sk_birna',
+  skellige_draig_bondhu: 'sk_draig',
+  skellige_cheymaey_skald: 'sk_skald',
+  skellige_cdrummond_shield_maiden: 'sk_shieldmaiden',
+  skellige_cac_warrior: 'sk_craite_warrior',
+  skellige_war_longgship: 'sk_war_longship',
+  skellige_light_longship: 'sk_light_longship',
+  skellige_ctordarroch_armorsmith: 'sk_armorsmith',
+  skellige_cbrokvar_archer: 'sk_brokvar',
+  skellige_cdimun_pirate: 'sk_dimun',
+  skellige_donar_an_hindar: 'sk_donar',
+  skellige_holger_blackhand: 'sk_holger',
+  skellige_udalryk: 'sk_udalryk',
+  skellige_svanrige: 'sk_svanrige',
+  skellige_madman_lugos: 'sk_madman_lugos',
+  // skellige_blueboy_lugos / skellige_olaf have no matching card def.
+};
+
 const IMAGE_RE = /\.(png|jpe?g|webp)$/i;
 const stem = (file: string): string => file.replace(IMAGE_RE, '');
 
@@ -93,9 +131,29 @@ for (const [folder, faction] of Object.entries(FOLDER_FACTION)) {
   }
 }
 
-// Leaders: <base><index>.png → the Nth leader of that faction in data order.
+// Skellige folder: explicit filename-stem → defId map (irregular names).
+const skelligeDir = join(cardsDir, 'Skellige');
+for (const file of readDir(skelligeDir)) {
+  const defId = SKELLIGE_MAP[stem(file)];
+  if (defId) {
+    if (!map[defId]) {
+      map[defId] = requirePath(join(skelligeDir, file));
+    }
+  } else {
+    unmatchedFiles.push(`Skellige/${file}`);
+  }
+}
+
+// Leaders. First the explicit overrides (Skellige's Crach/Bran), then the
+// `<base><index>.png` → Nth-leader-of-faction rule for the base factions.
 const leaderDir = join(cardsDir, 'leaders');
 const leaderFiles = readDir(leaderDir);
+for (const file of leaderFiles) {
+  const defId = LEADER_OVERRIDES[stem(file)];
+  if (defId && !map[defId]) {
+    map[defId] = requirePath(join(leaderDir, file));
+  }
+}
 for (const [base, faction] of Object.entries(LEADER_BASE)) {
   const leaders = CARD_DEFS.filter((d) => d.faction === faction && d.type === 'leader');
   leaders.forEach((leader, i) => {
