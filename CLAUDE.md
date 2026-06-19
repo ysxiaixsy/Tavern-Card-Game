@@ -61,17 +61,22 @@ Placeholder art only; never reference CDPR assets (see IP note in the brief).
   pair × every distinct deck def — large but finite, per the no-mid-move-
   prompt rule.
 - **Card scope (2026 decision — reversed the earlier base-only rule):** the
-  COMPLETE in-game W3 Gwent pool, base + Hearts of Stone + Blood and Wine.
-  Phased (see cards.ts header). DONE: Phase 1 (HoS neutrals/faction cards +
-  Son of Medell), Phase 2 (Cow + Bovine = Summon-Avenger system), Phase 3a
-  (Skellige faction: roster, Crach leader `reshuffle_graveyards`, round-3
-  faction perk in resolveRound, Kambi→Hemdall). REMAINING: 3b Skellige Storm
-  (halve two rows, 1 copy — user's balance call) + King Bran (half-weather);
-  3c Mardroeme + Berserker/Vildkaarl transform; 3d HoS leaders (Emhyr
-  Invader, Eredin Treacherous = passive spy-double both sides, Francesca
-  Hope). Mechanics added: `scorch_row`+`scorchRow`, `summonsGroup`,
-  `summonAvenger`+`GameState.pendingSummons`. Many Skellige stats carry
-  `VERIFY` (fandom blocks fetch; user to confirm from his checklist).
+  COMPLETE in-game W3 Gwent pool, base + Hearts of Stone + Blood and Wine —
+  **all phases DONE.** Phase 1 (HoS neutrals/faction cards + Son of Medell),
+  Phase 2 (Cow + Bovine = Summon-Avenger system), Phase 3a (Skellige roster,
+  Crach `reshuffle_graveyards`, round-3 perk, Kambi→Hemdall), **3b** (Skellige
+  Storm — WeatherKind `'storm'`, halves ranged+siege ceil/min1; King Bran
+  `halve_weather` softens weather to a halving for his side — Skellige has
+  exactly 2 leaders, now complete), **3c** (Mardroeme: bespoke CardType +
+  `CardDef.transformsTo`, transforms Berserker→Vildkaarl 14 and Young
+  Berserker→Young Vildkaarl 8 on BOTH sides), **3d** (the 3 HoS leaders:
+  Eredin the Treacherous = passive `spy_double_passive`; Francesca Hope =
+  `realign_agile`; Emhyr Invader = passive `restore_random_passive` for BOTH
+  players — both passives cancellable via White Flame). Mechanics added across
+  phases: `scorch_row`, `summonsGroup`, `summonAvenger`+`pendingSummons`,
+  `'storm'` weather, `halve_weather`, `'mardroeme'` type + `transformsTo`,
+  `spy_double_passive`, `realign_agile`, `restore_random_passive`. 165 tests.
+  Many Skellige/Berserker stats still carry `VERIFY` (fandom blocks fetch).
 - **Assets/IP — card art pipeline LIVE:** real CDPR card faces wire in for
   PRIVATE, non-distributed use only and are kept OUT of git. Drop PNGs in
   `assets/cards/<Faction>/` (named `<Faction>-NNN-CardName.png`) + `leaders/`
