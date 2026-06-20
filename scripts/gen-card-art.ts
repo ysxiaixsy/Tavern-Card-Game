@@ -1,14 +1,16 @@
 /**
  * Build src/ui/cardArt.ts — a map of card defId → require(image) — by scanning
- * the (gitignored) assets/cards/ folder and matching filenames to CARD_DEFS by
- * normalized card name. Run: npm run gen:art
+ * the (gitignored) assets/cards/ folder. Run: npm run gen:art
  *
- * Card folders: Neutral, NRealms, Nilfgaard, Monster, Scoiatael (one PNG per
- * card, named "<Faction>-NNN-DescriptiveName.png"; duplicates for multi-copy
- * cards share one def, first file wins). leaders/<base><1..N>.png map to the
- * Nth leader of that faction in data order. Prints a coverage report; any
- * unmatched card simply keeps the programmatic frame.
+ * Two matchers:
+ *  - The base-faction folders (Neutral, NRealms, Nilfgaard, Monster, Scoiatael)
+ *    hold "<Faction>-NNN-DescriptiveName.png" files matched to CARD_DEFS by
+ *    normalized name (duplicates for multi-copy cards share one def, first wins).
+ *  - Everything irregular — the Skellige/ folder, the descriptively-named
+ *    leaders/, and a handful of bare-named neutrals (cow, godimm, …) — is mapped
+ *    explicitly via NAME_MAP (filename stem → defId).
  *
+ * Prints a coverage report; any unmatched card keeps the programmatic frame.
  * The output (src/ui/cardArt.ts) is committed alongside assets/cards/ so EAS
  * cloud builds ship the art — keep this repo private if it ever gets a remote.
  */
@@ -21,33 +23,31 @@ import type { Faction } from '../src/engine/types.ts';
 const root = join(import.meta.dirname ?? '.', '..');
 const cardsDir = join(root, 'assets', 'cards');
 
-const FOLDER_FACTION: Record<string, Faction> = {
+/** Folder → faction for the name-matcher; null folders are NAME_MAP-only. */
+const FOLDER_FACTION: Record<string, Faction | null> = {
   Neutral: 'neutral',
   NRealms: 'northern_realms',
   Nilfgaard: 'nilfgaard',
   Monster: 'monsters',
   Scoiatael: 'scoiatael',
-};
-const LEADER_BASE: Record<string, Faction> = {
-  foltest: 'northern_realms',
-  emhyr: 'nilfgaard',
-  eredin: 'monsters',
-  francesca: 'scoiatael',
+  Skellige: null,
+  leaders: null,
 };
 
-/** Leader files whose name isn't `<base><N>` (Skellige's two leaders). */
-const LEADER_OVERRIDES: Record<string, string> = {
-  // filename stem: defId
-  crach1: 'sk_crach',
-  bran: 'sk_bran',
-};
-
-/**
- * The Skellige/ folder uses its own `skellige_<name>.png` naming with clan
- * abbreviations, so it gets an explicit filename-stem → defId map rather than
- * the normalized-name matcher used for the other faction folders.
- */
-const SKELLIGE_MAP: Record<string, string> = {
+/** Explicit filename-stem → defId for every irregularly-named asset. */
+const NAME_MAP: Record<string, string> = {
+  // Bare-named neutrals / expansion specials
+  cow: 'neu_cow',
+  godimm: 'neu_godimm',
+  godimm_darkness: 'neu_godimm_darkness',
+  olgierd: 'neu_olgierd',
+  toad: 'mon_toad',
+  schirru: 'st_schirru',
+  skelligestorm: 'sk_storm',
+  // Scoiatael name-spelling stragglers
+  'Scoiatael-003-IsengrimFaolitarna': 'st_isengrim',
+  'Scoiatael-026-CiaranAepEasnillien': 'st_ciaran',
+  // Skellige folder (skellige_<name>.png, with clan abbreviations)
   skellige_berseker: 'sk_berserker',
   skellige_young_berserker: 'sk_young_berserker',
   skellige_mardroeme: 'sk_mardroeme',
@@ -70,18 +70,35 @@ const SKELLIGE_MAP: Record<string, string> = {
   skellige_udalryk: 'sk_udalryk',
   skellige_svanrige: 'sk_svanrige',
   skellige_madman_lugos: 'sk_madman_lugos',
-  // skellige_blueboy_lugos / skellige_olaf have no matching card def.
+  skellige_blueboy_lugos: 'sk_blueboy_lugos',
+  skellige_olaf: 'sk_olaf',
+  // Leaders (descriptive names; 5 per base faction + Skellige's two)
+  emhyr_imperial: 'ng_emhyr',
+  emhyr_whiteflame: 'ng_emhyr_whiteflame',
+  emhyr_emperor: 'ng_emhyr_emperor',
+  emhyr_relentless: 'ng_emhyr_relentless',
+  emhyr_invader: 'ng_emhyr_invader',
+  eredin_bringer: 'mon_eredin',
+  eredin_king: 'mon_eredin_king',
+  eredin_commander: 'mon_eredin_redriders',
+  eredin_destroyer: 'mon_eredin_destroyer',
+  eredin_treacherous: 'mon_eredin_treacherous',
+  foltest_king: 'nr_foltest',
+  foltest_lord: 'nr_foltest_commander',
+  foltest_siegemaster: 'nr_foltest_siegemaster',
+  foltest_steel: 'nr_foltest_steelforged',
+  foltest_son_of_medell: 'nr_foltest_medell',
+  francesca_daisy: 'st_francesca',
+  francesca_pureblood: 'st_francesca_pureblood',
+  francesca_beautiful: 'st_francesca_beautiful',
+  francesca_queen: 'st_francesca_queen',
+  francesca_hope: 'st_francesca_hope',
+  bran: 'sk_bran',
+  crach1: 'sk_crach',
 };
 
 const IMAGE_RE = /\.(png|jpe?g|webp)$/i;
 const stem = (file: string): string => file.replace(IMAGE_RE, '');
-
-/** Hand-mapped stragglers whose filename spelling won't auto-match the def. */
-const OVERRIDES: Record<string, string> = {
-  // defId: filename stem (no extension)
-  st_isengrim: 'Scoiatael-003-IsengrimFaolitarna',
-  st_ciaran: 'Scoiatael-026-CiaranAepEasnillien',
-};
 
 const norm = (s: string): string =>
   s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -105,16 +122,19 @@ function readDir(dir: string): string[] {
   }
 }
 
-// Units & specials, matched by normalized name within each faction folder.
 for (const [folder, faction] of Object.entries(FOLDER_FACTION)) {
   const dir = join(cardsDir, folder);
-  const defs = CARD_DEFS.filter((d) => d.faction === faction && d.type !== 'leader');
+  const defs = faction ? CARD_DEFS.filter((d) => d.faction === faction && d.type !== 'leader') : [];
   for (const file of readDir(dir)) {
-    const override = Object.entries(OVERRIDES).find(([, s]) => s === stem(file));
-    if (override) {
-      if (!map[override[0]]) {
-        map[override[0]] = requirePath(join(dir, file));
+    const mapped = NAME_MAP[stem(file)];
+    if (mapped) {
+      if (!map[mapped]) {
+        map[mapped] = requirePath(join(dir, file));
       }
+      continue;
+    }
+    if (!faction) {
+      unmatchedFiles.push(`${folder}/${file}`);
       continue;
     }
     const key = norm(stem(file).split('-').slice(2).join('-'));
@@ -129,39 +149,6 @@ for (const [folder, faction] of Object.entries(FOLDER_FACTION)) {
       unmatchedFiles.push(`${folder}/${file}`);
     }
   }
-}
-
-// Skellige folder: explicit filename-stem → defId map (irregular names).
-const skelligeDir = join(cardsDir, 'Skellige');
-for (const file of readDir(skelligeDir)) {
-  const defId = SKELLIGE_MAP[stem(file)];
-  if (defId) {
-    if (!map[defId]) {
-      map[defId] = requirePath(join(skelligeDir, file));
-    }
-  } else {
-    unmatchedFiles.push(`Skellige/${file}`);
-  }
-}
-
-// Leaders. First the explicit overrides (Skellige's Crach/Bran), then the
-// `<base><index>.png` → Nth-leader-of-faction rule for the base factions.
-const leaderDir = join(cardsDir, 'leaders');
-const leaderFiles = readDir(leaderDir);
-for (const file of leaderFiles) {
-  const defId = LEADER_OVERRIDES[stem(file)];
-  if (defId && !map[defId]) {
-    map[defId] = requirePath(join(leaderDir, file));
-  }
-}
-for (const [base, faction] of Object.entries(LEADER_BASE)) {
-  const leaders = CARD_DEFS.filter((d) => d.faction === faction && d.type === 'leader');
-  leaders.forEach((leader, i) => {
-    const file = leaderFiles.find((f) => norm(stem(f)) === `${base}${i + 1}`);
-    if (file && !map[leader.id]) {
-      map[leader.id] = requirePath(join(leaderDir, file));
-    }
-  });
 }
 
 // Report.

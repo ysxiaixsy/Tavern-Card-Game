@@ -1725,13 +1725,22 @@ export const CARD_DEFS: readonly CardDef[] = [
     abilities: [],
   },
   {
-    id: 'sk_vabjorn',
-    name: 'Vabjorn',
+    id: 'sk_blueboy_lugos',
+    name: 'Blueboy Lugos',
     faction: 'skellige',
     type: 'unit',
-    row: 'melee',
-    strength: 6, // VERIFY
+    row: 'melee', // VERIFY: row not specified, assumed close combat
+    strength: 6,
     abilities: [],
+  },
+  {
+    id: 'sk_olaf',
+    name: 'Olaf',
+    faction: 'skellige',
+    type: 'unit',
+    row: 'agile',
+    strength: 12,
+    abilities: ['agile', 'moral'],
   },
 
   // -------------------------------------------------------------------------
