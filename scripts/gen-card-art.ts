@@ -79,6 +79,11 @@ const NAME_MAP: Record<string, string> = {
   skellige_madman_lugos: 'sk_madman_lugos',
   skellige_blueboy_lugos: 'sk_blueboy_lugos',
   skellige_olaf: 'sk_olaf',
+  // Summon/transform-only forms (live in the Skellige art folder)
+  hemdall: 'sk_hemdall',
+  vildkaarl: 'sk_vildkaarl',
+  young_vildkaarl: 'sk_young_vildkaarl',
+  bovine_defense_force: 'neu_bovine',
   // Leaders (descriptive names; 5 per base faction + Skellige's two)
   emhyr_imperial: 'ng_emhyr',
   emhyr_whiteflame: 'ng_emhyr_whiteflame',
