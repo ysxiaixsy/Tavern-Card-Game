@@ -122,7 +122,9 @@ function CardViewInner({
           },
         ]}
       >
-        <Image source={art} resizeMode="cover" style={StyleSheet.absoluteFill} />
+        {/* Explicit 100% box: on the New Architecture an Image with only
+            absoluteFill falls back to its intrinsic pixel size. */}
+        <Image source={art} resizeMode="cover" style={styles.art} />
         {isUnit && (
           <View
             style={[
@@ -247,6 +249,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
+  },
+  art: {
+    width: '100%',
+    height: '100%',
   },
   artBadge: {
     position: 'absolute',
