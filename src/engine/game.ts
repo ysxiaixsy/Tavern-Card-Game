@@ -124,10 +124,14 @@ export function createGame(config: GameConfig, seed: string): GameState {
     validateDeck(deckList);
     const leaderDef = getCardDef(deckList.leaderId);
 
-    const instances: CardInstance[] = deckList.cardIds.map((defId, i) => ({
-      instanceId: `${p}:${defId}:${i}`,
-      defId,
-    }));
+    // Tag each copy of a card with a per-def index (#0, #1, …) so the UI can
+    // show per-copy art variants. The instanceId stays opaque to engine logic.
+    const copyCounts: Record<string, number> = {};
+    const instances: CardInstance[] = deckList.cardIds.map((defId) => {
+      const copy = copyCounts[defId] ?? 0;
+      copyCounts[defId] = copy + 1;
+      return { instanceId: `${p}:${defId}#${copy}`, defId };
+    });
     const [shuffled, nextRng] = rngShuffle(rngState, instances);
     rngState = nextRng;
 

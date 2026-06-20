@@ -48,6 +48,7 @@ function BoardRowInner({
             <CardView
               key={unit.instanceId}
               defId={unit.defId}
+              instanceId={unit.instanceId}
               size="board"
               effective={unit.effectiveStrength}
               highlighted={isTarget}

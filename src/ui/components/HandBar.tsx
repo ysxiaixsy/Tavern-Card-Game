@@ -92,6 +92,7 @@ function DraggableHandCard({
     <View ref={ref} collapsable={false} {...responder.panHandlers} style={hidden && styles.hidden}>
       <CardView
         defId={card.defId}
+        instanceId={card.instanceId}
         size="hand"
         selected={selected}
         dimmed={!playable && !selected}
@@ -265,7 +266,7 @@ export function HandBar({
             },
           ]}
         >
-          <CardView defId={drag.defId} size="hand" selected />
+          <CardView defId={drag.defId} instanceId={drag.instanceId} size="hand" selected />
         </Animated.View>
       )}
     </View>

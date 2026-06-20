@@ -65,6 +65,7 @@ export function MulliganView({ view, title, waitingText, onMove }: MulliganViewP
           <View key={card.instanceId} style={styles.cell}>
             <CardView
               defId={card.defId}
+              instanceId={card.instanceId}
               size="hand"
               selected={selected.includes(card.instanceId)}
               onPress={() => toggle(card.instanceId)}

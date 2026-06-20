@@ -22,6 +22,8 @@ import {
 interface Props {
   defId: string;
   size: CardSizeKind;
+  /** Card instance id — used to pick the per-copy art variant (multi-copy cards). */
+  instanceId?: string;
   /** Current effective strength (board cards); falls back to printed. */
   effective?: number;
   selected?: boolean;
@@ -45,9 +47,16 @@ function strengthColor(effective: number, printed: number, isHero: boolean): str
   return palette.text;
 }
 
+/** Copy index encoded in the instanceId (`p1:st_mahakaman#3` → 3), else 0. */
+function copyIndexOf(instanceId: string | undefined): number {
+  const match = instanceId?.match(/#(\d+)/);
+  return match ? Number(match[1]) : 0;
+}
+
 function CardViewInner({
   defId,
   size,
+  instanceId,
   effective,
   selected,
   highlighted,
@@ -86,10 +95,14 @@ function CardViewInner({
         ? palette.gold
         : faction.frame;
 
-  // Real card art (private, gitignored — see cardArt.ts). The art's printed
-  // strength is static, so units get a live effective-strength badge overlaid
-  // top-left; selection/target state stays on the border.
-  const art = CARD_ART[defId];
+  // Real card art (see cardArt.ts). Multi-copy cards carry a variant array —
+  // pick the one for this copy. The art's printed strength is static, so units
+  // get a live effective-strength badge overlaid top-left; selection/target
+  // state stays on the border.
+  const artEntry = CARD_ART[defId];
+  const art = Array.isArray(artEntry)
+    ? artEntry[copyIndexOf(instanceId) % artEntry.length]
+    : artEntry;
   if (art) {
     return (
       <Pressable

@@ -114,6 +114,7 @@ export function GraveyardSheet({
           <CardView
             key={card.instanceId}
             defId={card.defId}
+            instanceId={card.instanceId}
             size="hand"
             onPress={() => setInspectId(card.defId === inspectId ? null : card.defId)}
           />
@@ -150,6 +151,7 @@ export function MedicSheet({
           <View key={i} style={styles.pickEntry}>
             <CardView
               defId={defIdInGraveyard(view, move.targetInstanceId)}
+              instanceId={move.targetInstanceId}
               size="hand"
               onPress={() => onSubmit(move)}
             />
@@ -250,6 +252,7 @@ export function LeaderSheet({
                 <CardView
                   key={i}
                   defId={defIdInGraveyard(view, move.targetInstanceId as string)}
+                  instanceId={move.targetInstanceId as string}
                   size="hand"
                   onPress={() => onSubmit(move)}
                 />
@@ -265,6 +268,7 @@ export function LeaderSheet({
                 <CardView
                   key={card.instanceId}
                   defId={card.defId}
+                  instanceId={card.instanceId}
                   size="board"
                   selected={discardSel.includes(card.instanceId)}
                   onPress={() =>
