@@ -17,6 +17,8 @@ export const abilityText: Record<Ability, string> = {
   agile: 'Agile: can be played in Close Combat or Ranged; choose on every play.',
   scorch_row:
     'Scorch (row): on play, if the opponent’s matching row totals 10 or more, destroys its strongest non-hero unit(s).',
+  scorch_global:
+    'Scorch: on play, destroys the strongest non-hero unit(s) on the entire board, both sides.',
 };
 
 const weatherText: Record<WeatherKind, string> = {
@@ -44,8 +46,6 @@ const leaderText: Record<string, string> = {
   cancel_leader: 'Once per match: cancel your opponent’s leader ability before they use it.',
   peek_hand: 'Once per match: look at 3 random cards in your opponent’s hand.',
   restore_to_hand: 'Once per match: restore a non-hero unit from your graveyard to your hand.',
-  play_from_graveyard:
-    'Once per match: play a non-hero unit from your graveyard instantly, with its full effect.',
   steal_from_graveyard: 'Once per match: take a non-hero unit from the ENEMY graveyard into your hand.',
   discard_draw: 'Once per match: discard 2 cards, then draw any card of your choice from your deck.',
   reshuffle_graveyards: "Once per match: shuffle both players' graveyards back into their decks.",
@@ -65,7 +65,10 @@ export function leaderAbilityText(def: CardDef): string {
   }
   const rowFill = def.leaderHornRow ?? def.leaderScorchRow;
   let text = leaderText[def.leaderAbility] ?? '';
-  text = text.replace('{weather}', def.leaderWeather ? WEATHER_NAME[def.leaderWeather] : 'weather');
+  text = text.replace(
+    '{weather}',
+    def.leaderWeather ? WEATHER_NAME[def.leaderWeather] : 'any weather card',
+  );
   text = text.replace('{row}', rowFill ? rowLabel[rowFill] : 'chosen');
   return text;
 }
@@ -95,13 +98,16 @@ export function describeCard(defId: string): string[] {
   }
   if (def.type === 'mardroeme') {
     lines.push(
-      'Mardroeme: transforms every Berserker on the board (both sides) into its stronger Vildkaarl form.',
+      'Mardroeme: play on one of your rows to transform your Berserkers there into their Vildkaarl form.',
     );
   }
   if (def.transformsTo) {
     lines.push(
-      `Berserker: transforms into ${getCardDef(def.transformsTo).name} when a Mardroeme is played.`,
+      `Berserker: transforms into ${getCardDef(def.transformsTo).name} when a Mardroeme is played on its row.`,
     );
+  }
+  if (def.triggersTransform) {
+    lines.push("On play: transforms Berserkers on this unit's row into their Vildkaarl form.");
   }
   if (def.type === 'leader' && def.leaderAbility) {
     lines.push(leaderAbilityText(def));

@@ -104,15 +104,13 @@ export function clearWeatherNetGain(view: PlayerView): number {
   return mine - theirs;
 }
 
-/** Strength my side gains right now if a Mardroeme transforms my Berserkers. */
-export function mardroemeGain(view: PlayerView): number {
+/** Strength my side gains if a Mardroeme transforms my Berserkers on `row`. */
+export function mardroemeGain(view: PlayerView, row: RowKind): number {
   let gain = 0;
-  for (const rowKind of ROW_KINDS) {
-    for (const unit of view.you.rows[rowKind].units) {
-      const def = getCardDef(unit.defId);
-      if (def.transformsTo) {
-        gain += (getCardDef(def.transformsTo).strength ?? 0) - unit.effectiveStrength;
-      }
+  for (const unit of view.you.rows[row].units) {
+    const def = getCardDef(unit.defId);
+    if (def.transformsTo) {
+      gain += (getCardDef(def.transformsTo).strength ?? 0) - unit.effectiveStrength;
     }
   }
   return gain;
@@ -202,10 +200,6 @@ export function estimateGain(view: PlayerView, move: Move): number {
         return leader.leaderScorchRow ? rowScorchGain(view, leader.leaderScorchRow) : 0;
       case 'row_horn':
         return leader.leaderHornRow ? hornGain(view, leader.leaderHornRow) : 0;
-      case 'play_from_graveyard': {
-        const def = move.targetInstanceId ? graveyardDef(view, move.targetInstanceId) : null;
-        return def && !def.abilities.includes('spy') ? (def.strength ?? 0) : 0;
-      }
       default:
         return 0;
     }
@@ -217,6 +211,9 @@ export function estimateGain(view: PlayerView, move: Move): number {
       const printed = def.strength ?? 0;
       if (def.abilities.includes('spy')) {
         return -printed; // strengthens THEIR side
+      }
+      if (def.abilities.includes('scorch_global')) {
+        return printed + scorchNetGain(view); // body + the Scorch it triggers
       }
       const rowKind = (move.row ?? def.row) as RowKind;
       const weathered = view.weather.kinds.some((k) => WEATHER_ROWS[k].includes(rowKind));
@@ -236,7 +233,7 @@ export function estimateGain(view: PlayerView, move: Move): number {
     case 'scorch':
       return scorchNetGain(view);
     case 'mardroeme':
-      return mardroemeGain(view);
+      return move.row ? mardroemeGain(view, move.row) : 0;
     case 'decoy': {
       const target = ROW_KINDS.flatMap((r) => view.you.rows[r].units).find(
         (u) => u.instanceId === move.targetInstanceId,
@@ -471,16 +468,6 @@ export function scoreMoves(view: PlayerView): ScoredMove[] {
         }
         return (def.strength ?? 0) >= 8 ? 45 : 14;
       }
-      case 'play_from_graveyard': {
-        const def = move.targetInstanceId ? graveyardDef(view, move.targetInstanceId) : null;
-        if (!def) {
-          return 0;
-        }
-        if (def.abilities.includes('spy')) {
-          return 180; // instant revive: the spy redraws immediately
-        }
-        return (def.strength ?? 0) >= 8 ? 55 : 16;
-      }
       case 'steal_from_graveyard': {
         const card = view.opponent.graveyard.find((c) => c.instanceId === move.targetInstanceId);
         const def = card ? getCardDef(card.defId) : null;
@@ -606,7 +593,7 @@ export function scoreMoves(view: PlayerView): ScoredMove[] {
         return dampened >= 5 ? 30 : 3;
       }
       case 'mardroeme': {
-        const g = mardroemeGain(view);
+        const g = move.row ? mardroemeGain(view, move.row) : 0;
         return g >= 8 ? 60 + g : g > 0 ? 20 + g : 2;
       }
       case 'horn': {
@@ -634,6 +621,10 @@ export function scoreMoves(view: PlayerView): ScoredMove[] {
         return 26 + (def.strength ?? 0) * 0.5;
       }
       case 'unit': {
+        if (def.abilities.includes('scorch_global')) {
+          const g = scorchNetGain(view);
+          return g >= 6 ? 60 + g : bodyScore(def);
+        }
         if (def.abilities.includes('scorch_row') && def.scorchRow) {
           const g = rowScorchGain(view, def.scorchRow);
           return g >= 6 ? 60 + g : bodyScore(def) - 2;

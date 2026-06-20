@@ -200,8 +200,12 @@ function applyPlayCard(s: GameState, move: PlayCardMove): void {
       break;
     }
     case 'mardroeme': {
+      const row = move.row;
+      if (!row || !ROW_KINDS.includes(row)) {
+        throw new GwentError('ILLEGAL_MOVE', 'Mardroeme needs a target row');
+      }
       ps.hand.splice(handIndex, 1);
-      resolveMardroeme(s);
+      resolveTransform(s, move.player, row); // your Berserkers on that row
       ps.graveyard.push(card);
       break;
     }
@@ -261,6 +265,16 @@ function resolveUnitPlay(
 
   if (def.abilities.includes('scorch_row') && def.scorchRow) {
     resolveRowScorch(s, actor, def.scorchRow);
+  }
+
+  // Built-in global Scorch (Clan Dimun Pirate): strongest unit(s), whole board.
+  if (def.abilities.includes('scorch_global')) {
+    resolveGlobalScorch(s);
+  }
+
+  // Built-in Mardroeme (Ermion): transform Berserkers on his own row.
+  if (def.triggersTransform) {
+    resolveTransform(s, side, rowKind);
   }
 
   // Medic last: it suspends the turn in a pendingChoice. If the graveyard has
@@ -414,19 +428,15 @@ function resolveRowScorch(s: GameState, actor: PlayerId, rowKind: RowKind): void
 }
 
 /**
- * Mardroeme: every Berserker on the board (both sides, all rows) becomes its
- * Vildkaarl form in place — same slot, same instanceId, new defId (and thus new
- * strength/abilities). Non-berserkers are untouched.
+ * Transform every Berserker on one side's row into its Vildkaarl form in place
+ * — same slot, same instanceId, new defId (and thus new strength/abilities).
+ * Used by Mardroeme (the played row) and Ermion (his own row). W3 is same-row.
  */
-function resolveMardroeme(s: GameState): void {
-  for (const side of PLAYER_IDS) {
-    for (const rowKind of ROW_KINDS) {
-      for (const unit of s.players[side].rows[rowKind].units) {
-        const into = getCardDef(unit.defId).transformsTo;
-        if (into) {
-          unit.defId = into;
-        }
-      }
+function resolveTransform(s: GameState, side: PlayerId, rowKind: RowKind): void {
+  for (const unit of s.players[side].rows[rowKind].units) {
+    const into = getCardDef(unit.defId).transformsTo;
+    if (into) {
+      unit.defId = into;
     }
   }
 }
@@ -552,9 +562,24 @@ function applyUseLeader(s: GameState, move: UseLeaderMove): void {
   switch (leaderDef.leaderAbility) {
     case 'weather_from_deck': {
       const kind = leaderDef.leaderWeather;
-      const index = kind ? weatherIndexInDeck(ps, kind) : -1;
-      if (index === -1) {
-        throw new GwentError('LEADER_UNAVAILABLE', `no ${kind ?? 'weather'} left in your deck`);
+      let index: number;
+      if (kind) {
+        index = weatherIndexInDeck(ps, kind);
+        if (index === -1) {
+          throw new GwentError('LEADER_UNAVAILABLE', `no ${kind} left in your deck`);
+        }
+      } else {
+        // Eredin King: play any chosen weather card (by def id) from the deck.
+        if (!move.drawDefId) {
+          throw new GwentError('ILLEGAL_MOVE', 'choose a weather card to play');
+        }
+        index = ps.deck.findIndex((c) => {
+          const w = getCardDef(c.defId).weather;
+          return c.defId === move.drawDefId && w !== undefined && w !== 'clear';
+        });
+        if (index === -1) {
+          throw new GwentError('INVALID_TARGET', `no ${move.drawDefId} weather in your deck`);
+        }
       }
       const [weather] = ps.deck.splice(index, 1);
       s.weatherCards.push({ ...weather, owner: move.player });
@@ -619,28 +644,6 @@ function applyUseLeader(s: GameState, move: UseLeaderMove): void {
     case 'restore_to_hand': {
       const { card } = takeGraveyardUnit(s, move.player, move.targetInstanceId);
       ps.hand.push(card);
-      break;
-    }
-    case 'play_from_graveyard': {
-      if (restoreToFieldIsRandom(s)) {
-        // Emhyr Invader of the North: the engine picks the unit at random.
-        const targets = medicTargets(ps);
-        if (targets.length === 0) {
-          throw new GwentError('LEADER_UNAVAILABLE', 'no non-hero unit in your graveyard');
-        }
-        const [index, rng] = rngInt(s.rngState, targets.length);
-        s.rngState = rng;
-        const chosen = targets[index];
-        const graveIndex = ps.graveyard.findIndex((c) => c.instanceId === chosen.instanceId);
-        const [card] = ps.graveyard.splice(graveIndex, 1);
-        const def = getCardDef(card.defId);
-        resolveUnitPlay(s, move.player, card, def, def.row === 'agile' ? randomAgileRow(s) : undefined);
-        break;
-      }
-      const { card, def } = takeGraveyardUnit(s, move.player, move.targetInstanceId);
-      // Full effects, exactly like a medic revival (spies draw, musters
-      // muster, a revived medic opens a pendingChoice chain).
-      resolveUnitPlay(s, move.player, card, def, move.row);
       break;
     }
     case 'realign_agile': {

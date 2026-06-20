@@ -149,9 +149,13 @@ function determinize(view: PlayerView, rng: number): [GameState, number] {
       { instanceId: `sim:weather-${++simCounter}`, defId: weatherDefId },
     ];
   }
-  // Likewise for discard_draw: every drawDefId offered by the engine really
-  // is in the deck, so plant them in the sample to keep candidates legal.
-  if (leaderUsable && myLeader.leaderAbility === 'discard_draw') {
+  // Likewise for discard_draw (and Eredin King's any-weather): every drawDefId
+  // the engine offers really is in the deck, so plant them to keep moves legal.
+  if (
+    leaderUsable &&
+    (myLeader.leaderAbility === 'discard_draw' ||
+      (myLeader.leaderAbility === 'weather_from_deck' && !myLeader.leaderWeather))
+  ) {
     const wanted = [
       ...new Set(
         view.legalMoves

@@ -114,20 +114,4 @@ describe('Emhyr, Invader of the North — restore-to-field abilities go random (
     expect(boardIds(s, 'p2')).toHaveLength(2);
   });
 
-  it('collapses a play-from-graveyard leader to a single random move', () => {
-    const base = makeState({
-      p1: { leader: 'ng_emhyr_invader', hand: ['nr_ves'] },
-      p2: {
-        leader: 'mon_eredin_king', // play_from_graveyard
-        hand: ['nr_ves'],
-        graveyard: ['ng_arbalest', 'ng_cynthia'],
-      },
-      turn: 'p2',
-    });
-    const leaderMoves = getLegalMoves(base, 'p2').filter(
-      (m): m is Extract<Move, { type: 'USE_LEADER' }> => m.type === 'USE_LEADER',
-    );
-    expect(leaderMoves).toHaveLength(1);
-    expect(leaderMoves[0].targetInstanceId).toBeUndefined();
-  });
 });

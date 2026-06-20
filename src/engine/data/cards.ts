@@ -519,8 +519,7 @@ export const CARD_DEFS: readonly CardDef[] = [
   // -------------------------------------------------------------------------
   // Monsters
   // -------------------------------------------------------------------------
-  // VERIFY: the name↔ability mapping across Eredin variants (Bringer of
-  // Death vs King of the Wild Hunt) — the mechanics themselves are W3's.
+  // Eredin leader abilities verified vs the wiki (2026-06-20).
   {
     id: 'mon_eredin',
     name: 'Eredin, Bringer of Death',
@@ -535,7 +534,8 @@ export const CARD_DEFS: readonly CardDef[] = [
     faction: 'monsters',
     type: 'leader',
     abilities: [],
-    leaderAbility: 'play_from_graveyard',
+    // "Pick any weather card from your deck and play it." (no fixed kind)
+    leaderAbility: 'weather_from_deck',
   },
   {
     id: 'mon_eredin_redriders',
@@ -1527,15 +1527,14 @@ export const CARD_DEFS: readonly CardDef[] = [
     maxCopiesPerDeck: 0, // transform-only (Young Berserker + Mardroeme)
   },
   {
-    // Mardroeme: on play, transforms every Berserker on BOTH sides (all rows)
-    // into its Vildkaarl form. (One source says same-row only; both-sides is
-    // the chosen house ruling.) See resolveMardroeme in apply.ts.
+    // Mardroeme: played onto one of your rows; transforms your Berserkers on
+    // THAT row into their Vildkaarl form (W3 is same-row). See resolveTransform.
     id: 'sk_mardroeme',
     name: 'Mardroeme',
     faction: 'skellige',
     type: 'mardroeme',
     abilities: [],
-    maxCopiesPerDeck: 3, // VERIFY
+    maxCopiesPerDeck: 3,
   },
   {
     id: 'sk_hjalmar',
@@ -1561,8 +1560,9 @@ export const CARD_DEFS: readonly CardDef[] = [
     faction: 'skellige',
     type: 'hero',
     row: 'ranged',
-    strength: 8, // VERIFY
+    strength: 8,
     abilities: [],
+    triggersTransform: true, // on play, transforms Berserkers on his (ranged) row
   },
   {
     id: 'sk_hemdall',
@@ -1676,8 +1676,8 @@ export const CARD_DEFS: readonly CardDef[] = [
     faction: 'skellige',
     type: 'unit',
     row: 'ranged',
-    strength: 6, // VERIFY (may carry scorch)
-    abilities: [],
+    strength: 6,
+    abilities: ['scorch_global'], // on play, Scorch the strongest unit(s) board-wide
   },
   {
     id: 'sk_donar',

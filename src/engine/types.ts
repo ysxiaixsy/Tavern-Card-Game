@@ -76,7 +76,8 @@ export type Ability =
   | 'moral' // Moral Boost
   | 'horn' // Commander's Horn as a unit ability (e.g. Dandelion)
   | 'agile'
-  | 'scorch_row'; // unit-scorch (Villentretenmerth/Toad/Schirru): on play, scorch the opponent row named by CardDef.scorchRow if its total ≥ 10
+  | 'scorch_row' // unit-scorch (Villentretenmerth/Toad/Schirru): on play, scorch the opponent row named by CardDef.scorchRow if its total ≥ 10
+  | 'scorch_global'; // unit with a built-in Scorch (Clan Dimun Pirate): on play, destroy the strongest non-hero unit(s) on the whole board
 
 export type LeaderAbilityId =
   | 'weather_from_deck' // play this leader's weather kind straight from your deck (see CardDef.leaderWeather)
@@ -86,7 +87,6 @@ export type LeaderAbilityId =
   | 'cancel_leader' // cancel the opponent's (unused) leader ability
   | 'peek_hand' // look at 3 random cards in the opponent's hand
   | 'restore_to_hand' // restore a non-hero unit from your graveyard to your hand
-  | 'play_from_graveyard' // play a non-hero unit from your graveyard instantly, full effects
   | 'steal_from_graveyard' // take a non-hero unit from the OPPONENT's graveyard into your hand
   | 'discard_draw' // discard 2 cards, then draw 1 card of your choice from your deck
   | 'reshuffle_graveyards' // Crach an Craite: shuffle both players' graveyards back into their decks
@@ -128,12 +128,17 @@ export interface CardDef {
    */
   summonAvenger?: string;
   /**
-   * Berserker marker: when a Mardroeme is played, every unit with a
-   * transformsTo on the board (both sides) becomes that card in place — same
+   * Berserker marker: when a Mardroeme (or Ermion) transforms its row, every
+   * unit with a transformsTo on that row becomes that card in place — same
    * slot, same instanceId. Berserker → Vildkaarl, Young Berserker → Young
    * Vildkaarl. The transform targets carry maxCopiesPerDeck: 0 (summon-only).
    */
   transformsTo?: string;
+  /**
+   * On play, transforms the Berserkers on this card's own row (its side) — a
+   * built-in Mardroeme. Ermion carries this. (See resolveTransform.)
+   */
+  triggersTransform?: boolean;
   /** Deck-building copy limit. Default 1. */
   maxCopiesPerDeck?: number;
   /** Weather cards only. */
@@ -295,13 +300,13 @@ export interface ResolveMedicMove {
 export interface UseLeaderMove {
   type: 'USE_LEADER';
   player: PlayerId;
-  /** Graveyard-targeting leaders (restore_to_hand, play_from_graveyard, steal_from_graveyard). */
+  /** Graveyard-targeting leaders (restore_to_hand, steal_from_graveyard). */
   targetInstanceId?: string;
-  /** Required when play_from_graveyard revives an agile unit. */
+  /** Reserved for agile revive choices (currently unused). */
   row?: RowKind;
   /** discard_draw: exactly 2 of your hand cards to discard. */
   discardInstanceIds?: string[];
-  /** discard_draw: the card (by def id) to fetch from your deck. */
+  /** discard_draw the card, or Eredin King the weather, to fetch from your deck (by def id). */
   drawDefId?: string;
 }
 

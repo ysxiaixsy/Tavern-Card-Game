@@ -10,7 +10,6 @@ import {
   decoyTargets,
   medicTargets,
   opponentOf,
-  restoreToFieldIsRandom,
   ROW_KINDS,
   weatherIndexInDeck,
 } from './helpers.ts';
@@ -108,8 +107,8 @@ function playCardMoves(state: GameState, player: PlayerId, card: CardInstance): 
       // Legal even with no non-hero units on the board (it simply fizzles).
       return [base];
     case 'mardroeme':
-      // Legal even with no Berserkers out (it simply fizzles, like Scorch).
-      return [base];
+      // Played onto one of your rows (transforms Berserkers there), like a horn.
+      return ROW_KINDS.map((row) => ({ ...base, row }));
     case 'horn': {
       const moves: Move[] = [];
       for (const row of ROW_KINDS) {
@@ -136,10 +135,25 @@ function leaderMoves(state: GameState, player: PlayerId): Move[] {
   }
   const def = getCardDef(ps.leader.defId);
   switch (def.leaderAbility) {
-    case 'weather_from_deck':
-      return def.leaderWeather && weatherIndexInDeck(ps, def.leaderWeather) !== -1
-        ? [{ type: 'USE_LEADER', player }]
-        : [];
+    case 'weather_from_deck': {
+      if (def.leaderWeather) {
+        return weatherIndexInDeck(ps, def.leaderWeather) !== -1
+          ? [{ type: 'USE_LEADER', player }]
+          : [];
+      }
+      // Eredin King: one move per distinct (non-clear) weather card in the deck.
+      const weathers = [
+        ...new Set(
+          ps.deck
+            .filter((c) => {
+              const w = getCardDef(c.defId).weather;
+              return w !== undefined && w !== 'clear';
+            })
+            .map((c) => c.defId),
+        ),
+      ].sort();
+      return weathers.map((drawDefId) => ({ type: 'USE_LEADER', player, drawDefId }));
+    }
     case 'clear_weather':
       // Only offered while weather is actually on the board (no wasted uses).
       return state.weatherCards.length === 0 ? [] : [{ type: 'USE_LEADER', player }];
@@ -174,24 +188,6 @@ function leaderMoves(state: GameState, player: PlayerId): Move[] {
         player,
         targetInstanceId: target.instanceId,
       }));
-    case 'play_from_graveyard': {
-      // Under Emhyr Invader of the North the engine picks the target at random,
-      // so it collapses to a single, payload-free move.
-      if (restoreToFieldIsRandom(state)) {
-        return medicTargets(ps).length > 0 ? [{ type: 'USE_LEADER', player }] : [];
-      }
-      const moves: Move[] = [];
-      for (const target of medicTargets(ps)) {
-        if (getCardDef(target.defId).row === 'agile') {
-          for (const row of AGILE_ROWS) {
-            moves.push({ type: 'USE_LEADER', player, targetInstanceId: target.instanceId, row });
-          }
-        } else {
-          moves.push({ type: 'USE_LEADER', player, targetInstanceId: target.instanceId });
-        }
-      }
-      return moves;
-    }
     case 'realign_agile': {
       const hasAgile = ([...AGILE_ROWS] as RowKind[]).some((r) =>
         ps.rows[r].units.some((u) => getCardDef(u.defId).row === 'agile'),

@@ -243,59 +243,24 @@ describe('Emperor of Nilfgaard — cancel the enemy leader', () => {
   });
 });
 
-describe('King of the Wild Hunt — play from the graveyard, full effects', () => {
-  it('a revived spy lands on the enemy side and draws 2', () => {
+describe('King of the Wild Hunt — pick any weather from the deck', () => {
+  it('offers one move per distinct weather in deck and plays the chosen one', () => {
     const state = makeState({
       p1: {
         leader: 'mon_eredin_king',
         hand: ['mon_ghoul'],
-        deck: ['mon_fiend', 'mon_werewolf', 'mon_griffin'],
-        graveyard: ['neu_avallach', 'mon_nekker'],
+        deck: ['neu_frost', 'mon_fiend', 'neu_rain'],
       },
       p2: { hand: ['nr_ves'] },
     });
-    // Avallac'h is a HERO spy — not a legal revive target; the nekker is.
     const moves = getLegalMoves(state, 'p1').filter((m) => m.type === 'USE_LEADER');
-    expect(moves).toHaveLength(1);
-
-    // Craft a non-hero spy into the graveyard instead and revive it.
-    const withSpy = makeState({
-      p1: {
-        leader: 'mon_eredin_king',
-        hand: ['mon_ghoul'],
-        deck: ['mon_fiend', 'mon_werewolf', 'mon_griffin'],
-        graveyard: ['nr_stennis'],
-      },
-      p2: { hand: ['nr_ves'] },
-    });
-    const spy = withSpy.players.p1.graveyard[0];
-    const s = applyMove(withSpy, {
-      type: 'USE_LEADER',
-      player: 'p1',
-      targetInstanceId: spy.instanceId,
-    });
-    expect(s.players.p2.rows.melee.units.map((u) => u.defId)).toEqual(['nr_stennis']);
-    expect(s.players.p1.hand).toHaveLength(3); // ghoul + 2 spy draws
+    expect(moves.map((m) => (m as { drawDefId?: string }).drawDefId).sort()).toEqual([
+      'neu_frost',
+      'neu_rain',
+    ]);
+    const s = applyMove(state, moves.find((m) => (m as { drawDefId?: string }).drawDefId === 'neu_rain')!);
+    expect(s.weatherCards.map((w) => w.defId)).toEqual(['neu_rain']);
     expect(s.players.p1.leaderUsed).toBe(true);
-  });
-
-  it('reviving a medic opens the usual pendingChoice chain', () => {
-    const state = makeState({
-      p1: {
-        leader: 'mon_eredin_king',
-        hand: ['mon_ghoul'],
-        graveyard: ['nr_dun_banner_medic', 'mon_werewolf'],
-      },
-      p2: { hand: ['nr_ves'] },
-    });
-    const medic = state.players.p1.graveyard[0];
-    const s = applyMove(state, {
-      type: 'USE_LEADER',
-      player: 'p1',
-      targetInstanceId: medic.instanceId,
-    });
-    expect(s.pendingChoice?.kind).toBe('medic_revive');
-    expect(s.turn).toBe('p1'); // chain keeps the turn
   });
 });
 
