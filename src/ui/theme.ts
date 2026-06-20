@@ -77,11 +77,15 @@ export const specialIcon = {
 
 export const GEM = '◆';
 
-/** Card frame dimensions per rendering context. */
+/**
+ * Card frame dimensions per rendering context. Aspect ≈ 0.53 to match the real
+ * Gwent card art (700×1323). Board/hand keep their heights and only narrow so
+ * the board doesn't grow vertically; the large (zoom) card scales up.
+ */
 export const CARD_SIZE = {
-  board: { width: 40, height: 52, name: 7, badge: 14, icon: 8 },
-  hand: { width: 76, height: 106, name: 9, badge: 22, icon: 12 },
-  large: { width: 220, height: 300, name: 18, badge: 44, icon: 22 },
+  board: { width: 28, height: 52, name: 7, badge: 14, icon: 8 },
+  hand: { width: 56, height: 106, name: 9, badge: 22, icon: 12 },
+  large: { width: 200, height: 372, name: 18, badge: 44, icon: 22 },
 } as const;
 
 export type CardSizeKind = keyof typeof CARD_SIZE;
