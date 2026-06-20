@@ -146,7 +146,7 @@ export const CARD_ART: Record<string, number | number[]> = {
   'sk_madman_lugos': require('../../assets/cards/Skellige/skellige_madman_lugos.webp'),
   'sk_mardroeme': require('../../assets/cards/Skellige/skellige_mardroeme.webp'),
   'sk_olaf': require('../../assets/cards/Skellige/skellige_olaf.webp'),
-  'sk_shieldmaiden': require('../../assets/cards/Skellige/skellige_cdrummond_shield_maiden.webp'),
+  'sk_shieldmaiden': [require('../../assets/cards/Skellige/skellige_cdrummond_shield_maiden.webp'), require('../../assets/cards/Skellige/skellige_cdrummond_shield_maiden_2.webp'), require('../../assets/cards/Skellige/skellige_cdrummond_shield_maiden_3.webp')],
   'sk_skald': require('../../assets/cards/Skellige/skellige_cheymaey_skald.webp'),
   'sk_storm': require('../../assets/cards/Neutral/skelligestorm.webp'),
   'sk_svanrige': require('../../assets/cards/Skellige/skellige_svanrige.webp'),

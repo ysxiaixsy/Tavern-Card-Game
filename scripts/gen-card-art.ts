@@ -37,7 +37,11 @@ const FOLDER_FACTION: Record<string, Faction | null> = {
   leaders: null,
 };
 
-/** Explicit filename-stem → defId for every irregularly-named asset. */
+/**
+ * Explicit filename-stem → defId for every irregularly-named asset. A trailing
+ * _<n> suffix (e.g. skellige_cdrummond_shield_maiden_2) is treated as another
+ * variant of the base entry, so per-copy variants need no map edits.
+ */
 const NAME_MAP: Record<string, string> = {
   // Bare-named neutrals / expansion specials
   cow: 'neu_cow',
@@ -123,10 +127,12 @@ const add = (defId: string, path: string): void => {
 
 function readDir(dir: string): string[] {
   try {
-    // Sort so variant order follows the filename numbering (…-019, …-020, …).
+    // Plain code-unit sort so variant order is predictable: the base name
+    // sorts before its _2/_3 suffixes ('.' < '_'), and zero-padded numbers
+    // (…-019, …-020) order correctly. (localeCompare reshuffles punctuation.)
     return readdirSync(dir)
       .filter((f) => IMAGE_RE.test(f))
-      .sort((a, b) => a.localeCompare(b));
+      .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
   } catch {
     return [];
   }
@@ -136,7 +142,10 @@ for (const [folder, faction] of Object.entries(FOLDER_FACTION)) {
   const dir = join(cardsDir, folder);
   const defs = faction ? CARD_DEFS.filter((d) => d.faction === faction && d.type !== 'leader') : [];
   for (const file of readDir(dir)) {
-    const mapped = NAME_MAP[stem(file)];
+    // A trailing _<n> marks an extra variant of the base name, so
+    // `skellige_x`, `skellige_x_2`, `skellige_x_3` all map to the same card.
+    const s = stem(file);
+    const mapped = NAME_MAP[s] ?? NAME_MAP[s.replace(/_\d+$/, '')];
     if (mapped) {
       add(mapped, requirePath(join(dir, file)));
       continue;
