@@ -39,6 +39,7 @@ export const CARD_ART: Record<string, number | number[]> = {
   'mon_vampire_ekimmara': require('../../assets/cards/Monster/Monster-019-VampireEkimmara.webp'),
   'mon_vampire_fleder': require('../../assets/cards/Monster/Monster-020-VampireFleder.webp'),
   'mon_vampire_garkain': require('../../assets/cards/Monster/Monster-021-VampireGarkain.webp'),
+  'mon_vampire_katakan': require('../../assets/cards/Monster/Monster-020-VampireKatakan.webp'),
   'mon_werewolf': require('../../assets/cards/Monster/Monster-011-Werewolf.webp'),
   'mon_wyvern': require('../../assets/cards/Monster/Monster-029-Wyvern.webp'),
   'neu_avallach': require('../../assets/cards/Neutral/Neutral-016-Avallach.webp'),
