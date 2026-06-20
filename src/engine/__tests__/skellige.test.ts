@@ -5,10 +5,37 @@ import { validateDeck } from '../game.ts';
 import { SKELLIGE_STARTER } from '../data/decks.ts';
 import { ROW_KINDS } from '../helpers.ts';
 import type { Move, PlayerId } from '../types.ts';
-import { makeState, pass } from './testkit.ts';
+import { makeState, pass, play } from './testkit.ts';
 
 const boardDefs = (s: ReturnType<typeof makeState>, p: PlayerId): string[] =>
   ROW_KINDS.flatMap((r) => s.players[p].rows[r].units.map((u) => u.defId));
+
+describe('Skellige — Cerys musters Shield Maidens (one-directional)', () => {
+  it('playing Cerys summons every Shield Maiden from hand and deck', () => {
+    const base = makeState({
+      p1: { hand: ['sk_cerys', 'sk_shieldmaiden'], deck: ['sk_shieldmaiden', 'sk_shieldmaiden'] },
+      p2: { hand: ['nr_ves'] },
+      turn: 'p1',
+    });
+    const s = play(base, 'p1', 'sk_cerys');
+    const melee = s.players.p1.rows.melee.units.map((u) => u.defId);
+    expect(melee).toContain('sk_cerys');
+    expect(melee.filter((d) => d === 'sk_shieldmaiden')).toHaveLength(3); // 1 hand + 2 deck
+    expect(s.players.p1.hand.some((c) => c.defId === 'sk_shieldmaiden')).toBe(false);
+    expect(s.players.p1.deck.some((c) => c.defId === 'sk_shieldmaiden')).toBe(false);
+  });
+
+  it('playing a Shield Maiden does NOT muster the others', () => {
+    const base = makeState({
+      p1: { hand: ['sk_shieldmaiden', 'nr_ves'], deck: ['sk_shieldmaiden', 'sk_shieldmaiden'] },
+      p2: { hand: ['nr_ves'] },
+      turn: 'p1',
+    });
+    const s = play(base, 'p1', 'sk_shieldmaiden');
+    expect(s.players.p1.rows.melee.units.filter((u) => u.defId === 'sk_shieldmaiden')).toHaveLength(1);
+    expect(s.players.p1.deck.filter((c) => c.defId === 'sk_shieldmaiden')).toHaveLength(2); // untouched
+  });
+});
 
 describe('Skellige — deck legality', () => {
   it('the Skellige starter deck is legal', () => {

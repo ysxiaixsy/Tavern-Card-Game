@@ -1552,7 +1552,10 @@ export const CARD_DEFS: readonly CardDef[] = [
     type: 'hero',
     row: 'melee',
     strength: 10,
-    abilities: [],
+    // One-directional muster (like Gaunter O'Dimm): Cerys summons the Shield
+    // Maidens, but a Shield Maiden never summons others. (See summonsGroup.)
+    abilities: ['muster'],
+    summonsGroup: 'sk_shieldmaiden',
   },
   {
     id: 'sk_ermion',
@@ -1618,7 +1621,8 @@ export const CARD_DEFS: readonly CardDef[] = [
     type: 'unit',
     row: 'melee',
     strength: 4,
-    abilities: ['bond'],
+    abilities: ['bond'], // Tight Bond only — does NOT muster (Cerys summons them)
+    musterGroup: 'sk_shieldmaiden', // pulled by Cerys's summonsGroup, not by each other
     maxCopiesPerDeck: 3,
   },
   {

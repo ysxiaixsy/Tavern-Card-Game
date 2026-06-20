@@ -121,26 +121,26 @@ sk_vildkaarl",maxCopiesPerDeck:3},{id:"sk_vildkaarl",name:"Vildkaarl",faction:"s
 {id:"sk_young_berserker",name:"Young Berserker",faction:"skellige",type:"unit",row:"ranged",strength:2,abilities:[],transformsTo:"sk_young_vildkaarl",maxCopiesPerDeck:3},
 {id:"sk_young_vildkaarl",name:"Young Vildkaarl",faction:"skellige",type:"unit",row:"ranged",strength:8,abilities:["bond"],maxCopiesPerDeck:0},{id:"sk_mardroeme",
 name:"Mardroeme",faction:"skellige",type:"mardroeme",abilities:[],maxCopiesPerDeck:3},{id:"sk_hjalmar",name:"Hjalmar an Craite",faction:"skellige",type:"hero",row:"\
-melee",strength:10,abilities:[]},{id:"sk_cerys",name:"Cerys an Craite",faction:"skellige",type:"hero",row:"melee",strength:10,abilities:[]},{id:"sk_ermion",name:"\
-Ermion",faction:"skellige",type:"hero",row:"ranged",strength:8,abilities:[],triggersTransform:!0},{id:"sk_hemdall",name:"Hemdall",faction:"skellige",type:"hero",
-row:"melee",strength:11,abilities:[],maxCopiesPerDeck:0},{id:"sk_kambi",name:"Kambi",faction:"skellige",type:"unit",row:"melee",strength:0,abilities:[],summonAvenger:"\
-sk_hemdall"},{id:"sk_birna",name:"Birna Bran",faction:"skellige",type:"unit",row:"melee",strength:2,abilities:["medic"]},{id:"sk_draig",name:"Draig Bon-Dhu",faction:"\
-skellige",type:"unit",row:"siege",strength:2,abilities:["horn"]},{id:"sk_skald",name:"Clan Heymaey Skald",faction:"skellige",type:"unit",row:"melee",strength:4,
-abilities:[]},{id:"sk_shieldmaiden",name:"Clan Drummond Shield Maiden",faction:"skellige",type:"unit",row:"melee",strength:4,abilities:["bond"],maxCopiesPerDeck:3},
-{id:"sk_craite_warrior",name:"Clan an Craite Warrior",faction:"skellige",type:"unit",row:"melee",strength:6,abilities:["bond"],maxCopiesPerDeck:3},{id:"sk_war_l\
-ongship",name:"War Longship",faction:"skellige",type:"unit",row:"siege",strength:6,abilities:["bond"],maxCopiesPerDeck:2},{id:"sk_light_longship",name:"Light Lo\
-ngship",faction:"skellige",type:"unit",row:"ranged",strength:4,abilities:["muster"],musterGroup:"sk_longship",maxCopiesPerDeck:3},{id:"sk_armorsmith",name:"Clan\
- Tordarroch Armorsmith",faction:"skellige",type:"unit",row:"melee",strength:4,abilities:[]},{id:"sk_brokvar",name:"Clan Brokvar Archer",faction:"skellige",type:"\
-unit",row:"ranged",strength:6,abilities:[]},{id:"sk_dimun",name:"Clan Dimun Pirate",faction:"skellige",type:"unit",row:"ranged",strength:6,abilities:["scorch_gl\
-obal"]},{id:"sk_donar",name:"Donar an Hindar",faction:"skellige",type:"unit",row:"melee",strength:4,abilities:[]},{id:"sk_holger",name:"Holger Blackhand",faction:"\
-skellige",type:"unit",row:"melee",strength:4,abilities:[]},{id:"sk_udalryk",name:"Udalryk",faction:"skellige",type:"unit",row:"melee",strength:4,abilities:[]},{
-id:"sk_svanrige",name:"Svanrige",faction:"skellige",type:"unit",row:"melee",strength:4,abilities:[]},{id:"sk_madman_lugos",name:"Madman Lugos",faction:"skellige",
-type:"unit",row:"melee",strength:6,abilities:[]},{id:"sk_blueboy_lugos",name:"Blueboy Lugos",faction:"skellige",type:"unit",row:"melee",strength:6,abilities:[]},
-{id:"sk_olaf",name:"Olaf",faction:"skellige",type:"unit",row:"agile",strength:12,abilities:["agile","moral"]},{id:"ng_emhyr_invader",name:"Emhyr var Emreis, Inv\
-ader of the North",faction:"nilfgaard",type:"leader",abilities:[],leaderAbility:"restore_random_passive"},{id:"mon_eredin_treacherous",name:"Eredin, the Treache\
-rous",faction:"monsters",type:"leader",abilities:[],leaderAbility:"spy_double_passive"},{id:"st_francesca_hope",name:"Francesca, Hope of the Aen Seidhe",faction:"\
-scoiatael",type:"leader",abilities:[],leaderAbility:"realign_agile"},{id:"leader_horn_marker",name:"Leader's Horn",faction:"neutral",type:"horn",abilities:[],maxCopiesPerDeck:0}],
-N="leader_horn_marker";var L={};for(let e of $){if(L[e.id])throw new Error(`Duplicate card def id: ${e.id}`);L[e.id]=e}function c(e){let n=L[e];if(!n)throw new Error(`Unknown card def\
+melee",strength:10,abilities:[]},{id:"sk_cerys",name:"Cerys an Craite",faction:"skellige",type:"hero",row:"melee",strength:10,abilities:["muster"],summonsGroup:"\
+sk_shieldmaiden"},{id:"sk_ermion",name:"Ermion",faction:"skellige",type:"hero",row:"ranged",strength:8,abilities:[],triggersTransform:!0},{id:"sk_hemdall",name:"\
+Hemdall",faction:"skellige",type:"hero",row:"melee",strength:11,abilities:[],maxCopiesPerDeck:0},{id:"sk_kambi",name:"Kambi",faction:"skellige",type:"unit",row:"\
+melee",strength:0,abilities:[],summonAvenger:"sk_hemdall"},{id:"sk_birna",name:"Birna Bran",faction:"skellige",type:"unit",row:"melee",strength:2,abilities:["me\
+dic"]},{id:"sk_draig",name:"Draig Bon-Dhu",faction:"skellige",type:"unit",row:"siege",strength:2,abilities:["horn"]},{id:"sk_skald",name:"Clan Heymaey Skald",faction:"\
+skellige",type:"unit",row:"melee",strength:4,abilities:[]},{id:"sk_shieldmaiden",name:"Clan Drummond Shield Maiden",faction:"skellige",type:"unit",row:"melee",strength:4,
+abilities:["bond"],musterGroup:"sk_shieldmaiden",maxCopiesPerDeck:3},{id:"sk_craite_warrior",name:"Clan an Craite Warrior",faction:"skellige",type:"unit",row:"m\
+elee",strength:6,abilities:["bond"],maxCopiesPerDeck:3},{id:"sk_war_longship",name:"War Longship",faction:"skellige",type:"unit",row:"siege",strength:6,abilities:[
+"bond"],maxCopiesPerDeck:2},{id:"sk_light_longship",name:"Light Longship",faction:"skellige",type:"unit",row:"ranged",strength:4,abilities:["muster"],musterGroup:"\
+sk_longship",maxCopiesPerDeck:3},{id:"sk_armorsmith",name:"Clan Tordarroch Armorsmith",faction:"skellige",type:"unit",row:"melee",strength:4,abilities:[]},{id:"\
+sk_brokvar",name:"Clan Brokvar Archer",faction:"skellige",type:"unit",row:"ranged",strength:6,abilities:[]},{id:"sk_dimun",name:"Clan Dimun Pirate",faction:"ske\
+llige",type:"unit",row:"ranged",strength:6,abilities:["scorch_global"]},{id:"sk_donar",name:"Donar an Hindar",faction:"skellige",type:"unit",row:"melee",strength:4,
+abilities:[]},{id:"sk_holger",name:"Holger Blackhand",faction:"skellige",type:"unit",row:"melee",strength:4,abilities:[]},{id:"sk_udalryk",name:"Udalryk",faction:"\
+skellige",type:"unit",row:"melee",strength:4,abilities:[]},{id:"sk_svanrige",name:"Svanrige",faction:"skellige",type:"unit",row:"melee",strength:4,abilities:[]},
+{id:"sk_madman_lugos",name:"Madman Lugos",faction:"skellige",type:"unit",row:"melee",strength:6,abilities:[]},{id:"sk_blueboy_lugos",name:"Blueboy Lugos",faction:"\
+skellige",type:"unit",row:"melee",strength:6,abilities:[]},{id:"sk_olaf",name:"Olaf",faction:"skellige",type:"unit",row:"agile",strength:12,abilities:["agile","\
+moral"]},{id:"ng_emhyr_invader",name:"Emhyr var Emreis, Invader of the North",faction:"nilfgaard",type:"leader",abilities:[],leaderAbility:"restore_random_passi\
+ve"},{id:"mon_eredin_treacherous",name:"Eredin, the Treacherous",faction:"monsters",type:"leader",abilities:[],leaderAbility:"spy_double_passive"},{id:"st_franc\
+esca_hope",name:"Francesca, Hope of the Aen Seidhe",faction:"scoiatael",type:"leader",abilities:[],leaderAbility:"realign_agile"},{id:"leader_horn_marker",name:"\
+Leader's Horn",faction:"neutral",type:"horn",abilities:[],maxCopiesPerDeck:0}],N="leader_horn_marker";var L={};for(let e of $){if(L[e.id])throw new Error(`Duplicate card def id: ${e.id}`);L[e.id]=e}function c(e){let n=L[e];if(!n)throw new Error(`Unknown card def\
  id: ${e}`);return n}function x(e){return e in L}var g=["melee","ranged","siege"],_=["p1","p2"],Y={frost:["melee"],fog:["ranged"],rain:["siege"],storm:["ranged","siege"]};function f(e){return e==="p1"?"p2":"p1"}
 function j(e,n){return _.some(r=>{let t=e.players[r];return c(t.leader.defId).leaderAbility===n&&!t.leaderUsed})}function z(e){return j(e,"spy_double_passive")}
 function q(e){return j(e,"restore_random_passive")}function X(e){return JSON.parse(JSON.stringify(e))}function P(e){let n=[];for(let r of e.weatherCards){let t=c(
