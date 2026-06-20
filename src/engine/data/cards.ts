@@ -306,7 +306,7 @@ export const CARD_DEFS: readonly CardDef[] = [
     name: 'Esterad Thyssen',
     faction: 'northern_realms',
     type: 'hero',
-    row: 'siege', // VERIFY: corrected from melee — Esterad is the NR siege hero.
+    row: 'melee', // close combat (verified vs wiki)
     strength: 10,
     abilities: [],
   },
@@ -586,9 +586,9 @@ export const CARD_DEFS: readonly CardDef[] = [
     name: 'Kayran',
     faction: 'monsters',
     type: 'hero',
-    row: 'melee', // VERIFY: Kayran may be agile (melee/ranged) in W3.
+    row: 'agile', // agile hero with Morale Boost (verified vs wiki)
     strength: 8,
-    abilities: [],
+    abilities: ['agile', 'moral'],
   },
   {
     id: 'mon_nekker',
@@ -1607,9 +1607,9 @@ export const CARD_DEFS: readonly CardDef[] = [
     name: 'Clan Heymaey Skald',
     faction: 'skellige',
     type: 'unit',
-    row: 'ranged',
+    row: 'melee', // close combat, no ability (verified vs wiki)
     strength: 4,
-    abilities: ['moral'], // VERIFY
+    abilities: [],
   },
   {
     id: 'sk_shieldmaiden',
