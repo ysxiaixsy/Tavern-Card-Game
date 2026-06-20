@@ -1,4 +1,4 @@
-var Y=[{id:"neu_geralt",name:"Geralt of Rivia",faction:"neutral",type:"hero",row:"melee",strength:15,abilities:[]},{id:"neu_ciri",name:"Cirilla Fiona Elen Riann\
+var $=[{id:"neu_geralt",name:"Geralt of Rivia",faction:"neutral",type:"hero",row:"melee",strength:15,abilities:[]},{id:"neu_ciri",name:"Cirilla Fiona Elen Riann\
 on",faction:"neutral",type:"hero",row:"melee",strength:15,abilities:[]},{id:"neu_yennefer",name:"Yennefer of Vengerberg",faction:"neutral",type:"hero",row:"rang\
 ed",strength:7,abilities:["medic"]},{id:"neu_triss",name:"Triss Merigold",faction:"neutral",type:"hero",row:"melee",strength:7,abilities:[]},{id:"neu_avallach",
 name:"Avallac'h",faction:"neutral",type:"hero",row:"melee",strength:0,abilities:["spy"]},{id:"neu_dandelion",name:"Dandelion",faction:"neutral",type:"unit",row:"\
@@ -20,7 +20,7 @@ fog"},{id:"nr_foltest_commander",name:"Foltest, Lord Commander of the North",fac
 {id:"nr_foltest_steelforged",name:"Foltest, the Steel-Forged",faction:"northern_realms",type:"leader",abilities:[],leaderAbility:"scorch_row_leader",leaderScorchRow:"\
 siege"},{id:"nr_foltest_medell",name:"Foltest, Son of Medell",faction:"northern_realms",type:"leader",abilities:[],leaderAbility:"scorch_row_leader",leaderScorchRow:"\
 ranged"},{id:"nr_vernon",name:"Vernon Roche",faction:"northern_realms",type:"hero",row:"melee",strength:10,abilities:[]},{id:"nr_natalis",name:"John Natalis",faction:"\
-northern_realms",type:"hero",row:"melee",strength:10,abilities:[]},{id:"nr_esterad",name:"Esterad Thyssen",faction:"northern_realms",type:"hero",row:"siege",strength:10,
+northern_realms",type:"hero",row:"melee",strength:10,abilities:[]},{id:"nr_esterad",name:"Esterad Thyssen",faction:"northern_realms",type:"hero",row:"melee",strength:10,
 abilities:[]},{id:"nr_philippa",name:"Philippa Eilhart",faction:"northern_realms",type:"hero",row:"ranged",strength:10,abilities:[]},{id:"nr_stennis",name:"Prin\
 ce Stennis",faction:"northern_realms",type:"unit",row:"melee",strength:5,abilities:["spy"]},{id:"nr_dijkstra",name:"Sigismund Dijkstra",faction:"northern_realms",
 type:"unit",row:"melee",strength:4,abilities:["spy"]},{id:"nr_thaler",name:"Thaler",faction:"northern_realms",type:"unit",row:"siege",strength:1,abilities:["spy"]},
@@ -39,12 +39,12 @@ hern_realms",type:"unit",row:"ranged",strength:4,abilities:[]},{id:"nr_dethmold"
 ta",faction:"northern_realms",type:"unit",row:"siege",strength:6,abilities:[]},{id:"nr_siege_tower",name:"Siege Tower",faction:"northern_realms",type:"unit",row:"\
 siege",strength:6,abilities:[]},{id:"nr_foot_soldier",name:"Redanian Foot Soldier",faction:"northern_realms",type:"unit",row:"melee",strength:1,abilities:[],maxCopiesPerDeck:2},
 {id:"mon_eredin",name:"Eredin, Bringer of Death",faction:"monsters",type:"leader",abilities:[],leaderAbility:"restore_to_hand"},{id:"mon_eredin_king",name:"Ered\
-in, King of the Wild Hunt",faction:"monsters",type:"leader",abilities:[],leaderAbility:"play_from_graveyard"},{id:"mon_eredin_redriders",name:"Eredin, Commander\
- of the Red Riders",faction:"monsters",type:"leader",abilities:[],leaderAbility:"row_horn",leaderHornRow:"melee"},{id:"mon_eredin_destroyer",name:"Eredin, Destr\
-oyer of Worlds",faction:"monsters",type:"leader",abilities:[],leaderAbility:"discard_draw"},{id:"mon_draug",name:"Draug",faction:"monsters",type:"hero",row:"mel\
-ee",strength:10,abilities:[]},{id:"mon_imlerith",name:"Imlerith",faction:"monsters",type:"hero",row:"melee",strength:10,abilities:[]},{id:"mon_leshen",name:"Les\
-hen",faction:"monsters",type:"hero",row:"ranged",strength:10,abilities:[]},{id:"mon_kayran",name:"Kayran",faction:"monsters",type:"hero",row:"melee",strength:8,
-abilities:[]},{id:"mon_nekker",name:"Nekker",faction:"monsters",type:"unit",row:"melee",strength:2,abilities:["muster"],musterGroup:"nekker",maxCopiesPerDeck:3},
+in, King of the Wild Hunt",faction:"monsters",type:"leader",abilities:[],leaderAbility:"weather_from_deck"},{id:"mon_eredin_redriders",name:"Eredin, Commander o\
+f the Red Riders",faction:"monsters",type:"leader",abilities:[],leaderAbility:"row_horn",leaderHornRow:"melee"},{id:"mon_eredin_destroyer",name:"Eredin, Destroy\
+er of Worlds",faction:"monsters",type:"leader",abilities:[],leaderAbility:"discard_draw"},{id:"mon_draug",name:"Draug",faction:"monsters",type:"hero",row:"melee",
+strength:10,abilities:[]},{id:"mon_imlerith",name:"Imlerith",faction:"monsters",type:"hero",row:"melee",strength:10,abilities:[]},{id:"mon_leshen",name:"Leshen",
+faction:"monsters",type:"hero",row:"ranged",strength:10,abilities:[]},{id:"mon_kayran",name:"Kayran",faction:"monsters",type:"hero",row:"agile",strength:8,abilities:[
+"agile","moral"]},{id:"mon_nekker",name:"Nekker",faction:"monsters",type:"unit",row:"melee",strength:2,abilities:["muster"],musterGroup:"nekker",maxCopiesPerDeck:3},
 {id:"mon_ghoul",name:"Ghoul",faction:"monsters",type:"unit",row:"melee",strength:1,abilities:["muster"],musterGroup:"ghoul",maxCopiesPerDeck:3},{id:"mon_arachas",
 name:"Arachas",faction:"monsters",type:"unit",row:"melee",strength:4,abilities:["muster"],musterGroup:"arachas",maxCopiesPerDeck:3},{id:"mon_arachas_behemoth",name:"\
 Arachas Behemoth",faction:"monsters",type:"unit",row:"siege",strength:6,abilities:["muster"],musterGroup:"arachas"},{id:"mon_crone_brewess",name:"Crone: Brewess",
@@ -122,121 +122,122 @@ sk_vildkaarl",maxCopiesPerDeck:3},{id:"sk_vildkaarl",name:"Vildkaarl",faction:"s
 {id:"sk_young_vildkaarl",name:"Young Vildkaarl",faction:"skellige",type:"unit",row:"ranged",strength:8,abilities:["bond"],maxCopiesPerDeck:0},{id:"sk_mardroeme",
 name:"Mardroeme",faction:"skellige",type:"mardroeme",abilities:[],maxCopiesPerDeck:3},{id:"sk_hjalmar",name:"Hjalmar an Craite",faction:"skellige",type:"hero",row:"\
 melee",strength:10,abilities:[]},{id:"sk_cerys",name:"Cerys an Craite",faction:"skellige",type:"hero",row:"melee",strength:10,abilities:[]},{id:"sk_ermion",name:"\
-Ermion",faction:"skellige",type:"hero",row:"ranged",strength:8,abilities:[]},{id:"sk_hemdall",name:"Hemdall",faction:"skellige",type:"hero",row:"melee",strength:11,
-abilities:[],maxCopiesPerDeck:0},{id:"sk_kambi",name:"Kambi",faction:"skellige",type:"unit",row:"melee",strength:0,abilities:[],summonAvenger:"sk_hemdall"},{id:"\
-sk_birna",name:"Birna Bran",faction:"skellige",type:"unit",row:"melee",strength:2,abilities:["medic"]},{id:"sk_draig",name:"Draig Bon-Dhu",faction:"skellige",type:"\
-unit",row:"siege",strength:2,abilities:["horn"]},{id:"sk_skald",name:"Clan Heymaey Skald",faction:"skellige",type:"unit",row:"ranged",strength:4,abilities:["mor\
-al"]},{id:"sk_shieldmaiden",name:"Clan Drummond Shield Maiden",faction:"skellige",type:"unit",row:"melee",strength:4,abilities:["bond"],maxCopiesPerDeck:3},{id:"\
-sk_craite_warrior",name:"Clan an Craite Warrior",faction:"skellige",type:"unit",row:"melee",strength:6,abilities:["bond"],maxCopiesPerDeck:3},{id:"sk_war_longsh\
-ip",name:"War Longship",faction:"skellige",type:"unit",row:"siege",strength:6,abilities:["bond"],maxCopiesPerDeck:2},{id:"sk_light_longship",name:"Light Longshi\
-p",faction:"skellige",type:"unit",row:"ranged",strength:4,abilities:["muster"],musterGroup:"sk_longship",maxCopiesPerDeck:3},{id:"sk_armorsmith",name:"Clan Tord\
-arroch Armorsmith",faction:"skellige",type:"unit",row:"melee",strength:4,abilities:[]},{id:"sk_brokvar",name:"Clan Brokvar Archer",faction:"skellige",type:"unit",
-row:"ranged",strength:6,abilities:[]},{id:"sk_dimun",name:"Clan Dimun Pirate",faction:"skellige",type:"unit",row:"ranged",strength:6,abilities:[]},{id:"sk_donar",
-name:"Donar an Hindar",faction:"skellige",type:"unit",row:"melee",strength:4,abilities:[]},{id:"sk_holger",name:"Holger Blackhand",faction:"skellige",type:"unit",
-row:"melee",strength:4,abilities:[]},{id:"sk_udalryk",name:"Udalryk",faction:"skellige",type:"unit",row:"melee",strength:4,abilities:[]},{id:"sk_svanrige",name:"\
-Svanrige",faction:"skellige",type:"unit",row:"melee",strength:4,abilities:[]},{id:"sk_madman_lugos",name:"Madman Lugos",faction:"skellige",type:"unit",row:"mele\
-e",strength:6,abilities:[]},{id:"sk_vabjorn",name:"Vabjorn",faction:"skellige",type:"unit",row:"melee",strength:6,abilities:[]},{id:"ng_emhyr_invader",name:"Emh\
-yr var Emreis, Invader of the North",faction:"nilfgaard",type:"leader",abilities:[],leaderAbility:"restore_random_passive"},{id:"mon_eredin_treacherous",name:"E\
-redin, the Treacherous",faction:"monsters",type:"leader",abilities:[],leaderAbility:"spy_double_passive"},{id:"st_francesca_hope",name:"Francesca, Hope of the A\
-en Seidhe",faction:"scoiatael",type:"leader",abilities:[],leaderAbility:"realign_agile"},{id:"leader_horn_marker",name:"Leader's Horn",faction:"neutral",type:"h\
-orn",abilities:[],maxCopiesPerDeck:0}],U="leader_horn_marker";var G={};for(let e of Y){if(G[e.id])throw new Error(`Duplicate card def id: ${e.id}`);G[e.id]=e}function c(e){let n=G[e];if(!n)throw new Error(`Unknown card def\
- id: ${e}`);return n}function M(e){return e in G}var g=["melee","ranged","siege"],_=["p1","p2"],j={frost:["melee"],fog:["ranged"],rain:["siege"],storm:["ranged","siege"]};function f(e){return e==="p1"?"p2":"p1"}
-function z(e,n){return _.some(r=>{let a=e.players[r];return c(a.leader.defId).leaderAbility===n&&!a.leaderUsed})}function q(e){return z(e,"spy_double_passive")}
-function A(e){return z(e,"restore_random_passive")}function X(e){return JSON.parse(JSON.stringify(e))}function T(e){let n=[];for(let r of e.weatherCards){let a=c(
-r.defId);a.weather&&a.weather!=="clear"&&!n.includes(a.weather)&&n.push(a.weather)}return n}function Z(e,n){return T(e).some(r=>r!=="storm"&&j[r].includes(n))}function J(e,n){return T(e).includes("storm")&&j.storm.includes(n)}function Q(e,n){for(let r of g){
-let a=e.rows[r].units.findIndex(t=>t.instanceId===n);if(a!==-1)return{rowKind:r,index:a}}return null}function ee(e,n){let r=[];for(let a of g)for(let t of e.players[n].
-rows[a].units)c(t.defId).type==="unit"&&r.push(t);return r}function w(e){return e.graveyard.filter(n=>c(n.defId).type==="unit")}function N(e,n){return e.deck.findIndex(
-r=>c(r.defId).weather===n)}function R(e,n,r){let a=e.players[n],t=0;for(;t<r&&a.deck.length>0;)a.hand.push(a.deck.shift()),t++;return t}function ne(e){let n=1779033703^e.length;for(let r=0;r<e.length;r++)n=Math.imul(n^e.charCodeAt(r),3432918353),n=n<<13|n>>>19;return n=Math.imul(n^n>>>16,2246822507),
+Ermion",faction:"skellige",type:"hero",row:"ranged",strength:8,abilities:[],triggersTransform:!0},{id:"sk_hemdall",name:"Hemdall",faction:"skellige",type:"hero",
+row:"melee",strength:11,abilities:[],maxCopiesPerDeck:0},{id:"sk_kambi",name:"Kambi",faction:"skellige",type:"unit",row:"melee",strength:0,abilities:[],summonAvenger:"\
+sk_hemdall"},{id:"sk_birna",name:"Birna Bran",faction:"skellige",type:"unit",row:"melee",strength:2,abilities:["medic"]},{id:"sk_draig",name:"Draig Bon-Dhu",faction:"\
+skellige",type:"unit",row:"siege",strength:2,abilities:["horn"]},{id:"sk_skald",name:"Clan Heymaey Skald",faction:"skellige",type:"unit",row:"melee",strength:4,
+abilities:[]},{id:"sk_shieldmaiden",name:"Clan Drummond Shield Maiden",faction:"skellige",type:"unit",row:"melee",strength:4,abilities:["bond"],maxCopiesPerDeck:3},
+{id:"sk_craite_warrior",name:"Clan an Craite Warrior",faction:"skellige",type:"unit",row:"melee",strength:6,abilities:["bond"],maxCopiesPerDeck:3},{id:"sk_war_l\
+ongship",name:"War Longship",faction:"skellige",type:"unit",row:"siege",strength:6,abilities:["bond"],maxCopiesPerDeck:2},{id:"sk_light_longship",name:"Light Lo\
+ngship",faction:"skellige",type:"unit",row:"ranged",strength:4,abilities:["muster"],musterGroup:"sk_longship",maxCopiesPerDeck:3},{id:"sk_armorsmith",name:"Clan\
+ Tordarroch Armorsmith",faction:"skellige",type:"unit",row:"melee",strength:4,abilities:[]},{id:"sk_brokvar",name:"Clan Brokvar Archer",faction:"skellige",type:"\
+unit",row:"ranged",strength:6,abilities:[]},{id:"sk_dimun",name:"Clan Dimun Pirate",faction:"skellige",type:"unit",row:"ranged",strength:6,abilities:["scorch_gl\
+obal"]},{id:"sk_donar",name:"Donar an Hindar",faction:"skellige",type:"unit",row:"melee",strength:4,abilities:[]},{id:"sk_holger",name:"Holger Blackhand",faction:"\
+skellige",type:"unit",row:"melee",strength:4,abilities:[]},{id:"sk_udalryk",name:"Udalryk",faction:"skellige",type:"unit",row:"melee",strength:4,abilities:[]},{
+id:"sk_svanrige",name:"Svanrige",faction:"skellige",type:"unit",row:"melee",strength:4,abilities:[]},{id:"sk_madman_lugos",name:"Madman Lugos",faction:"skellige",
+type:"unit",row:"melee",strength:6,abilities:[]},{id:"sk_blueboy_lugos",name:"Blueboy Lugos",faction:"skellige",type:"unit",row:"melee",strength:6,abilities:[]},
+{id:"sk_olaf",name:"Olaf",faction:"skellige",type:"unit",row:"agile",strength:12,abilities:["agile","moral"]},{id:"ng_emhyr_invader",name:"Emhyr var Emreis, Inv\
+ader of the North",faction:"nilfgaard",type:"leader",abilities:[],leaderAbility:"restore_random_passive"},{id:"mon_eredin_treacherous",name:"Eredin, the Treache\
+rous",faction:"monsters",type:"leader",abilities:[],leaderAbility:"spy_double_passive"},{id:"st_francesca_hope",name:"Francesca, Hope of the Aen Seidhe",faction:"\
+scoiatael",type:"leader",abilities:[],leaderAbility:"realign_agile"},{id:"leader_horn_marker",name:"Leader's Horn",faction:"neutral",type:"horn",abilities:[],maxCopiesPerDeck:0}],
+N="leader_horn_marker";var L={};for(let e of $){if(L[e.id])throw new Error(`Duplicate card def id: ${e.id}`);L[e.id]=e}function c(e){let n=L[e];if(!n)throw new Error(`Unknown card def\
+ id: ${e}`);return n}function x(e){return e in L}var g=["melee","ranged","siege"],_=["p1","p2"],Y={frost:["melee"],fog:["ranged"],rain:["siege"],storm:["ranged","siege"]};function f(e){return e==="p1"?"p2":"p1"}
+function j(e,n){return _.some(r=>{let t=e.players[r];return c(t.leader.defId).leaderAbility===n&&!t.leaderUsed})}function z(e){return j(e,"spy_double_passive")}
+function q(e){return j(e,"restore_random_passive")}function X(e){return JSON.parse(JSON.stringify(e))}function P(e){let n=[];for(let r of e.weatherCards){let t=c(
+r.defId);t.weather&&t.weather!=="clear"&&!n.includes(t.weather)&&n.push(t.weather)}return n}function Z(e,n){return P(e).some(r=>r!=="storm"&&Y[r].includes(n))}function J(e,n){return P(e).includes("storm")&&Y.storm.includes(n)}function Q(e,n){for(let r of g){
+let t=e.rows[r].units.findIndex(a=>a.instanceId===n);if(t!==-1)return{rowKind:r,index:t}}return null}function ee(e,n){let r=[];for(let t of g)for(let a of e.players[n].
+rows[t].units)c(a.defId).type==="unit"&&r.push(a);return r}function R(e){return e.graveyard.filter(n=>c(n.defId).type==="unit")}function G(e,n){return e.deck.findIndex(
+r=>c(r.defId).weather===n)}function S(e,n,r){let t=e.players[n],a=0;for(;a<r&&t.deck.length>0;)t.hand.push(t.deck.shift()),a++;return a}function ne(e){let n=1779033703^e.length;for(let r=0;r<e.length;r++)n=Math.imul(n^e.charCodeAt(r),3432918353),n=n<<13|n>>>19;return n=Math.imul(n^n>>>16,2246822507),
 n=Math.imul(n^n>>>13,3266489909),(n^=n>>>16)>>>0}function _e(e){let n=e+1831565813>>>0,r=n;return r=Math.imul(r^r>>>15,r|1),r^=r+Math.imul(r^r>>>7,r|61),[((r^r>>>
-14)>>>0)/4294967296,n]}function I(e,n){if(n<=0)throw new Error("rngInt: maxExclusive must be positive");let[r,a]=_e(e);return[Math.floor(r*n),a]}function S(e,n){
-let r=n.slice(),a=e;for(let t=r.length-1;t>0;t--){let[i,o]=I(a,t+1);a=o;let s=r[t];r[t]=r[i],r[i]=s}return[r,a]}function re(e,n,r){let[a,t]=S(e,n);return[a.slice(
-0,Math.min(r,a.length)),t]}function ye(e,n,r){let a=Z(e,r),t=J(e,r);if(!a&&!t)return"none";let i=c(e.players[n].leader.defId);return e.players[n].leaderUsed&&i.leaderAbility==="halve_weat\
-her"?"halve":a?"nuke":"halve"}function b(e,n,r){let a=e.players[n].rows[r],t=ye(e,n,r),i=q(e),o=a.horn!==null,s=a.units.filter(m=>c(m.defId).abilities.includes(
-"horn")).length,l=a.units.filter(m=>c(m.defId).abilities.includes("moral")).length,h={};for(let m of a.units)c(m.defId).abilities.includes("bond")&&(h[m.defId]=
-(h[m.defId]??0)+1);return a.units.map(m=>{let p=c(m.defId);if(p.type==="hero")return{...m,effectiveStrength:p.strength??0};if(p.type!=="unit")return{...m,effectiveStrength:0};
-let u=p.strength??0;t==="nuke"?u=1:t==="halve"&&(u=Math.max(1,Math.ceil(u/2))),p.abilities.includes("bond")&&(u*=h[m.defId]??1);let y=l-(p.abilities.includes("m\
-oral")?1:0);return u+=y,(o||s-(p.abilities.includes("horn")?1:0)>0)&&(u*=2),i&&p.abilities.includes("spy")&&(u*=2),{...m,effectiveStrength:u}})}function k(e,n,r){
-return b(e,n,r).reduce((a,t)=>a+t.effectiveStrength,0)}function D(e,n){return g.reduce((r,a)=>r+k(e,n,a),0)}var d=class extends Error{code;constructor(n,r){super(`${n}: ${r}`),this.name="GwentError",this.code=n}};function we(e,n){if(e.phase==="finished")throw new d("GAME_FINISHED","the match is over");if(n.player!=="p1"&&n.player!=="p2")throw new d("ILLEGAL_MOVE",`unknow\
-n player ${String(n.player)}`);if(e.pendingChoice){let a=e.pendingChoice.kind==="medic_revive"?"RESOLVE_MEDIC":"CHOOSE_FIRST_PLAYER";if(n.type!==a)throw new d("\
+14)>>>0)/4294967296,n]}function I(e,n){if(n<=0)throw new Error("rngInt: maxExclusive must be positive");let[r,t]=_e(e);return[Math.floor(r*n),t]}function C(e,n){
+let r=n.slice(),t=e;for(let a=r.length-1;a>0;a--){let[i,o]=I(t,a+1);t=o;let s=r[a];r[a]=r[i],r[i]=s}return[r,t]}function re(e,n,r){let[t,a]=C(e,n);return[t.slice(
+0,Math.min(r,t.length)),a]}function ye(e,n,r){let t=Z(e,r),a=J(e,r);if(!t&&!a)return"none";let i=c(e.players[n].leader.defId);return e.players[n].leaderUsed&&i.leaderAbility==="halve_weat\
+her"?"halve":t?"nuke":"halve"}function E(e,n,r){let t=e.players[n].rows[r],a=ye(e,n,r),i=z(e),o=t.horn!==null,s=t.units.filter(m=>c(m.defId).abilities.includes(
+"horn")).length,l=t.units.filter(m=>c(m.defId).abilities.includes("moral")).length,h={};for(let m of t.units)c(m.defId).abilities.includes("bond")&&(h[m.defId]=
+(h[m.defId]??0)+1);return t.units.map(m=>{let p=c(m.defId);if(p.type==="hero")return{...m,effectiveStrength:p.strength??0};if(p.type!=="unit")return{...m,effectiveStrength:0};
+let u=p.strength??0;a==="nuke"?u=1:a==="halve"&&(u=Math.max(1,Math.ceil(u/2))),p.abilities.includes("bond")&&(u*=h[m.defId]??1);let y=l-(p.abilities.includes("m\
+oral")?1:0);return u+=y,(o||s-(p.abilities.includes("horn")?1:0)>0)&&(u*=2),i&&p.abilities.includes("spy")&&(u*=2),{...m,effectiveStrength:u}})}function v(e,n,r){
+return E(e,n,r).reduce((t,a)=>t+a.effectiveStrength,0)}function D(e,n){return g.reduce((r,t)=>r+v(e,n,t),0)}var d=class extends Error{code;constructor(n,r){super(`${n}: ${r}`),this.name="GwentError",this.code=n}};function we(e,n){if(e.phase==="finished")throw new d("GAME_FINISHED","the match is over");if(n.player!=="p1"&&n.player!=="p2")throw new d("ILLEGAL_MOVE",`unknow\
+n player ${String(n.player)}`);if(e.pendingChoice){let t=e.pendingChoice.kind==="medic_revive"?"RESOLVE_MEDIC":"CHOOSE_FIRST_PLAYER";if(n.type!==t)throw new d("\
 PENDING_CHOICE",`a ${e.pendingChoice.kind} choice must be resolved first`);if(n.player!==e.pendingChoice.player)throw new d("NOT_YOUR_TURN","this choice belongs\
  to the other player")}else if(n.type==="RESOLVE_MEDIC"||n.type==="CHOOSE_FIRST_PLAYER")throw new d("ILLEGAL_MOVE",`${n.type} without a matching pending choice`);
-let r=X(e);switch(n.type){case"CHOOSE_FIRST_PLAYER":Ie(r,n.first);break;case"MULLIGAN":be(r,n);break;case"PASS":K(r,n.player),r.players[n.player].passed=!0,O(r);
-break;case"PLAY_CARD":K(r,n.player),ke(r,n),O(r);break;case"RESOLVE_MEDIC":De(r,n),O(r);break;case"USE_LEADER":K(r,n.player),Le(r,n),O(r);break;default:throw new d(
-"ILLEGAL_MOVE",`unknown move type ${n.type}`)}return r.moveCount+=1,r}function K(e,n){if(e.phase!=="play")throw new d("WRONG_PHASE",`expected play phase, got ${e.
+let r=X(e);switch(n.type){case"CHOOSE_FIRST_PLAYER":Ie(r,n.first);break;case"MULLIGAN":be(r,n);break;case"PASS":O(r,n.player),r.players[n.player].passed=!0,M(r);
+break;case"PLAY_CARD":O(r,n.player),ke(r,n),M(r);break;case"RESOLVE_MEDIC":Ae(r,n),M(r);break;case"USE_LEADER":O(r,n.player),Le(r,n),M(r);break;default:throw new d(
+"ILLEGAL_MOVE",`unknown move type ${n.type}`)}return r.moveCount+=1,r}function O(e,n){if(e.phase!=="play")throw new d("WRONG_PHASE",`expected play phase, got ${e.
 phase}`);if(e.turn!==n)throw new d("NOT_YOUR_TURN",`it is ${e.turn}'s turn`);if(e.players[n].passed)throw new d("ALREADY_PASSED","no further actions after passi\
 ng")}function Ie(e,n){e.roundLeader=n,e.turn=n,e.pendingChoice=null}function be(e,n){if(e.phase!=="mulligan")throw new d("WRONG_PHASE","mulligan is only allowed\
- before round 1");let r=e.players[n.player];if(r.mulliganDone)throw new d("ILLEGAL_MOVE","mulligan already submitted");let a=n.cardInstanceIds;if(a.length>2||new Set(
-a).size!==a.length)throw new d("ILLEGAL_MOVE","mulligan may swap at most 2 distinct cards");for(let t of a){let i=r.hand.findIndex(h=>h.instanceId===t);if(i===-1)
-throw new d("CARD_NOT_FOUND",`${t} is not in hand`);let[o]=r.hand.splice(i,1);r.deck.push(o);let[s,l]=S(e.rngState,r.deck);r.deck=s,e.rngState=l,R(e,n.player,1)}
-r.mulligansUsed=a.length,r.mulliganDone=!0,_.every(t=>e.players[t].mulliganDone)&&(e.phase="play",e.round=1,e.turn=e.roundLeader,ce(e))}function ke(e,n){let r=e.
-players[n.player],a=r.hand.findIndex(o=>o.instanceId===n.cardInstanceId);if(a===-1)throw new d("CARD_NOT_FOUND",`${n.cardInstanceId} is not in your hand`);let t=r.
-hand[a],i=c(t.defId);switch(i.type){case"unit":case"hero":{r.hand.splice(a,1),L(e,n.player,t,i,n.row);break}case"weather":{r.hand.splice(a,1),Ce(e,n.player,t,i);
+ before round 1");let r=e.players[n.player];if(r.mulliganDone)throw new d("ILLEGAL_MOVE","mulligan already submitted");let t=n.cardInstanceIds;if(t.length>2||new Set(
+t).size!==t.length)throw new d("ILLEGAL_MOVE","mulligan may swap at most 2 distinct cards");for(let a of t){let i=r.hand.findIndex(h=>h.instanceId===a);if(i===-1)
+throw new d("CARD_NOT_FOUND",`${a} is not in hand`);let[o]=r.hand.splice(i,1);r.deck.push(o);let[s,l]=C(e.rngState,r.deck);r.deck=s,e.rngState=l,S(e,n.player,1)}
+r.mulligansUsed=t.length,r.mulliganDone=!0,_.every(a=>e.players[a].mulliganDone)&&(e.phase="play",e.round=1,e.turn=e.roundLeader,ce(e))}function ke(e,n){let r=e.
+players[n.player],t=r.hand.findIndex(o=>o.instanceId===n.cardInstanceId);if(t===-1)throw new d("CARD_NOT_FOUND",`${n.cardInstanceId} is not in your hand`);let a=r.
+hand[t],i=c(a.defId);switch(i.type){case"unit":case"hero":{r.hand.splice(t,1),V(e,n.player,a,i,n.row);break}case"weather":{r.hand.splice(t,1),Se(e,n.player,a,i);
 break}case"horn":{let o=n.row;if(!o||!g.includes(o))throw new d("ILLEGAL_MOVE","Commander's Horn needs a target row");if(r.rows[o].horn!==null)throw new d("INVA\
-LID_TARGET",`the ${o} horn slot is occupied`);r.hand.splice(a,1),r.rows[o].horn=t;break}case"scorch":{r.hand.splice(a,1),Re(e),r.graveyard.push(t);break}case"ma\
-rdroeme":{r.hand.splice(a,1),Se(e),r.graveyard.push(t);break}case"decoy":{Ae(e,n.player,a,n.targetInstanceId);break}default:throw new d("ILLEGAL_MOVE",`cannot p\
-lay a ${i.type} card from hand`)}}function L(e,n,r,a,t){let i=a.abilities.includes("spy"),o=i?f(n):n,s;if(a.row==="agile"){if(t!=="melee"&&t!=="ranged")throw new d(
-"ILLEGAL_MOVE",`${a.name} is agile: choose melee or ranged`);s=t}else if(a.row==="melee"||a.row==="ranged"||a.row==="siege")s=a.row;else throw new d("ILLEGAL_MO\
-VE",`${a.name} has no row and cannot be placed`);e.players[o].rows[s].units.push(r),i&&R(e,n,2),a.abilities.includes("muster")&&a.musterGroup&&te(e,n,a.musterGroup),
-a.summonsGroup&&te(e,n,a.summonsGroup),a.abilities.includes("scorch_row")&&a.scorchRow&&oe(e,n,a.scorchRow),a.abilities.includes("medic")&&w(e.players[n]).length>
-0&&(A(e)?ve(e,n):e.pendingChoice={kind:"medic_revive",player:n,medicInstanceId:r.instanceId})}function ie(e){let[n,r]=I(e.rngState,2);return e.rngState=r,n===0?
-"melee":"ranged"}function ve(e,n){let r=w(e.players[n]);if(r.length===0)return;let[a,t]=I(e.rngState,r.length);e.rngState=t;let i=r[a],o=e.players[n].graveyard.
-findIndex(h=>h.instanceId===i.instanceId),[s]=e.players[n].graveyard.splice(o,1),l=c(s.defId);L(e,n,s,l,l.row==="agile"?ie(e):void 0)}function Ee(e,n){let r=e.players[n],
-a=["melee","ranged"],t=[];for(let s of a){let l=[];for(let h of r.rows[s].units)c(h.defId).row==="agile"?t.push(h):l.push(h);r.rows[s].units=l}if(t.length===0)throw new d(
-"LEADER_UNAVAILABLE","no agile units to move");let i="melee",o=-1/0;for(let s of a){r.rows[s].units.push(...t);let l=D(e,n);r.rows[s].units.splice(r.rows[s].units.
-length-t.length,t.length),l>o&&(o=l,i=s)}r.rows[i].units.push(...t)}function te(e,n,r){let a=e.players[n],t=s=>c(s.defId).musterGroup===r,i=a.hand.filter(t);a.hand=
-a.hand.filter(s=>!t(s));let o=a.deck.filter(t);a.deck=a.deck.filter(s=>!t(s));for(let s of[...i,...o]){let l=c(s.defId),h=l.row==="melee"||l.row==="ranged"||l.row===
-"siege"?l.row:"melee";a.rows[h].units.push(s)}}function Re(e){let n=-1,r=[];for(let a of _)for(let t of g)for(let i of b(e,a,t))c(i.defId).type==="unit"&&(i.effectiveStrength>
-n&&(n=i.effectiveStrength,r.length=0),i.effectiveStrength===n&&r.push({side:a,rowKind:t,instanceId:i.instanceId}));de(e,r)}function oe(e,n,r){let a=f(n);if(k(e,
-a,r)<10)return;let t=-1,i=[];for(let o of b(e,a,r))c(o.defId).type==="unit"&&(o.effectiveStrength>t&&(t=o.effectiveStrength,i.length=0),o.effectiveStrength===t&&
-i.push({side:a,rowKind:r,instanceId:o.instanceId}));de(e,i)}function Se(e){for(let n of _)for(let r of g)for(let a of e.players[n].rows[r].units){let t=c(a.defId).
-transformsTo;t&&(a.defId=t)}}function se(e,n,r){let a=c(r.defId).summonAvenger;a&&e.pendingSummons.push({player:n,card:{instanceId:`${r.instanceId}:avenger`,defId:a}})}
-function de(e,n){for(let r of n){let a=e.players[r.side].rows[r.rowKind],t=a.units.findIndex(i=>i.instanceId===r.instanceId);if(t!==-1){let[i]=a.units.splice(t,
-1);e.players[r.side].graveyard.push(i),se(e,r.side,i)}}}function le(e){for(let n of e.weatherCards)e.players[n.owner].graveyard.push({instanceId:n.instanceId,defId:n.
-defId});e.weatherCards=[]}function Ce(e,n,r,a){if(a.weather==="clear"){le(e),e.players[n].graveyard.push(r);return}e.weatherCards.push({...r,owner:n})}function Ae(e,n,r,a){
-if(!a)throw new d("ILLEGAL_MOVE","Decoy needs a target unit on your side");let t=e.players[n],i=Q(t,a);if(!i)throw new d("INVALID_TARGET",`${a} is not on your s\
-ide of the board`);let o=t.rows[i.rowKind].units[i.index];if(c(o.defId).type!=="unit")throw new d("INVALID_TARGET","Decoy cannot target heroes or special cards");
-let[s]=t.hand.splice(r,1);t.rows[i.rowKind].units[i.index]=s,t.hand.push(o)}function De(e,n){let r=e.players[n.player],a=r.graveyard.findIndex(o=>o.instanceId===
-n.targetInstanceId);if(a===-1)throw new d("INVALID_TARGET",`${n.targetInstanceId} is not in your graveyard`);let t=r.graveyard[a],i=c(t.defId);if(i.type!=="unit")
-throw new d("INVALID_TARGET","medics can only revive non-hero units");r.graveyard.splice(a,1),e.pendingChoice=null,L(e,n.player,t,i,n.row)}function ae(e,n,r){if(!r)
-throw new d("ILLEGAL_MOVE","this leader needs a graveyard unit as its target");let a=e.players[n],t=a.graveyard.findIndex(s=>s.instanceId===r);if(t===-1)throw new d(
-"INVALID_TARGET",`${r} is not in your graveyard`);let i=c(a.graveyard[t].defId);if(i.type!=="unit")throw new d("INVALID_TARGET","leaders can only target non-her\
-o units");let[o]=a.graveyard.splice(t,1);return{card:o,def:i}}function Le(e,n){let r=e.players[n.player];if(r.leaderUsed)throw new d("LEADER_UNAVAILABLE","leade\
-r ability already used");let a=c(r.leader.defId);switch(a.leaderAbility){case"weather_from_deck":{let t=a.leaderWeather,i=t?N(r,t):-1;if(i===-1)throw new d("LEA\
-DER_UNAVAILABLE",`no ${t??"weather"} left in your deck`);let[o]=r.deck.splice(i,1);e.weatherCards.push({...o,owner:n.player});break}case"clear_weather":{if(e.weatherCards.
-length===0)throw new d("LEADER_UNAVAILABLE","no weather to clear");le(e);break}case"scorch_row_leader":{let t=a.leaderScorchRow;if(!t)throw new d("LEADER_UNAVAI\
-LABLE","leader has no scorch row configured");let i=f(n.player);if(k(e,i,t)<10)throw new d("LEADER_UNAVAILABLE",`opponent's ${t} row is below 10`);oe(e,n.player,
-t);break}case"row_horn":{let t=a.leaderHornRow;if(!t)throw new d("LEADER_UNAVAILABLE","leader has no horn row configured");if(r.rows[t].horn!==null)throw new d(
-"INVALID_TARGET",`the ${t} horn slot is occupied`);r.rows[t].horn={instanceId:`${n.player}:leader-horn`,defId:U};break}case"cancel_leader":{let t=e.players[f(n.
-player)];if(t.leaderUsed)throw new d("LEADER_UNAVAILABLE","opponent's leader is already spent");t.leaderUsed=!0;break}case"peek_hand":{let t=e.players[f(n.player)].
-hand;if(t.length===0)throw new d("LEADER_UNAVAILABLE","opponent has no cards in hand");let[i,o]=re(e.rngState,t,3);e.rngState=o;for(let s of i)r.knownOpponentCardIds.
-includes(s.instanceId)||r.knownOpponentCardIds.push(s.instanceId);break}case"restore_to_hand":{let{card:t}=ae(e,n.player,n.targetInstanceId);r.hand.push(t);break}case"\
-play_from_graveyard":{if(A(e)){let o=w(r);if(o.length===0)throw new d("LEADER_UNAVAILABLE","no non-hero unit in your graveyard");let[s,l]=I(e.rngState,o.length);
-e.rngState=l;let h=o[s],m=r.graveyard.findIndex(y=>y.instanceId===h.instanceId),[p]=r.graveyard.splice(m,1),u=c(p.defId);L(e,n.player,p,u,u.row==="agile"?ie(e):
-void 0);break}let{card:t,def:i}=ae(e,n.player,n.targetInstanceId);L(e,n.player,t,i,n.row);break}case"realign_agile":{Ee(e,n.player);break}case"steal_from_gravey\
-ard":{let t=e.players[f(n.player)];if(!n.targetInstanceId)throw new d("ILLEGAL_MOVE","choose a card in the enemy graveyard");let i=t.graveyard.findIndex(s=>s.instanceId===
-n.targetInstanceId);if(i===-1)throw new d("INVALID_TARGET",`${n.targetInstanceId} is not in the enemy graveyard`);if(c(t.graveyard[i].defId).type!=="unit")throw new d(
-"INVALID_TARGET","only non-hero units can be stolen");let[o]=t.graveyard.splice(i,1);r.hand.push(o);break}case"discard_draw":{let t=n.discardInstanceIds;if(!t||
-t.length!==2||new Set(t).size!==2)throw new d("ILLEGAL_MOVE","discard exactly 2 distinct hand cards");if(!n.drawDefId)throw new d("ILLEGAL_MOVE","choose a card \
-to fetch from your deck");for(let s of t){let l=r.hand.findIndex(m=>m.instanceId===s);if(l===-1)throw new d("CARD_NOT_FOUND",`${s} is not in your hand`);let[h]=r.
-hand.splice(l,1);r.graveyard.push(h)}let i=r.deck.findIndex(s=>s.defId===n.drawDefId);if(i===-1)throw new d("INVALID_TARGET",`no ${n.drawDefId} left in your dec\
-k`);let[o]=r.deck.splice(i,1);r.hand.push(o);break}case"halve_weather":{if(e.weatherCards.length===0)throw new d("LEADER_UNAVAILABLE","no weather to halve");break}case"\
-reshuffle_graveyards":{for(let t of _){let i=e.players[t];i.deck.push(...i.graveyard),i.graveyard=[];let[o,s]=S(e.rngState,i.deck);i.deck=o,e.rngState=s}break}case"\
-draw_extra_start":throw new d("LEADER_UNAVAILABLE","this ability triggers automatically");default:throw new d("LEADER_UNAVAILABLE","this leader has no usable ab\
-ility")}r.leaderUsed=!0}function O(e){if(!e.pendingChoice){if(_.every(n=>e.players[n].passed))me(e);else{let n=f(e.turn);e.players[n].passed||(e.turn=n)}ce(e)}}
-function ce(e){for(;e.phase==="play";){let n=e.players[e.turn];if(n.passed||n.hand.length>0)return;n.passed=!0,_.every(r=>e.players[r].passed)?me(e):e.turn=f(e.
-turn)}}function me(e){let n={p1:D(e,"p1"),p2:D(e,"p2")},r=n.p1>n.p2?"p1":n.p2>n.p1?"p2":null,a=!1;if(r===null){let l=e.players.p1.faction==="nilfgaard",h=e.players.
-p2.faction==="nilfgaard";l!==h&&(r=l?"p1":"p2",a=!0)}e.roundHistory.push({round:e.round,totals:n,winner:r,...a?{tieBrokenByNilfgaard:a}:{}}),r===null?(e.players.
-p1.gems-=1,e.players.p2.gems-=1):e.players[f(r)].gems-=1;let t=e.players.p1.gems<=0,i=e.players.p2.gems<=0,o=t||i;!o&&r&&e.players[r].faction==="northern_realms"&&
-R(e,r,1);let s={};if(!o)for(let l of _){if(e.players[l].faction!=="monsters")continue;let h=[];for(let m of g)for(let p of e.players[l].rows[m].units){let u=c(p.
-defId);u.faction==="monsters"&&(u.type==="unit"||u.type==="hero")&&h.push(p.instanceId)}if(h.length>0){let[m,p]=I(e.rngState,h.length);e.rngState=p,s[l]=h[m]}}for(let l of _){
-let h=e.players[l];for(let m of g){let p=h.rows[m],u=[];for(let y of p.units)y.instanceId===s[l]?u.push(y):(h.graveyard.push(y),se(e,l,y));p.units=u,p.horn&&(p.
-horn.defId!==U&&h.graveyard.push(p.horn),p.horn=null)}}for(let l of e.weatherCards)e.players[l.owner].graveyard.push({instanceId:l.instanceId,defId:l.defId});if(e.
-weatherCards=[],o){e.phase="finished",e.result={winner:t&&i?null:t?"p2":"p1",gems:{p1:e.players.p1.gems,p2:e.players.p2.gems},rounds:e.roundHistory};return}e.round+=
-1,e.roundLeader=r??e.roundLeader,e.turn=e.roundLeader,e.players.p1.passed=!1,e.players.p2.passed=!1;for(let{player:l,card:h}of e.pendingSummons){let m=c(h.defId),
-p=m.row==="melee"||m.row==="ranged"||m.row==="siege"?m.row:"melee";e.players[l].rows[p].units.push(h)}if(e.pendingSummons=[],e.round===3)for(let l of _){if(e.players[l].
-faction!=="skellige")continue;let h=e.players[l];for(let m=0;m<2;m++){let p=h.graveyard.map((C,P)=>({card:C,index:P})).filter(({card:C})=>{let P=c(C.defId).type;
-return P==="unit"||P==="hero"});if(p.length===0)break;let[u,y]=I(e.rngState,p.length);e.rngState=y;let[v]=h.graveyard.splice(p[u].index,1),E=c(v.defId),x=E.row===
-"melee"||E.row==="ranged"||E.row==="siege"?E.row:"melee";h.rows[x].units.push(v)}}}var he={leaderId:"nr_foltest",cardIds:["nr_vernon","nr_natalis","nr_esterad","nr_philippa","neu_geralt","neu_yennefer","nr_stennis","nr_dijkstra","nr_thaler","n\
+LID_TARGET",`the ${o} horn slot is occupied`);r.hand.splice(t,1),r.rows[o].horn=a;break}case"scorch":{r.hand.splice(t,1),ae(e),r.graveyard.push(a);break}case"ma\
+rdroeme":{let o=n.row;if(!o||!g.includes(o))throw new d("ILLEGAL_MOVE","Mardroeme needs a target row");r.hand.splice(t,1),oe(e,n.player,o),r.graveyard.push(a);break}case"\
+decoy":{Ce(e,n.player,t,n.targetInstanceId);break}default:throw new d("ILLEGAL_MOVE",`cannot play a ${i.type} card from hand`)}}function V(e,n,r,t,a){let i=t.abilities.
+includes("spy"),o=i?f(n):n,s;if(t.row==="agile"){if(a!=="melee"&&a!=="ranged")throw new d("ILLEGAL_MOVE",`${t.name} is agile: choose melee or ranged`);s=a}else if(t.
+row==="melee"||t.row==="ranged"||t.row==="siege")s=t.row;else throw new d("ILLEGAL_MOVE",`${t.name} has no row and cannot be placed`);e.players[o].rows[s].units.
+push(r),i&&S(e,n,2),t.abilities.includes("muster")&&t.musterGroup&&te(e,n,t.musterGroup),t.summonsGroup&&te(e,n,t.summonsGroup),t.abilities.includes("scorch_row")&&
+t.scorchRow&&ie(e,n,t.scorchRow),t.abilities.includes("scorch_global")&&ae(e),t.triggersTransform&&oe(e,o,s),t.abilities.includes("medic")&&R(e.players[n]).length>
+0&&(q(e)?Ee(e,n):e.pendingChoice={kind:"medic_revive",player:n,medicInstanceId:r.instanceId})}function Re(e){let[n,r]=I(e.rngState,2);return e.rngState=r,n===0?
+"melee":"ranged"}function Ee(e,n){let r=R(e.players[n]);if(r.length===0)return;let[t,a]=I(e.rngState,r.length);e.rngState=a;let i=r[t],o=e.players[n].graveyard.
+findIndex(h=>h.instanceId===i.instanceId),[s]=e.players[n].graveyard.splice(o,1),l=c(s.defId);V(e,n,s,l,l.row==="agile"?Re(e):void 0)}function ve(e,n){let r=e.players[n],
+t=["melee","ranged"],a=[];for(let s of t){let l=[];for(let h of r.rows[s].units)c(h.defId).row==="agile"?a.push(h):l.push(h);r.rows[s].units=l}if(a.length===0)throw new d(
+"LEADER_UNAVAILABLE","no agile units to move");let i="melee",o=-1/0;for(let s of t){r.rows[s].units.push(...a);let l=D(e,n);r.rows[s].units.splice(r.rows[s].units.
+length-a.length,a.length),l>o&&(o=l,i=s)}r.rows[i].units.push(...a)}function te(e,n,r){let t=e.players[n],a=s=>c(s.defId).musterGroup===r,i=t.hand.filter(a);t.hand=
+t.hand.filter(s=>!a(s));let o=t.deck.filter(a);t.deck=t.deck.filter(s=>!a(s));for(let s of[...i,...o]){let l=c(s.defId),h=l.row==="melee"||l.row==="ranged"||l.row===
+"siege"?l.row:"melee";t.rows[h].units.push(s)}}function ae(e){let n=-1,r=[];for(let t of _)for(let a of g)for(let i of E(e,t,a))c(i.defId).type==="unit"&&(i.effectiveStrength>
+n&&(n=i.effectiveStrength,r.length=0),i.effectiveStrength===n&&r.push({side:t,rowKind:a,instanceId:i.instanceId}));de(e,r)}function ie(e,n,r){let t=f(n);if(v(e,
+t,r)<10)return;let a=-1,i=[];for(let o of E(e,t,r))c(o.defId).type==="unit"&&(o.effectiveStrength>a&&(a=o.effectiveStrength,i.length=0),o.effectiveStrength===a&&
+i.push({side:t,rowKind:r,instanceId:o.instanceId}));de(e,i)}function oe(e,n,r){for(let t of e.players[n].rows[r].units){let a=c(t.defId).transformsTo;a&&(t.defId=
+a)}}function se(e,n,r){let t=c(r.defId).summonAvenger;t&&e.pendingSummons.push({player:n,card:{instanceId:`${r.instanceId}:avenger`,defId:t}})}function de(e,n){
+for(let r of n){let t=e.players[r.side].rows[r.rowKind],a=t.units.findIndex(i=>i.instanceId===r.instanceId);if(a!==-1){let[i]=t.units.splice(a,1);e.players[r.side].
+graveyard.push(i),se(e,r.side,i)}}}function le(e){for(let n of e.weatherCards)e.players[n.owner].graveyard.push({instanceId:n.instanceId,defId:n.defId});e.weatherCards=
+[]}function Se(e,n,r,t){if(t.weather==="clear"){le(e),e.players[n].graveyard.push(r);return}e.weatherCards.push({...r,owner:n})}function Ce(e,n,r,t){if(!t)throw new d(
+"ILLEGAL_MOVE","Decoy needs a target unit on your side");let a=e.players[n],i=Q(a,t);if(!i)throw new d("INVALID_TARGET",`${t} is not on your side of the board`);
+let o=a.rows[i.rowKind].units[i.index];if(c(o.defId).type!=="unit")throw new d("INVALID_TARGET","Decoy cannot target heroes or special cards");let[s]=a.hand.splice(
+r,1);a.rows[i.rowKind].units[i.index]=s,a.hand.push(o)}function Ae(e,n){let r=e.players[n.player],t=r.graveyard.findIndex(o=>o.instanceId===n.targetInstanceId);
+if(t===-1)throw new d("INVALID_TARGET",`${n.targetInstanceId} is not in your graveyard`);let a=r.graveyard[t],i=c(a.defId);if(i.type!=="unit")throw new d("INVAL\
+ID_TARGET","medics can only revive non-hero units");r.graveyard.splice(t,1),e.pendingChoice=null,V(e,n.player,a,i,n.row)}function De(e,n,r){if(!r)throw new d("I\
+LLEGAL_MOVE","this leader needs a graveyard unit as its target");let t=e.players[n],a=t.graveyard.findIndex(s=>s.instanceId===r);if(a===-1)throw new d("INVALID_\
+TARGET",`${r} is not in your graveyard`);let i=c(t.graveyard[a].defId);if(i.type!=="unit")throw new d("INVALID_TARGET","leaders can only target non-hero units");
+let[o]=t.graveyard.splice(a,1);return{card:o,def:i}}function Le(e,n){let r=e.players[n.player];if(r.leaderUsed)throw new d("LEADER_UNAVAILABLE","leader ability \
+already used");let t=c(r.leader.defId);switch(t.leaderAbility){case"weather_from_deck":{let a=t.leaderWeather,i;if(a){if(i=G(r,a),i===-1)throw new d("LEADER_UNA\
+VAILABLE",`no ${a} left in your deck`)}else{if(!n.drawDefId)throw new d("ILLEGAL_MOVE","choose a weather card to play");if(i=r.deck.findIndex(s=>{let l=c(s.defId).
+weather;return s.defId===n.drawDefId&&l!==void 0&&l!=="clear"}),i===-1)throw new d("INVALID_TARGET",`no ${n.drawDefId} weather in your deck`)}let[o]=r.deck.splice(
+i,1);e.weatherCards.push({...o,owner:n.player});break}case"clear_weather":{if(e.weatherCards.length===0)throw new d("LEADER_UNAVAILABLE","no weather to clear");
+le(e);break}case"scorch_row_leader":{let a=t.leaderScorchRow;if(!a)throw new d("LEADER_UNAVAILABLE","leader has no scorch row configured");let i=f(n.player);if(v(
+e,i,a)<10)throw new d("LEADER_UNAVAILABLE",`opponent's ${a} row is below 10`);ie(e,n.player,a);break}case"row_horn":{let a=t.leaderHornRow;if(!a)throw new d("LE\
+ADER_UNAVAILABLE","leader has no horn row configured");if(r.rows[a].horn!==null)throw new d("INVALID_TARGET",`the ${a} horn slot is occupied`);r.rows[a].horn={instanceId:`${n.
+player}:leader-horn`,defId:N};break}case"cancel_leader":{let a=e.players[f(n.player)];if(a.leaderUsed)throw new d("LEADER_UNAVAILABLE","opponent's leader is alr\
+eady spent");a.leaderUsed=!0;break}case"peek_hand":{let a=e.players[f(n.player)].hand;if(a.length===0)throw new d("LEADER_UNAVAILABLE","opponent has no cards in\
+ hand");let[i,o]=re(e.rngState,a,3);e.rngState=o;for(let s of i)r.knownOpponentCardIds.includes(s.instanceId)||r.knownOpponentCardIds.push(s.instanceId);break}case"\
+restore_to_hand":{let{card:a}=De(e,n.player,n.targetInstanceId);r.hand.push(a);break}case"realign_agile":{ve(e,n.player);break}case"steal_from_graveyard":{let a=e.
+players[f(n.player)];if(!n.targetInstanceId)throw new d("ILLEGAL_MOVE","choose a card in the enemy graveyard");let i=a.graveyard.findIndex(s=>s.instanceId===n.targetInstanceId);
+if(i===-1)throw new d("INVALID_TARGET",`${n.targetInstanceId} is not in the enemy graveyard`);if(c(a.graveyard[i].defId).type!=="unit")throw new d("INVALID_TARG\
+ET","only non-hero units can be stolen");let[o]=a.graveyard.splice(i,1);r.hand.push(o);break}case"discard_draw":{let a=n.discardInstanceIds;if(!a||a.length!==2||
+new Set(a).size!==2)throw new d("ILLEGAL_MOVE","discard exactly 2 distinct hand cards");if(!n.drawDefId)throw new d("ILLEGAL_MOVE","choose a card to fetch from \
+your deck");for(let s of a){let l=r.hand.findIndex(m=>m.instanceId===s);if(l===-1)throw new d("CARD_NOT_FOUND",`${s} is not in your hand`);let[h]=r.hand.splice(
+l,1);r.graveyard.push(h)}let i=r.deck.findIndex(s=>s.defId===n.drawDefId);if(i===-1)throw new d("INVALID_TARGET",`no ${n.drawDefId} left in your deck`);let[o]=r.
+deck.splice(i,1);r.hand.push(o);break}case"halve_weather":{if(e.weatherCards.length===0)throw new d("LEADER_UNAVAILABLE","no weather to halve");break}case"reshu\
+ffle_graveyards":{for(let a of _){let i=e.players[a];i.deck.push(...i.graveyard),i.graveyard=[];let[o,s]=C(e.rngState,i.deck);i.deck=o,e.rngState=s}break}case"d\
+raw_extra_start":throw new d("LEADER_UNAVAILABLE","this ability triggers automatically");default:throw new d("LEADER_UNAVAILABLE","this leader has no usable abi\
+lity")}r.leaderUsed=!0}function M(e){if(!e.pendingChoice){if(_.every(n=>e.players[n].passed))me(e);else{let n=f(e.turn);e.players[n].passed||(e.turn=n)}ce(e)}}function ce(e){
+for(;e.phase==="play";){let n=e.players[e.turn];if(n.passed||n.hand.length>0)return;n.passed=!0,_.every(r=>e.players[r].passed)?me(e):e.turn=f(e.turn)}}function me(e){
+let n={p1:D(e,"p1"),p2:D(e,"p2")},r=n.p1>n.p2?"p1":n.p2>n.p1?"p2":null,t=!1;if(r===null){let l=e.players.p1.faction==="nilfgaard",h=e.players.p2.faction==="nilf\
+gaard";l!==h&&(r=l?"p1":"p2",t=!0)}e.roundHistory.push({round:e.round,totals:n,winner:r,...t?{tieBrokenByNilfgaard:t}:{}}),r===null?(e.players.p1.gems-=1,e.players.
+p2.gems-=1):e.players[f(r)].gems-=1;let a=e.players.p1.gems<=0,i=e.players.p2.gems<=0,o=a||i;!o&&r&&e.players[r].faction==="northern_realms"&&S(e,r,1);let s={};
+if(!o)for(let l of _){if(e.players[l].faction!=="monsters")continue;let h=[];for(let m of g)for(let p of e.players[l].rows[m].units){let u=c(p.defId);u.faction===
+"monsters"&&(u.type==="unit"||u.type==="hero")&&h.push(p.instanceId)}if(h.length>0){let[m,p]=I(e.rngState,h.length);e.rngState=p,s[l]=h[m]}}for(let l of _){let h=e.
+players[l];for(let m of g){let p=h.rows[m],u=[];for(let y of p.units)y.instanceId===s[l]?u.push(y):(h.graveyard.push(y),se(e,l,y));p.units=u,p.horn&&(p.horn.defId!==
+N&&h.graveyard.push(p.horn),p.horn=null)}}for(let l of e.weatherCards)e.players[l.owner].graveyard.push({instanceId:l.instanceId,defId:l.defId});if(e.weatherCards=
+[],o){e.phase="finished",e.result={winner:a&&i?null:a?"p2":"p1",gems:{p1:e.players.p1.gems,p2:e.players.p2.gems},rounds:e.roundHistory};return}e.round+=1,e.roundLeader=
+r??e.roundLeader,e.turn=e.roundLeader,e.players.p1.passed=!1,e.players.p2.passed=!1;for(let{player:l,card:h}of e.pendingSummons){let m=c(h.defId),p=m.row==="mel\
+ee"||m.row==="ranged"||m.row==="siege"?m.row:"melee";e.players[l].rows[p].units.push(h)}if(e.pendingSummons=[],e.round===3)for(let l of _){if(e.players[l].faction!==
+"skellige")continue;let h=e.players[l];for(let m=0;m<2;m++){let p=h.graveyard.map((w,k)=>({card:w,index:k})).filter(({card:w})=>{let k=c(w.defId).type;return k===
+"unit"||k==="hero"});if(p.length===0)break;let[u,y]=I(e.rngState,p.length);e.rngState=y;let[A]=h.graveyard.splice(p[u].index,1),b=c(A.defId),T=b.row==="melee"||
+b.row==="ranged"||b.row==="siege"?b.row:"melee";h.rows[T].units.push(A)}}}var he={leaderId:"nr_foltest",cardIds:["nr_vernon","nr_natalis","nr_esterad","nr_philippa","neu_geralt","neu_yennefer","nr_stennis","nr_dijkstra","nr_thaler","n\
 r_dun_banner_medic","nr_blue_stripes","nr_blue_stripes","nr_blue_stripes","nr_crinfrid","nr_crinfrid","nr_crinfrid","nr_catapult","nr_catapult","nr_kaedweni","n\
 r_kaedweni","nr_kaedweni","nr_siegfried","nr_ves","neu_dandelion","neu_villentretenmerth","neu_fog","neu_horn","neu_decoy","neu_decoy","neu_scorch"]},pe={leaderId:"\
 mon_eredin",cardIds:["mon_draug","mon_imlerith","mon_leshen","mon_kayran","neu_ciri","neu_triss","neu_avallach","mon_nekker","mon_nekker","mon_nekker","mon_arac\
@@ -251,46 +252,45 @@ ler","st_yaevinn","st_dol_scout","st_dol_scout","st_vrihedd_veteran","st_barclay
 horn","neu_decoy","neu_clear","neu_frost"]},Ge={leaderId:"sk_crach",cardIds:["sk_hjalmar","sk_cerys","sk_ermion","neu_geralt","sk_kambi","sk_birna","sk_shieldma\
 iden","sk_shieldmaiden","sk_shieldmaiden","sk_craite_warrior","sk_craite_warrior","sk_craite_warrior","sk_war_longship","sk_war_longship","sk_light_longship","s\
 k_light_longship","sk_light_longship","sk_skald","sk_brokvar","sk_dimun","sk_armorsmith","sk_donar","sk_berserker","sk_berserker","neu_horn","neu_decoy","neu_sc\
-orch","neu_frost","sk_storm","sk_mardroeme"]},Me={northern_realms:he,nilfgaard:xe,monsters:pe,scoiatael:Pe,skellige:Ge};var ue=10,Te=2,F=22,H=10,B=25,W=30;function fe(e){if(!M(e.leaderId))throw new d("INVALID_CONFIG",`unknown leader ${e.leaderId}`);let n=c(e.leaderId);if(n.type!==
-"leader")throw new d("INVALID_CONFIG",`${n.name} is not a leader card`);let r=0,a=0,t={};for(let i of e.cardIds){if(!M(i))throw new d("INVALID_CONFIG",`unknown \
+orch","neu_frost","sk_storm","sk_mardroeme"]},Me={northern_realms:he,nilfgaard:xe,monsters:pe,scoiatael:Pe,skellige:Ge};var ue=10,Te=2,U=22,K=10,F=25,H=30;function fe(e){if(!x(e.leaderId))throw new d("INVALID_CONFIG",`unknown leader ${e.leaderId}`);let n=c(e.leaderId);if(n.type!==
+"leader")throw new d("INVALID_CONFIG",`${n.name} is not a leader card`);let r=0,t=0,a={};for(let i of e.cardIds){if(!x(i))throw new d("INVALID_CONFIG",`unknown \
 card ${i}`);let o=c(i);if(o.type==="leader")throw new d("INVALID_CONFIG",`${o.name}: leaders cannot be deck cards`);if(o.faction!=="neutral"&&o.faction!==n.faction)
-throw new d("INVALID_CONFIG",`${o.name} (${o.faction}) cannot join a ${n.faction} deck`);if(o.type==="unit"||o.type==="hero"?r++:a++,t[i]=(t[i]??0)+1,t[i]>(o.maxCopiesPerDeck??
-1))throw new d("INVALID_CONFIG",`${o.name}: at most ${o.maxCopiesPerDeck??1} cop(y/ies) per deck`)}if(r<F)throw new d("INVALID_CONFIG",`deck has ${r} unit cards\
-; at least ${F} required`);if(a>H)throw new d("INVALID_CONFIG",`deck has ${a} special cards; at most ${H} allowed`);if(e.cardIds.length<B)throw new d("INVALID_C\
-ONFIG",`deck has ${e.cardIds.length} cards; at least ${B} required`);if(e.cardIds.length>W)throw new d("INVALID_CONFIG",`deck has ${e.cardIds.length} cards; at \
-most ${W} allowed`)}function Ne(){let e={};return e.melee={units:[],horn:null},e.ranged={units:[],horn:null},e.siege={units:[],horn:null},e}function Oe(e,n){let r=ne(
-n),a={};for(let m of _){let p=e.players[m].deck;fe(p);let u=c(p.leaderId),y=p.cardIds.map((x,C)=>({instanceId:`${m}:${x}:${C}`,defId:x})),[v,E]=S(r,y);r=E,a[m]=
-{faction:u.faction,leader:{instanceId:`${m}:leader`,defId:p.leaderId},leaderUsed:u.leaderAbility==="draw_extra_start",gems:Te,hand:v.slice(0,ue),deck:v.slice(ue),
-graveyard:[],rows:Ne(),passed:!1,mulliganDone:!1,mulligansUsed:0,knownOpponentCardIds:[]}}let[t,i]=I(r,2);r=i;let o=t===0?"p1":"p2",s={v:1,seed:n,rngState:r,config:e,
-phase:"mulligan",round:0,turn:o,roundLeader:o,players:a,weatherCards:[],pendingSummons:[],pendingChoice:null,roundHistory:[],result:null,moveCount:0};for(let m of _)
-c(a[m].leader.defId).leaderAbility==="draw_extra_start"&&R(s,m,1);let l=a.p1.faction==="scoiatael",h=a.p2.faction==="scoiatael";if(l!==h){let m=l?"p1":"p2";s.pendingChoice=
-{kind:"choose_first_player",player:m},s.turn=m}return s}function Ve(e){return e.result}function Ue(e){return e.pendingChoice?e.pendingChoice.player:e.phase==="m\
-ulligan"?e.players.p1.mulliganDone?"p2":"p1":e.turn}var V=["melee","ranged"];function $(e,n){if(e.phase==="finished")return[];if(e.pendingChoice){if(e.pendingChoice.player!==n)return[];if(e.pendingChoice.kind==="\
-choose_first_player")return[{type:"CHOOSE_FIRST_PLAYER",player:n,first:"p1"},{type:"CHOOSE_FIRST_PLAYER",player:n,first:"p2"}];let a=[];for(let t of w(e.players[n]))
-if(c(t.defId).row==="agile")for(let i of V)a.push({type:"RESOLVE_MEDIC",player:n,targetInstanceId:t.instanceId,row:i});else a.push({type:"RESOLVE_MEDIC",player:n,
-targetInstanceId:t.instanceId});return a}if(e.phase==="mulligan")return e.players[n].mulliganDone?[]:Ke(e,n);if(e.turn!==n||e.players[n].passed)return[];let r=[
-{type:"PASS",player:n}];for(let a of e.players[n].hand)r.push(...Fe(e,n,a));return r.push(...He(e,n)),r}function Ke(e,n){let r=e.players[n].hand,a=[{type:"MULLI\
-GAN",player:n,cardInstanceIds:[]}];for(let t=0;t<r.length;t++){a.push({type:"MULLIGAN",player:n,cardInstanceIds:[r[t].instanceId]});for(let i=t+1;i<r.length;i++)
-a.push({type:"MULLIGAN",player:n,cardInstanceIds:[r[t].instanceId,r[i].instanceId]})}return a}function Fe(e,n,r){let a=c(r.defId),t={type:"PLAY_CARD",player:n,cardInstanceId:r.
-instanceId};switch(a.type){case"unit":case"hero":return a.row==="agile"?V.map(i=>({...t,row:i})):[t];case"weather":return[t];case"scorch":return[t];case"mardroe\
-me":return[t];case"horn":{let i=[];for(let o of g)e.players[n].rows[o].horn===null&&i.push({...t,row:o});return i}case"decoy":return ee(e,n).map(i=>({...t,targetInstanceId:i.
-instanceId}));default:return[]}}function He(e,n){let r=e.players[n];if(r.leaderUsed)return[];let a=c(r.leader.defId);switch(a.leaderAbility){case"weather_from_d\
-eck":return a.leaderWeather&&N(r,a.leaderWeather)!==-1?[{type:"USE_LEADER",player:n}]:[];case"clear_weather":return e.weatherCards.length===0?[]:[{type:"USE_LEA\
-DER",player:n}];case"scorch_row_leader":{let t=a.leaderScorchRow;if(!t)return[];let i=f(n),o=e.players[i].rows[t].units.some(s=>c(s.defId).type==="unit");return k(
-e,i,t)>=10&&o?[{type:"USE_LEADER",player:n}]:[]}case"row_horn":{let t=a.leaderHornRow;return t&&r.rows[t].horn===null?[{type:"USE_LEADER",player:n}]:[]}case"can\
-cel_leader":return e.players[f(n)].leaderUsed?[]:[{type:"USE_LEADER",player:n}];case"peek_hand":return e.players[f(n)].hand.length===0?[]:[{type:"USE_LEADER",player:n}];case"\
-restore_to_hand":return w(r).map(t=>({type:"USE_LEADER",player:n,targetInstanceId:t.instanceId}));case"play_from_graveyard":{if(A(e))return w(r).length>0?[{type:"\
-USE_LEADER",player:n}]:[];let t=[];for(let i of w(r))if(c(i.defId).row==="agile")for(let o of V)t.push({type:"USE_LEADER",player:n,targetInstanceId:i.instanceId,
-row:o});else t.push({type:"USE_LEADER",player:n,targetInstanceId:i.instanceId});return t}case"realign_agile":return[...V].some(i=>r.rows[i].units.some(o=>c(o.defId).
-row==="agile"))?[{type:"USE_LEADER",player:n}]:[];case"spy_double_passive":case"restore_random_passive":return[];case"steal_from_graveyard":return w(e.players[f(
-n)]).map(t=>({type:"USE_LEADER",player:n,targetInstanceId:t.instanceId}));case"discard_draw":{if(r.hand.length<2||r.deck.length===0)return[];let t=[...new Set(r.
-deck.map(o=>o.defId))].sort(),i=[];for(let o=0;o<r.hand.length;o++)for(let s=o+1;s<r.hand.length;s++)for(let l of t)i.push({type:"USE_LEADER",player:n,discardInstanceIds:[
-r.hand[o].instanceId,r.hand[s].instanceId],drawDefId:l});return i}case"reshuffle_graveyards":return e.players.p1.graveyard.length+e.players.p2.graveyard.length>
-0?[{type:"USE_LEADER",player:n}]:[];case"halve_weather":return e.weatherCards.length===0?[]:[{type:"USE_LEADER",player:n}];case"draw_extra_start":return[];default:
-return[]}}function ge(e,n){let r=e.players[n],a={},t=0;for(let i of g){let o=b(e,n,i),s=o.reduce((l,h)=>l+h.effectiveStrength,0);a[i]={units:o,horn:r.rows[i].horn,total:s},
-t+=s}return{faction:r.faction,gems:r.gems,passed:r.passed,leader:r.leader,leaderUsed:r.leaderUsed,deckCount:r.deck.length,graveyard:r.graveyard,rows:a,total:t}}
-function Be(e,n){let r=f(n),a=e.players[n],t=e.players[r],i=t.hand.filter(o=>a.knownOpponentCardIds.includes(o.instanceId));return{player:n,phase:e.phase,round:e.
-round,turn:e.turn,pendingChoice:e.pendingChoice,you:{...ge(e,n),hand:a.hand,mulliganDone:a.mulliganDone,mulligansUsed:a.mulligansUsed},opponent:{...ge(e,r),handCount:t.
-hand.length,revealedHand:i},weather:{kinds:T(e),cards:e.weatherCards},roundHistory:e.roundHistory,result:e.result,legalMoves:$(e,n)}}export{Y as CARD_DEFS,d as GwentError,W as MAX_DECK_CARDS,H as MAX_SPECIAL_CARDS,B as MIN_DECK_CARDS,F as MIN_UNIT_CARDS,pe as MONSTERS_STARTER,he as NORTHERN_REALMS_STARTER,
-Me as STARTER_DECKS,Ue as actorOf,we as applyMove,Oe as createGame,c as getCardDef,$ as getLegalMoves,Be as getView,M as hasCardDef,Ve as isTerminal,k as rowTotal,
-b as rowUnitViews,D as sideTotal,fe as validateDeck};
+throw new d("INVALID_CONFIG",`${o.name} (${o.faction}) cannot join a ${n.faction} deck`);if(o.type==="unit"||o.type==="hero"?r++:t++,a[i]=(a[i]??0)+1,a[i]>(o.maxCopiesPerDeck??
+1))throw new d("INVALID_CONFIG",`${o.name}: at most ${o.maxCopiesPerDeck??1} cop(y/ies) per deck`)}if(r<U)throw new d("INVALID_CONFIG",`deck has ${r} unit cards\
+; at least ${U} required`);if(t>K)throw new d("INVALID_CONFIG",`deck has ${t} special cards; at most ${K} allowed`);if(e.cardIds.length<F)throw new d("INVALID_C\
+ONFIG",`deck has ${e.cardIds.length} cards; at least ${F} required`);if(e.cardIds.length>H)throw new d("INVALID_CONFIG",`deck has ${e.cardIds.length} cards; at \
+most ${H} allowed`)}function Ne(){let e={};return e.melee={units:[],horn:null},e.ranged={units:[],horn:null},e.siege={units:[],horn:null},e}function Oe(e,n){let r=ne(
+n),t={};for(let m of _){let p=e.players[m].deck;fe(p);let u=c(p.leaderId),y={},A=p.cardIds.map(w=>{let k=y[w]??0;return y[w]=k+1,{instanceId:`${m}:${w}#${k}`,defId:w}}),
+[b,T]=C(r,A);r=T,t[m]={faction:u.faction,leader:{instanceId:`${m}:leader`,defId:p.leaderId},leaderUsed:u.leaderAbility==="draw_extra_start",gems:Te,hand:b.slice(
+0,ue),deck:b.slice(ue),graveyard:[],rows:Ne(),passed:!1,mulliganDone:!1,mulligansUsed:0,knownOpponentCardIds:[]}}let[a,i]=I(r,2);r=i;let o=a===0?"p1":"p2",s={v:1,
+seed:n,rngState:r,config:e,phase:"mulligan",round:0,turn:o,roundLeader:o,players:t,weatherCards:[],pendingSummons:[],pendingChoice:null,roundHistory:[],result:null,
+moveCount:0};for(let m of _)c(t[m].leader.defId).leaderAbility==="draw_extra_start"&&S(s,m,1);let l=t.p1.faction==="scoiatael",h=t.p2.faction==="scoiatael";if(l!==
+h){let m=l?"p1":"p2";s.pendingChoice={kind:"choose_first_player",player:m},s.turn=m}return s}function Ve(e){return e.result}function Ue(e){return e.pendingChoice?
+e.pendingChoice.player:e.phase==="mulligan"?e.players.p1.mulliganDone?"p2":"p1":e.turn}var B=["melee","ranged"];function W(e,n){if(e.phase==="finished")return[];if(e.pendingChoice){if(e.pendingChoice.player!==n)return[];if(e.pendingChoice.kind==="\
+choose_first_player")return[{type:"CHOOSE_FIRST_PLAYER",player:n,first:"p1"},{type:"CHOOSE_FIRST_PLAYER",player:n,first:"p2"}];let t=[];for(let a of R(e.players[n]))
+if(c(a.defId).row==="agile")for(let i of B)t.push({type:"RESOLVE_MEDIC",player:n,targetInstanceId:a.instanceId,row:i});else t.push({type:"RESOLVE_MEDIC",player:n,
+targetInstanceId:a.instanceId});return t}if(e.phase==="mulligan")return e.players[n].mulliganDone?[]:Ke(e,n);if(e.turn!==n||e.players[n].passed)return[];let r=[
+{type:"PASS",player:n}];for(let t of e.players[n].hand)r.push(...Fe(e,n,t));return r.push(...He(e,n)),r}function Ke(e,n){let r=e.players[n].hand,t=[{type:"MULLI\
+GAN",player:n,cardInstanceIds:[]}];for(let a=0;a<r.length;a++){t.push({type:"MULLIGAN",player:n,cardInstanceIds:[r[a].instanceId]});for(let i=a+1;i<r.length;i++)
+t.push({type:"MULLIGAN",player:n,cardInstanceIds:[r[a].instanceId,r[i].instanceId]})}return t}function Fe(e,n,r){let t=c(r.defId),a={type:"PLAY_CARD",player:n,cardInstanceId:r.
+instanceId};switch(t.type){case"unit":case"hero":return t.row==="agile"?B.map(i=>({...a,row:i})):[a];case"weather":return[a];case"scorch":return[a];case"mardroe\
+me":return g.map(i=>({...a,row:i}));case"horn":{let i=[];for(let o of g)e.players[n].rows[o].horn===null&&i.push({...a,row:o});return i}case"decoy":return ee(e,
+n).map(i=>({...a,targetInstanceId:i.instanceId}));default:return[]}}function He(e,n){let r=e.players[n];if(r.leaderUsed)return[];let t=c(r.leader.defId);switch(t.
+leaderAbility){case"weather_from_deck":return t.leaderWeather?G(r,t.leaderWeather)!==-1?[{type:"USE_LEADER",player:n}]:[]:[...new Set(r.deck.filter(i=>{let o=c(
+i.defId).weather;return o!==void 0&&o!=="clear"}).map(i=>i.defId))].sort().map(i=>({type:"USE_LEADER",player:n,drawDefId:i}));case"clear_weather":return e.weatherCards.
+length===0?[]:[{type:"USE_LEADER",player:n}];case"scorch_row_leader":{let a=t.leaderScorchRow;if(!a)return[];let i=f(n),o=e.players[i].rows[a].units.some(s=>c(s.
+defId).type==="unit");return v(e,i,a)>=10&&o?[{type:"USE_LEADER",player:n}]:[]}case"row_horn":{let a=t.leaderHornRow;return a&&r.rows[a].horn===null?[{type:"USE\
+_LEADER",player:n}]:[]}case"cancel_leader":return e.players[f(n)].leaderUsed?[]:[{type:"USE_LEADER",player:n}];case"peek_hand":return e.players[f(n)].hand.length===
+0?[]:[{type:"USE_LEADER",player:n}];case"restore_to_hand":return R(r).map(a=>({type:"USE_LEADER",player:n,targetInstanceId:a.instanceId}));case"realign_agile":return[
+...B].some(i=>r.rows[i].units.some(o=>c(o.defId).row==="agile"))?[{type:"USE_LEADER",player:n}]:[];case"spy_double_passive":case"restore_random_passive":return[];case"\
+steal_from_graveyard":return R(e.players[f(n)]).map(a=>({type:"USE_LEADER",player:n,targetInstanceId:a.instanceId}));case"discard_draw":{if(r.hand.length<2||r.deck.
+length===0)return[];let a=[...new Set(r.deck.map(o=>o.defId))].sort(),i=[];for(let o=0;o<r.hand.length;o++)for(let s=o+1;s<r.hand.length;s++)for(let l of a)i.push(
+{type:"USE_LEADER",player:n,discardInstanceIds:[r.hand[o].instanceId,r.hand[s].instanceId],drawDefId:l});return i}case"reshuffle_graveyards":return e.players.p1.
+graveyard.length+e.players.p2.graveyard.length>0?[{type:"USE_LEADER",player:n}]:[];case"halve_weather":return e.weatherCards.length===0?[]:[{type:"USE_LEADER",player:n}];case"\
+draw_extra_start":return[];default:return[]}}function ge(e,n){let r=e.players[n],t={},a=0;for(let i of g){let o=E(e,n,i),s=o.reduce((l,h)=>l+h.effectiveStrength,0);t[i]={units:o,horn:r.rows[i].horn,total:s},
+a+=s}return{faction:r.faction,gems:r.gems,passed:r.passed,leader:r.leader,leaderUsed:r.leaderUsed,deckCount:r.deck.length,graveyard:r.graveyard,rows:t,total:a}}
+function Be(e,n){let r=f(n),t=e.players[n],a=e.players[r],i=a.hand.filter(o=>t.knownOpponentCardIds.includes(o.instanceId));return{player:n,phase:e.phase,round:e.
+round,turn:e.turn,pendingChoice:e.pendingChoice,you:{...ge(e,n),hand:t.hand,mulliganDone:t.mulliganDone,mulligansUsed:t.mulligansUsed},opponent:{...ge(e,r),handCount:a.
+hand.length,revealedHand:i},weather:{kinds:P(e),cards:e.weatherCards},roundHistory:e.roundHistory,result:e.result,legalMoves:W(e,n)}}export{$ as CARD_DEFS,d as GwentError,H as MAX_DECK_CARDS,K as MAX_SPECIAL_CARDS,F as MIN_DECK_CARDS,U as MIN_UNIT_CARDS,pe as MONSTERS_STARTER,he as NORTHERN_REALMS_STARTER,
+Me as STARTER_DECKS,Ue as actorOf,we as applyMove,Oe as createGame,c as getCardDef,W as getLegalMoves,Be as getView,x as hasCardDef,Ve as isTerminal,v as rowTotal,
+E as rowUnitViews,D as sideTotal,fe as validateDeck};
