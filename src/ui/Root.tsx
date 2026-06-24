@@ -20,6 +20,7 @@ import { OnlineScreen } from './screens/OnlineScreen';
 import { PrivacyScreen } from './screens/PrivacyScreen';
 import { ResultScreen } from './screens/ResultScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
+import { StyleGalleryScreen } from './screens/StyleGalleryScreen';
 
 export function Root(): React.JSX.Element {
   const screen = useAppStore((s) => s.screen);
@@ -34,6 +35,8 @@ export function Root(): React.JSX.Element {
     content = <OnlineScreen />;
   } else if (screen === 'settings') {
     content = <SettingsScreen />;
+  } else if (screen === 'gallery') {
+    content = <StyleGalleryScreen />;
   } else if (screen === 'home' || session === null) {
     content = <HomeScreen />;
   } else if (session.state.phase === 'finished') {

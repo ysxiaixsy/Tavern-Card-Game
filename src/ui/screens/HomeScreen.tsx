@@ -16,6 +16,7 @@ export function HomeScreen(): React.JSX.Element {
   const openDecks = useAppStore((s) => s.openDecks);
   const openOnline = useAppStore((s) => s.openOnline);
   const openSettings = useAppStore((s) => s.openSettings);
+  const openGallery = useAppStore((s) => s.openGallery);
   const deckCount = useAppStore((s) => s.customDecks.length);
 
   const go = (action: () => void): (() => void) => () => {
@@ -25,7 +26,12 @@ export function HomeScreen(): React.JSX.Element {
 
   return (
     <View style={styles.screen}>
-      <Pressable style={styles.settingsButton} onPress={go(openSettings)} hitSlop={10}>
+      <Pressable
+        style={styles.settingsButton}
+        onPress={go(openSettings)}
+        onLongPress={go(openGallery)}
+        hitSlop={10}
+      >
         <Text style={styles.settingsIcon}>⚙️</Text>
       </Pressable>
 

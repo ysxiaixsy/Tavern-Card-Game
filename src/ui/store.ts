@@ -80,7 +80,7 @@ export const DEFAULT_PREFS: Prefs = {
 };
 
 export type GameMode = 'hotseat' | 'ai';
-export type Screen = 'home' | 'decks' | 'setup' | 'game' | 'online' | 'settings';
+export type Screen = 'home' | 'decks' | 'setup' | 'game' | 'online' | 'settings' | 'gallery';
 
 /** Pointer to the most recent online game, persisted for reconnects. */
 export interface LastOnlineGame {
@@ -116,6 +116,7 @@ interface AppStore {
   openDecks(): void;
   openOnline(): void;
   openSettings(): void;
+  openGallery(): void; // dev: design-system style gallery
   beginSetup(mode: GameMode): void;
   setLastOnlineGame(game: LastOnlineGame | null): void;
   setPref<K extends keyof Prefs>(key: K, value: Prefs[K]): void;
@@ -204,6 +205,10 @@ export const useAppStore = create<AppStore>()(
 
         openSettings() {
           set({ screen: 'settings' });
+        },
+
+        openGallery() {
+          set({ screen: 'gallery' });
         },
 
         setLastOnlineGame(game: LastOnlineGame | null) {
