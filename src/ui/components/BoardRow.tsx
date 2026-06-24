@@ -1,13 +1,17 @@
 /**
- * One battle row: row icon + total badge, horn slot, units. Weather-affected
- * rows get a cold tint. During decoy targeting, valid units glow gold.
+ * One battle row: row icon + total, horn slot, units. Weather-affected rows get
+ * a cold steel tint. During decoy targeting, valid units glow gold.
  */
 
 import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import type { RowKind, RowView } from '../../engine/types';
-import { palette, rowIcon, sp } from '../theme';
+import { border, color, radius, space } from '../tokens';
 import { CardView } from './CardView';
+import { Icon, type IconName } from './Icon';
+import { Text } from './Text';
+
+const ROW_ICON: Record<RowKind, IconName> = { melee: 'sword', ranged: 'bow', siege: 'tower' };
 
 interface Props {
   row: RowView;
@@ -29,13 +33,15 @@ function BoardRowInner({
 }: Props): React.JSX.Element {
   const targeting = targetIds !== undefined;
   return (
-    <View style={[styles.row, underWeather && { backgroundColor: palette.weatherTint }]}>
+    <View style={[styles.row, underWeather && { backgroundColor: color.weatherTint }]}>
       <View style={styles.meta}>
-        <Text style={styles.rowIcon}>{rowIcon[rowKind]}</Text>
-        <Text style={styles.total}>{row.total}</Text>
+        <Icon name={ROW_ICON[rowKind]} size={13} color={color.inkDim} />
+        <Text variant="numeral" color={color.accent} style={styles.total}>
+          {row.total}
+        </Text>
       </View>
       <View style={[styles.hornSlot, row.horn !== null && styles.hornFilled]}>
-        <Text style={styles.hornGlyph}>{row.horn !== null ? '📯' : ''}</Text>
+        {row.horn !== null && <Icon name="horn" size={12} color={color.accent} />}
       </View>
       <ScrollView
         horizontal
@@ -68,44 +74,37 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: palette.line,
+    borderBottomColor: color.line,
     paddingVertical: 2,
     minHeight: 58,
   },
   meta: {
     width: 34,
     alignItems: 'center',
-  },
-  rowIcon: {
-    fontSize: 12,
+    gap: 1,
   },
   total: {
-    color: palette.gold,
     fontSize: 13,
-    fontWeight: '700',
   },
   hornSlot: {
     width: 22,
     height: 52,
-    borderRadius: 4,
-    borderWidth: 1,
+    borderRadius: radius.sm,
+    borderWidth: border.thin,
     borderStyle: 'dashed',
-    borderColor: palette.line,
-    marginRight: sp(1),
+    borderColor: color.line,
+    marginRight: space.xs,
     alignItems: 'center',
     justifyContent: 'center',
   },
   hornFilled: {
     borderStyle: 'solid',
-    borderColor: palette.gold,
-    backgroundColor: palette.surfaceRaised,
-  },
-  hornGlyph: {
-    fontSize: 12,
+    borderColor: color.accent,
+    backgroundColor: color.surfaceRaised,
   },
   units: {
-    gap: sp(1),
-    paddingRight: sp(2),
+    gap: space.xs,
+    paddingRight: space.sm,
     alignItems: 'center',
   },
 });

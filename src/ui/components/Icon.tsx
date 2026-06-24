@@ -29,6 +29,7 @@ export type IconName =
   | 'agile'
   | 'scorch'
   | 'decoy'
+  | 'mardroeme'
   | 'crown' // leader
   | 'gem'
   | 'grave'
@@ -177,6 +178,14 @@ const GLYPHS: Record<IconName, (c: string) => React.JSX.Element> = {
     <>
       <Path d="M4 13 Q8 7 12 13 Q16 7 20 13" />
       <Path d="M4 13 Q8 19 12 13 Q16 19 20 13" />
+    </>
+  ),
+  mardroeme: (c) => (
+    <>
+      <Path d="M4.5 12 a7.5 5.5 0 0 1 15 0 Z" />
+      <Path d="M9.5 12 V17 a2.5 2 0 0 0 5 0 V12" />
+      <Circle {...fill(c)} cx={9.5} cy={9.5} r={0.9} />
+      <Circle {...fill(c)} cx={14} cy={10.5} r={0.7} />
     </>
   ),
   crown: (c) => <Path {...fill(c)} d="M4 18 L5 8 L9.5 12 L12 6 L14.5 12 L19 8 L20 18 Z" />,

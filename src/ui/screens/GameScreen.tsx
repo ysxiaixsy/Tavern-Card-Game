@@ -10,16 +10,20 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { getView } from '../../engine/view';
 import type { Move, PlayerView, RowKind } from '../../engine/types';
-import { factionTheme, palette, sp, weatherIcon } from '../theme';
+import { factionTheme, sp } from '../theme';
+import { color, radius } from '../tokens';
 import { useAppStore } from '../store';
 import { feedback } from '../feedback';
 import { Appear, Pulse } from '../components/anim';
 import { BoardRow } from '../components/BoardRow';
+import { Button } from '../components/Button';
 import { HandBar } from '../components/HandBar';
+import { Icon } from '../components/Icon';
 import { PlayerStrip } from '../components/PlayerStrip';
+import { Text } from '../components/Text';
 import {
   CardZoomSheet,
   ChooseFirstSheet,
@@ -137,14 +141,18 @@ export function BattleScreen({
     <View style={styles.screen}>
       {/* header */}
       <View style={styles.header}>
-        <Text style={styles.headerText}>{headerText}</Text>
+        <Text variant="caption" tone="dim">
+          {headerText}
+        </Text>
         <Pressable onPress={confirmQuit} hitSlop={8}>
-          <Text style={styles.quit}>✕</Text>
+          <Icon name="close" size={18} color={color.inkDim} />
         </Pressable>
       </View>
       {notice !== null && (
         <Appear key={notice} distance={0}>
-          <Text style={styles.notice}>{notice}</Text>
+          <Text variant="label" tone="onAccent" caps style={styles.notice}>
+            {notice}
+          </Text>
         </Appear>
       )}
 
@@ -168,11 +176,17 @@ export function BattleScreen({
         ))}
 
         <View style={styles.weatherStrip}>
-          <Text style={styles.weatherText}>
-            {view.weather.kinds.length === 0
-              ? '— clear skies —'
-              : view.weather.kinds.map((k) => `${weatherIcon[k]}`).join('  ')}
-          </Text>
+          {view.weather.kinds.length === 0 ? (
+            <Text variant="caption" tone="dim">
+              clear skies
+            </Text>
+          ) : (
+            <View style={styles.weatherIcons}>
+              {view.weather.kinds.map((k) => (
+                <Icon key={k} name={k} size={16} color={color.debuff} />
+              ))}
+            </View>
+          )}
         </View>
 
         {YOUR_ROW_ORDER.map((rowKind) => (
@@ -208,22 +222,34 @@ export function BattleScreen({
       {/* totals / targeting bar */}
       {targeting ? (
         <View style={styles.totalsBar}>
-          <Text style={styles.targetHint}>Tap a gold-framed unit…</Text>
+          <Text variant="label" tone="accentBright" caps>
+            Tap a gold-framed unit
+          </Text>
           <Pressable onPress={() => setTargeting(null)} style={styles.cancelBtn} hitSlop={6}>
-            <Text style={styles.cancelText}>Cancel</Text>
+            <Text variant="caption">Cancel</Text>
           </Pressable>
         </View>
       ) : (
         <View style={styles.totalsBar}>
+          <Text variant="label" tone={youLead ? 'accentBright' : 'dim'} caps>
+            You
+          </Text>
           <Pulse trigger={view.you.total}>
-            <Text style={[styles.total, youLead && styles.totalLead]}>You {view.you.total}</Text>
-          </Pulse>
-          <Text style={styles.totalVs}>vs</Text>
-          <Pulse trigger={view.opponent.total}>
-            <Text style={[styles.total, oppLead && styles.totalLead]}>
-              {view.opponent.total} Opponent
+            <Text variant="numeral" color={youLead ? color.accentBright : color.ink} style={styles.score}>
+              {view.you.total}
             </Text>
           </Pulse>
+          <Text variant="label" tone="dim">
+            vs
+          </Text>
+          <Pulse trigger={view.opponent.total}>
+            <Text variant="numeral" color={oppLead ? color.accentBright : color.ink} style={styles.score}>
+              {view.opponent.total}
+            </Text>
+          </Pulse>
+          <Text variant="label" tone={oppLead ? 'accentBright' : 'dim'} caps>
+            Foe
+          </Text>
         </View>
       )}
 
@@ -250,13 +276,13 @@ export function BattleScreen({
         onZoom={setZoomDefId}
       />
 
-      <Pressable
-        onPress={confirmPass}
+      <Button
+        variant="danger"
+        label={canPass ? 'Pass' : view.you.passed ? 'Passed' : '…'}
         disabled={!canPass}
-        style={[styles.passButton, !canPass && styles.passDisabled]}
-      >
-        <Text style={styles.passText}>{canPass ? 'PASS' : view.you.passed ? 'PASSED' : '…'}</Text>
-      </Pressable>
+        onPress={confirmPass}
+        style={styles.passButton}
+      />
 
       {/* sheets */}
       <CardZoomSheet defId={zoomDefId} onClose={() => setZoomDefId(null)} />
@@ -308,7 +334,7 @@ export function GameScreen(): React.JSX.Element | null {
     <BattleScreen
       view={view}
       notice={session.notice}
-      headerText={`Round ${Math.max(view.round, 1)} · ${seatName('you')}${aiThinking ? '   🤖 thinking…' : ''}`}
+      headerText={`Round ${Math.max(view.round, 1)} · ${seatName('you')}${aiThinking ? '  ·  thinking…' : ''}`}
       yourName={seatName('you')}
       opponentName={session.mode === 'ai' ? `AI (${factionTheme[view.opponent.faction].label})` : seatName('opponent')}
       onMove={dispatchMove}
@@ -321,7 +347,7 @@ export function GameScreen(): React.JSX.Element | null {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: palette.bg,
+    backgroundColor: color.bg,
   },
   header: {
     flexDirection: 'row',
@@ -330,20 +356,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: sp(3),
     paddingVertical: sp(1),
   },
-  headerText: {
-    color: palette.textDim,
-    fontSize: 12,
-  },
-  quit: {
-    color: palette.textDim,
-    fontSize: 16,
-  },
   notice: {
-    color: '#241a12',
-    backgroundColor: palette.gold,
-    fontSize: 12,
+    backgroundColor: color.accent,
     paddingHorizontal: sp(3),
     paddingVertical: sp(1),
+    textAlign: 'center',
   },
   board: {
     flex: 1,
@@ -352,14 +369,14 @@ const styles = StyleSheet.create({
     minHeight: 26,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: palette.surface,
+    backgroundColor: color.surface,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderColor: palette.line,
+    borderColor: color.line,
   },
-  weatherText: {
-    color: palette.textDim,
-    fontSize: 13,
+  weatherIcons: {
+    flexDirection: 'row',
+    gap: sp(2),
   },
   totalsBar: {
     flexDirection: 'row',
@@ -367,50 +384,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: sp(3),
     paddingVertical: sp(1),
-    backgroundColor: palette.surface,
+    backgroundColor: color.surface,
   },
-  total: {
-    color: palette.textDim,
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  totalLead: {
-    color: palette.goldBright,
-  },
-  totalVs: {
-    color: palette.line,
-    fontSize: 12,
-  },
-  targetHint: {
-    color: palette.goldBright,
-    fontSize: 13,
+  score: {
+    fontSize: 20,
   },
   cancelBtn: {
-    borderColor: palette.line,
+    borderColor: color.line,
     borderWidth: 1,
-    borderRadius: 12,
+    borderRadius: radius.md,
     paddingHorizontal: sp(3),
     paddingVertical: 2,
   },
-  cancelText: {
-    color: palette.text,
-    fontSize: 12,
-  },
   passButton: {
-    margin: sp(2),
-    marginTop: 0,
-    backgroundColor: palette.danger,
-    borderRadius: 24,
-    alignItems: 'center',
-    paddingVertical: sp(3),
-  },
-  passDisabled: {
-    backgroundColor: palette.surfaceRaised,
-  },
-  passText: {
-    color: palette.text,
-    fontWeight: '800',
-    fontSize: 15,
-    letterSpacing: 2,
+    marginHorizontal: sp(2),
+    marginBottom: sp(2),
   },
 });

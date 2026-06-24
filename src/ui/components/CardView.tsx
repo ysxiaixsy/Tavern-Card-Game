@@ -1,23 +1,19 @@
 /**
- * Programmatic card frame (placeholder art by design — see docs/BRIEF.md).
- * Faction-colored frame, strength badge, row icon, ability icons, name text.
- * All styling constants come from theme.ts so real art can slot in later.
+ * Card frame. Shows real art when present (cover-fit + a live strength badge),
+ * else a programmatic frame: faction-colored edge, engraved strength numeral,
+ * row + ability icons, name. Styling comes from the design tokens; glyphs are
+ * the hand-drawn SVG Icon set (no emoji).
  */
 
 import React from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
 import { getCardDef } from '../../engine/data/cards';
+import type { Ability, CardDef, UnitRow } from '../../engine/types';
 import { CARD_ART } from '../cardArt';
-import {
-  abilityIcon,
-  CARD_SIZE,
-  factionTheme,
-  palette,
-  rowIcon,
-  specialIcon,
-  weatherIcon,
-  type CardSizeKind,
-} from '../theme';
+import { CARD_SIZE, type CardSizeKind } from '../theme';
+import { border, color, faction as factionTokens, radius } from '../tokens';
+import { Icon, type IconName } from './Icon';
+import { Text } from './Text';
 
 interface Props {
   defId: string;
@@ -34,17 +30,50 @@ interface Props {
   onLongPress?: () => void;
 }
 
+/** Strength color: hero gold, buffed green-up, weakened red-down, else ink. */
 function strengthColor(effective: number, printed: number, isHero: boolean): string {
   if (isHero) {
-    return palette.goldBright;
+    return color.accentBright;
   }
   if (effective > printed) {
-    return palette.success;
+    return color.buff;
   }
   if (effective < printed) {
-    return palette.danger;
+    return color.sealRed;
   }
-  return palette.text;
+  return color.ink;
+}
+
+const ROW_ICON: Record<UnitRow, IconName> = {
+  melee: 'sword',
+  ranged: 'bow',
+  siege: 'tower',
+  agile: 'agile',
+};
+
+const ABILITY_ICON: Record<Ability, IconName> = {
+  spy: 'spy',
+  medic: 'medic',
+  muster: 'muster',
+  bond: 'bond',
+  moral: 'moral',
+  horn: 'horn',
+  agile: 'agile',
+  scorch_row: 'scorch',
+  scorch_global: 'scorch',
+};
+
+/** Center glyph for non-unit special cards. */
+function specialIconName(def: CardDef): IconName | null {
+  if (def.type === 'weather' && def.weather) {
+    return def.weather; // frost|fog|rain|storm|clear are all IconNames
+  }
+  if (def.type === 'horn') return 'horn';
+  if (def.type === 'scorch') return 'scorch';
+  if (def.type === 'decoy') return 'decoy';
+  if (def.type === 'mardroeme') return 'mardroeme';
+  if (def.type === 'leader') return 'crown';
+  return null;
 }
 
 /** Copy index encoded in the instanceId (`p1:st_mahakaman#3` → 3), else 0. */
@@ -66,39 +95,53 @@ function CardViewInner({
 }: Props): React.JSX.Element {
   const def = getCardDef(defId);
   const dims = CARD_SIZE[size];
-  const faction = factionTheme[def.faction];
+  const faction = factionTokens[def.faction];
   const isHero = def.type === 'hero';
   const isUnit = def.type === 'unit' || isHero;
   const printed = def.strength ?? 0;
   const shown = effective ?? printed;
 
-  let centerGlyph: string | null = null;
-  if (def.type === 'weather' && def.weather) {
-    centerGlyph = weatherIcon[def.weather];
-  } else if (def.type === 'horn') {
-    centerGlyph = specialIcon.horn;
-  } else if (def.type === 'scorch') {
-    centerGlyph = specialIcon.scorch;
-  } else if (def.type === 'decoy') {
-    centerGlyph = specialIcon.decoy;
-  } else if (def.type === 'mardroeme') {
-    centerGlyph = specialIcon.mardroeme;
-  } else if (def.type === 'leader') {
-    centerGlyph = specialIcon.leader;
-  }
-
   const frameColor = highlighted
-    ? palette.targetGlow
+    ? color.targetable
     : selected
-      ? palette.goldBright
+      ? color.accentBright
       : isHero
-        ? palette.gold
+        ? color.accent
         : faction.frame;
 
-  // Real card art (see cardArt.ts). Multi-copy cards carry a variant array —
-  // pick the one for this copy. The art's printed strength is static, so units
-  // get a live effective-strength badge overlaid top-left; selection/target
-  // state stays on the border.
+  const frameBox = {
+    width: dims.width,
+    height: dims.height,
+    borderColor: frameColor,
+    borderWidth: selected || highlighted ? border.bold : border.frame,
+    opacity: dimmed ? 0.4 : 1,
+    transform: selected && size === 'hand' ? [{ translateY: -8 }] : [],
+  };
+
+  const badge = isUnit && (
+    <View
+      style={[
+        styles.badge,
+        {
+          width: dims.badge,
+          height: dims.badge,
+          borderRadius: dims.badge / 2,
+          backgroundColor: isHero ? color.surfaceRaised : color.surface,
+          borderColor: frameColor,
+        },
+      ]}
+    >
+      <Text
+        variant="numeral"
+        color={strengthColor(shown, printed, isHero)}
+        style={{ fontSize: dims.badge * 0.6 }}
+      >
+        {shown}
+      </Text>
+    </View>
+  );
+
+  // Real card art: cover-fit image + a live strength badge overlaid top-left.
   const artEntry = CARD_ART[defId];
   const art = Array.isArray(artEntry)
     ? artEntry[copyIndexOf(instanceId) % artEntry.length]
@@ -110,48 +153,18 @@ function CardViewInner({
         onLongPress={onLongPress}
         delayLongPress={250}
         disabled={!onPress && !onLongPress}
-        style={[
-          styles.frame,
-          {
-            width: dims.width,
-            height: dims.height,
-            borderColor: frameColor,
-            borderWidth: selected || highlighted ? 2.5 : 1.5,
-            opacity: dimmed ? 0.4 : 1,
-            transform: selected && size === 'hand' ? [{ translateY: -8 }] : [],
-          },
-        ]}
+        style={[styles.frame, frameBox]}
       >
         {/* Explicit 100% box: on the New Architecture an Image with only
             absoluteFill falls back to its intrinsic pixel size. */}
         <Image source={art} resizeMode="cover" style={styles.art} />
-        {isUnit && (
-          <View
-            style={[
-              styles.artBadge,
-              {
-                width: dims.badge,
-                height: dims.badge,
-                borderRadius: dims.badge / 2,
-                backgroundColor: isHero ? '#3a2d14' : palette.surface,
-                borderColor: frameColor,
-              },
-            ]}
-          >
-            <Text
-              style={{
-                color: strengthColor(shown, printed, isHero),
-                fontSize: dims.badge * 0.58,
-                fontWeight: '700',
-              }}
-            >
-              {shown}
-            </Text>
-          </View>
-        )}
+        {badge && <View style={styles.artBadge}>{badge}</View>}
       </Pressable>
     );
   }
+
+  const centerGlyph = specialIconName(def);
+  const abilities = def.abilities.filter((a) => a in ABILITY_ICON);
 
   return (
     <Pressable
@@ -159,48 +172,18 @@ function CardViewInner({
       onLongPress={onLongPress}
       delayLongPress={250}
       disabled={!onPress && !onLongPress}
-      style={[
-        styles.frame,
-        {
-          width: dims.width,
-          height: dims.height,
-          borderColor: frameColor,
-          borderWidth: selected || highlighted ? 2.5 : 1.5,
-          backgroundColor: palette.surfaceRaised,
-          opacity: dimmed ? 0.4 : 1,
-          transform: selected && size === 'hand' ? [{ translateY: -8 }] : [],
-        },
-      ]}
+      style={[styles.frame, frameBox, { backgroundColor: color.surfaceRaised }]}
     >
-      {/* top strip: strength badge or special glyph */}
+      {/* top strip: strength badge or special glyph, + hero star */}
       <View style={styles.topRow}>
         {isUnit ? (
-          <View
-            style={[
-              styles.badge,
-              {
-                width: dims.badge,
-                height: dims.badge,
-                borderRadius: dims.badge / 2,
-                backgroundColor: isHero ? '#3a2d14' : palette.surface,
-                borderColor: frameColor,
-              },
-            ]}
-          >
-            <Text
-              style={{
-                color: strengthColor(shown, printed, isHero),
-                fontSize: dims.badge * 0.58,
-                fontWeight: '700',
-              }}
-            >
-              {shown}
-            </Text>
-          </View>
+          badge
+        ) : centerGlyph ? (
+          <Icon name={centerGlyph} size={dims.badge} color={color.accent} />
         ) : (
-          <Text style={{ fontSize: dims.badge * 0.8 }}>{centerGlyph}</Text>
+          <View />
         )}
-        {isHero && <Text style={{ fontSize: dims.icon, color: palette.goldBright }}>★</Text>}
+        {isHero && <Icon name="star" size={dims.icon} color={color.accentBright} />}
       </View>
 
       {/* faction tint stripe */}
@@ -209,22 +192,21 @@ function CardViewInner({
       {/* bottom: row + abilities, then name */}
       <View style={styles.bottom}>
         <View style={styles.iconRow}>
-          <Text style={{ fontSize: dims.icon }}>
-            {isUnit && def.row ? (def.row === 'agile' ? abilityIcon.agile : rowIcon[def.row]) : ' '}
-          </Text>
-          <Text style={{ fontSize: dims.icon }} numberOfLines={1}>
-            {def.abilities.map((a) => abilityIcon[a]).join('')}
-          </Text>
+          {isUnit && def.row ? (
+            <Icon name={ROW_ICON[def.row]} size={dims.icon} color={faction.accent} />
+          ) : (
+            <View />
+          )}
+          <View style={styles.abilityRow}>
+            {abilities.map((a, i) => (
+              <Icon key={i} name={ABILITY_ICON[a]} size={dims.icon} color={color.accentBright} />
+            ))}
+          </View>
         </View>
         <Text
+          variant={size === 'board' ? 'caption' : 'label'}
           numberOfLines={size === 'large' ? 2 : 1}
-          style={{
-            color: palette.text,
-            fontSize: dims.name,
-            textAlign: 'center',
-            paddingHorizontal: 2,
-            paddingBottom: 2,
-          }}
+          style={{ fontSize: dims.name, textAlign: 'center', paddingHorizontal: 2, paddingBottom: 2 }}
         >
           {def.name}
         </Text>
@@ -235,7 +217,7 @@ function CardViewInner({
 
 const styles = StyleSheet.create({
   frame: {
-    borderRadius: 6,
+    borderRadius: radius.sm,
     justifyContent: 'space-between',
     overflow: 'hidden',
   },
@@ -248,7 +230,7 @@ const styles = StyleSheet.create({
   badge: {
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
+    borderWidth: border.thin,
   },
   art: {
     width: '100%',
@@ -258,9 +240,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 3,
     left: 3,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
   },
   stripe: {
     height: 2,
@@ -270,7 +249,12 @@ const styles = StyleSheet.create({
   iconRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 2,
+  },
+  abilityRow: {
+    flexDirection: 'row',
+    gap: 1,
   },
 });
 

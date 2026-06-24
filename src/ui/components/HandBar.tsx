@@ -20,16 +20,20 @@ import {
   Animated,
   type LayoutChangeEvent,
   PanResponder,
-  Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   View,
 } from 'react-native';
-import type { CardInstance, Move, PlayCardMove, PlayerView } from '../../engine/types';
+import type { CardInstance, Move, PlayCardMove, PlayerView, RowKind } from '../../engine/types';
 import { getCardDef } from '../../engine/data/cards';
-import { CARD_SIZE, palette, rowIcon, rowLabel, sp } from '../theme';
+import { CARD_SIZE, rowLabel, sp } from '../theme';
+import { color, radius } from '../tokens';
+import { Button } from './Button';
 import { CardView } from './CardView';
+import { Icon, type IconName } from './Icon';
+import { Text } from './Text';
+
+const ROW_ICON: Record<RowKind, IconName> = { melee: 'sword', ranged: 'bow', siege: 'tower' };
 
 interface Props {
   view: PlayerView;
@@ -192,22 +196,27 @@ export function HandBar({
   let actionBar: React.JSX.Element | null = null;
   if (hint === null && selectedId !== null && myAction) {
     if (selectedPlays.length === 0) {
-      actionBar = <Text style={styles.hint}>No legal play for this card right now.</Text>;
-    } else if (targeted.length === selectedPlays.length) {
       actionBar = (
-        <Pressable style={styles.action} onPress={() => choose(selectedId)}>
-          <Text style={styles.actionText}>Choose a target on your side →</Text>
-        </Pressable>
+        <Text variant="caption" tone="dim" style={styles.hint}>
+          No legal play for this card right now.
+        </Text>
       );
+    } else if (targeted.length === selectedPlays.length) {
+      actionBar = <Button label="Choose a target" onPress={() => choose(selectedId)} />;
     } else {
       actionBar = (
         <View style={styles.actionRow}>
           {selectedPlays.map((move, i) => (
-            <Pressable key={i} style={styles.action} onPress={() => onSubmit(move)}>
-              <Text style={styles.actionText}>
-                {move.row ? `${rowIcon[move.row]} ${rowLabel[move.row]}` : '▶ Play'}
-              </Text>
-            </Pressable>
+            <Button
+              key={i}
+              label={move.row ? rowLabel[move.row] : 'Play'}
+              onPress={() => onSubmit(move)}
+              icon={
+                move.row ? (
+                  <Icon name={ROW_ICON[move.row]} size={14} color={color.inkOnAccent} />
+                ) : undefined
+              }
+            />
           ))}
         </View>
       );
@@ -245,12 +254,18 @@ export function HandBar({
             onDragEnd={onDragEnd}
           />
         ))}
-        {view.you.hand.length === 0 && <Text style={styles.hint}>No cards left in hand.</Text>}
+        {view.you.hand.length === 0 && (
+          <Text variant="caption" tone="dim" style={styles.hint}>
+            No cards left in hand.
+          </Text>
+        )}
       </ScrollView>
 
       {hint !== null && (
         <View pointerEvents="none" style={styles.hintOverlay}>
-          <Text style={styles.dragHint}>↑ {hint}</Text>
+          <Text variant="label" tone="accentBright" caps style={styles.dragHint}>
+            ↑ {hint}
+          </Text>
         </View>
       )}
 
@@ -282,17 +297,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: sp(2),
   },
-  action: {
-    backgroundColor: palette.gold,
-    borderRadius: 16,
-    paddingHorizontal: sp(4),
-    paddingVertical: sp(2),
-  },
-  actionText: {
-    color: '#241a12',
-    fontWeight: '700',
-    fontSize: 13,
-  },
   hintOverlay: {
     position: 'absolute',
     top: -sp(5),
@@ -302,18 +306,13 @@ const styles = StyleSheet.create({
     zIndex: 101,
   },
   dragHint: {
-    color: palette.goldBright,
-    fontSize: 13,
-    fontWeight: '700',
-    backgroundColor: palette.surface,
+    backgroundColor: color.surface,
     paddingHorizontal: sp(3),
     paddingVertical: 2,
-    borderRadius: 10,
+    borderRadius: radius.md,
     overflow: 'hidden',
   },
   hint: {
-    color: palette.textDim,
-    fontSize: 12,
     paddingVertical: sp(2),
     alignSelf: 'center',
   },
