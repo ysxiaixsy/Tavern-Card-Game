@@ -4,11 +4,14 @@
  */
 
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { palette, sp } from '../theme';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { color, space } from '../tokens';
 import { useAppStore } from '../store';
 import { feedback } from '../feedback';
 import { Appear } from '../components/anim';
+import { Button } from '../components/Button';
+import { Icon } from '../components/Icon';
+import { Text } from '../components/Text';
 import { isOnlineConfigured } from '../../online/supabase';
 
 export function HomeScreen(): React.JSX.Element {
@@ -32,39 +35,50 @@ export function HomeScreen(): React.JSX.Element {
         onLongPress={go(openGallery)}
         hitSlop={10}
       >
-        <Text style={styles.settingsIcon}>⚙️</Text>
+        <Icon name="gear" size={22} color={color.inkDim} />
       </Pressable>
 
       <Appear distance={4} duration={400} style={styles.titleBlock}>
-        <Text style={styles.kicker}>THE WITCHER 3 TAVERN GAME</Text>
-        <Text style={styles.title}>GWENT</Text>
-        <Text style={styles.sub}>best of 3 · 10 cards · no draw step</Text>
+        <Text variant="label" tone="dim" caps>
+          The Witcher 3 Tavern Game
+        </Text>
+        <Text variant="hero" tone="accentBright" style={styles.title}>
+          GWENT
+        </Text>
+        <Text variant="caption" tone="dim" style={styles.sub}>
+          best of 3 · 10 cards · no draw step
+        </Text>
       </Appear>
 
       <Appear delay={120} style={styles.menu}>
-        <Pressable style={styles.button} onPress={go(() => beginSetup('hotseat'))}>
-          <Text style={styles.buttonText}>⚔️ Hot-seat — two players, one phone</Text>
-        </Pressable>
-        <Pressable style={styles.button} onPress={go(() => beginSetup('ai'))}>
-          <Text style={styles.buttonText}>🤖 Versus AI</Text>
-        </Pressable>
-        <Pressable style={[styles.button, styles.buttonGhost]} onPress={go(openDecks)}>
-          <Text style={styles.buttonGhostText}>
-            🃏 Deck builder{deckCount > 0 ? `  (${deckCount} custom)` : ''}
-          </Text>
-        </Pressable>
+        <Button
+          label="Hot-seat"
+          onPress={go(() => beginSetup('hotseat'))}
+          icon={<Icon name="sword" size={18} color={color.inkOnAccent} />}
+        />
+        <Button
+          label="Versus AI"
+          onPress={go(() => beginSetup('ai'))}
+          icon={<Icon name="helm" size={18} color={color.inkOnAccent} />}
+        />
+        <Button
+          label={`Deck Builder${deckCount > 0 ? ` · ${deckCount}` : ''}`}
+          variant="ghost"
+          onPress={go(openDecks)}
+          icon={<Icon name="deck" size={18} color={color.accentBright} />}
+        />
         {isOnlineConfigured ? (
-          <Pressable style={styles.button} onPress={go(openOnline)}>
-            <Text style={styles.buttonText}>🌐 Online — play a friend by room code</Text>
-          </Pressable>
+          <Button
+            label="Online"
+            onPress={go(openOnline)}
+            icon={<Icon name="globe" size={18} color={color.inkOnAccent} />}
+          />
         ) : (
-          <View style={[styles.button, styles.buttonDisabled]}>
-            <Text style={styles.buttonDisabledText}>🌐 Online — add Supabase keys to .env</Text>
-          </View>
+          <Button label="Online — add Supabase keys" disabled />
         )}
       </Appear>
 
-      <Text style={styles.footer}>
+      <Text variant="caption" tone="dim" style={styles.footer}>
         Fan-made, non-commercial. Placeholder art only — no CDPR assets.
       </Text>
     </View>
@@ -74,81 +88,36 @@ export function HomeScreen(): React.JSX.Element {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: palette.bg,
+    backgroundColor: color.bg,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: sp(6),
+    padding: space.xl,
   },
   settingsButton: {
     position: 'absolute',
-    top: sp(3),
-    right: sp(4),
-    padding: sp(2),
-  },
-  settingsIcon: {
-    fontSize: 22,
+    top: space.md,
+    right: space.lg,
+    padding: space.sm,
   },
   titleBlock: {
     alignItems: 'center',
     alignSelf: 'stretch',
   },
-  kicker: {
-    color: palette.textDim,
-    fontSize: 11,
-    letterSpacing: 3,
-  },
   title: {
-    color: palette.goldBright,
     fontSize: 56,
-    fontWeight: '900',
-    letterSpacing: 6,
-    marginVertical: sp(1),
+    letterSpacing: 8,
+    marginVertical: space.xs,
   },
   sub: {
-    color: palette.textDim,
-    fontSize: 12,
-    marginBottom: sp(8),
+    marginBottom: space.xxl,
   },
   menu: {
-    gap: sp(3),
+    gap: space.md,
     alignSelf: 'stretch',
   },
-  button: {
-    backgroundColor: palette.gold,
-    borderRadius: 26,
-    paddingVertical: sp(4),
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: '#241a12',
-    fontWeight: '800',
-    fontSize: 15,
-  },
-  buttonGhost: {
-    backgroundColor: 'transparent',
-    borderWidth: 1.5,
-    borderColor: palette.gold,
-  },
-  buttonGhostText: {
-    color: palette.goldBright,
-    fontWeight: '700',
-    fontSize: 15,
-  },
-  buttonDisabled: {
-    backgroundColor: palette.surfaceRaised,
-    borderWidth: 1,
-    borderColor: palette.line,
-  },
-  buttonDisabledText: {
-    color: palette.textDim,
-    fontWeight: '600',
-    fontSize: 14,
-  },
   footer: {
-    color: palette.textDim,
-    fontSize: 10,
     position: 'absolute',
-    bottom: sp(6),
+    bottom: space.xl,
     textAlign: 'center',
   },
 });

@@ -35,7 +35,11 @@ export type IconName =
   | 'hand'
   | 'deck'
   | 'close'
-  | 'star'; // hero
+  | 'star' // hero
+  | 'gear' // settings
+  | 'globe' // online
+  | 'helm' // AI opponent
+  | 'back'; // back chevron
 
 interface Props {
   name: IconName;
@@ -208,4 +212,29 @@ const GLYPHS: Record<IconName, (c: string) => React.JSX.Element> = {
       points="12,3 14.5,9.3 21,9.7 16,14 17.7,20.5 12,16.8 6.3,20.5 8,14 3,9.7 9.5,9.3"
     />
   ),
+  gear: (c) => (
+    <>
+      <Path d="M5 8 H19" />
+      <Circle {...fill(c)} cx={9} cy={8} r={1.8} />
+      <Path d="M5 12 H19" />
+      <Circle {...fill(c)} cx={15} cy={12} r={1.8} />
+      <Path d="M5 16 H19" />
+      <Circle {...fill(c)} cx={9} cy={16} r={1.8} />
+    </>
+  ),
+  globe: () => (
+    <>
+      <Circle cx={12} cy={12} r={9} />
+      <Path d="M3 12 H21" />
+      <Path d="M12 3 C 6.5 7, 6.5 17, 12 21 C 17.5 17, 17.5 7, 12 3 Z" />
+    </>
+  ),
+  helm: () => (
+    <>
+      <Path d="M7 20 V11 a5 5 0 0 1 10 0 V20 Z" />
+      <Path d="M9 12 H15" />
+      <Path d="M11.5 15 V18" />
+    </>
+  ),
+  back: () => <Path d="M14 6 L8 12 L14 18" />,
 };
