@@ -11,7 +11,6 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   TextInput,
   View,
 } from 'react-native';
@@ -26,6 +25,9 @@ import {
 } from '../../engine/game';
 import { GwentError, type CardDef } from '../../engine/types';
 import { factionTheme, palette, sp } from '../theme';
+import { color } from '../tokens';
+import { Icon } from '../components/Icon';
+import { Text } from '../components/Text';
 import {
   allDecks,
   leaderShortName,
@@ -163,9 +165,12 @@ function DeckRow({
         <Text style={[styles.deckName, { color: theme.accent }]} numberOfLines={1}>
           {deck.name}
         </Text>
-        <Text style={styles.deckMeta} numberOfLines={1}>
-          👑 {leaderShortName(deck.leaderId)} · {deck.cardIds.length} cards
-        </Text>
+        <View style={styles.deckMetaRow}>
+          <Icon name="crown" size={12} color={color.inkDim} />
+          <Text style={styles.deckMeta} numberOfLines={1}>
+            {leaderShortName(deck.leaderId)} · {deck.cardIds.length} cards
+          </Text>
+        </View>
       </View>
       {onEdit && (
         <Pressable style={styles.rowButton} onPress={onEdit}>
@@ -322,7 +327,7 @@ function DeckEditor({
                 style={[styles.leaderChip, { borderColor: selected ? factionTheme[faction].accent : palette.line }, selected && { backgroundColor: palette.surfaceRaised }]}
               >
                 <Text numberOfLines={2} style={[styles.leaderName, { color: selected ? palette.text : palette.textDim }]}>
-                  👑 {leaderShortName(leader.id)}
+                  {leaderShortName(leader.id)}
                 </Text>
               </Pressable>
             );
@@ -442,7 +447,7 @@ const styles = StyleSheet.create({
     marginBottom: sp(4),
   },
   newText: {
-    color: '#241a12',
+    color: color.inkOnAccent,
     fontWeight: '800',
     fontSize: 14,
   },
@@ -470,6 +475,11 @@ const styles = StyleSheet.create({
   deckName: {
     fontWeight: '800',
     fontSize: 14,
+  },
+  deckMetaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: sp(1),
   },
   deckMeta: {
     color: palette.textDim,
@@ -523,7 +533,7 @@ const styles = StyleSheet.create({
     opacity: 0.35,
   },
   saveText: {
-    color: '#241a12',
+    color: color.inkOnAccent,
     fontWeight: '800',
     fontSize: 13,
   },

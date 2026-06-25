@@ -5,7 +5,10 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { color } from '../tokens';
+import { Icon } from './Icon';
+import { Text } from './Text';
 import { getCardDef } from '../../engine/data/cards';
 import type {
   CardInstance,
@@ -38,7 +41,7 @@ export function Sheet({ visible, title, onClose, children }: SheetProps): React.
             <Text style={styles.panelTitle}>{title}</Text>
             {onClose && (
               <Pressable onPress={onClose} hitSlop={10}>
-                <Text style={styles.close}>✕</Text>
+                <Icon name="close" size={18} color={color.inkDim} />
               </Pressable>
             )}
           </View>
@@ -433,7 +436,7 @@ const styles = StyleSheet.create({
     minWidth: 220,
   },
   bigButtonText: {
-    color: '#241a12',
+    color: color.inkOnAccent,
     fontWeight: '800',
     fontSize: 14,
   },

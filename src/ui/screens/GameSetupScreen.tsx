@@ -4,15 +4,13 @@
  */
 
 import React, { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { factionTheme, palette, sp } from '../theme';
-import {
-  allDecks,
-  leaderShortName,
-  useAppStore,
-  type SavedDeck,
-} from '../store';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { border, color, faction as factionTokens, radius, sp } from '../tokens';
+import { allDecks, leaderShortName, useAppStore, type SavedDeck } from '../store';
 import type { Difficulty } from '../../ai/agent';
+import { Button } from '../components/Button';
+import { Icon } from '../components/Icon';
+import { Text } from '../components/Text';
 
 function DeckChip({
   deck,
@@ -23,22 +21,25 @@ function DeckChip({
   selected: boolean;
   onPress: () => void;
 }): React.JSX.Element {
-  const theme = factionTheme[deck.faction];
+  const theme = factionTokens[deck.faction];
   return (
     <Pressable
       onPress={onPress}
       style={[
         styles.deckChip,
-        { borderColor: selected ? theme.accent : palette.line },
-        selected && { backgroundColor: palette.surfaceRaised },
+        { borderColor: selected ? theme.accent : color.line },
+        selected && { backgroundColor: color.surfaceRaised },
       ]}
     >
-      <Text style={[styles.deckName, { color: selected ? theme.accent : palette.text }]} numberOfLines={1}>
+      <Text variant="bodyStrong" color={selected ? theme.accent : color.ink} numberOfLines={1}>
         {deck.name}
       </Text>
-      <Text style={styles.deckMeta} numberOfLines={1}>
-        👑 {leaderShortName(deck.leaderId)} · {deck.cardIds.length} cards
-      </Text>
+      <View style={styles.deckMeta}>
+        <Icon name="crown" size={12} color={color.inkDim} />
+        <Text variant="caption" tone="dim" numberOfLines={1}>
+          {leaderShortName(deck.leaderId)} · {deck.cardIds.length} cards
+        </Text>
+      </View>
     </Pressable>
   );
 }
@@ -56,7 +57,9 @@ function SeatRow({
 }): React.JSX.Element {
   return (
     <View style={styles.seatBlock}>
-      <Text style={styles.seatLabel}>{label}</Text>
+      <Text variant="label" tone="dim" caps style={styles.seatLabel}>
+        {label}
+      </Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.deckRow}>
         {decks.map((deck) => (
           <DeckChip
@@ -91,23 +94,31 @@ export function GameSetupScreen(): React.JSX.Element {
   return (
     <ScrollView style={styles.scroll} contentContainerStyle={styles.screen}>
       <View style={styles.header}>
-        <Pressable onPress={goHome} hitSlop={10}>
-          <Text style={styles.back}>‹ Back</Text>
+        <Pressable onPress={goHome} hitSlop={10} style={styles.headerBtn}>
+          <Icon name="back" size={16} color={color.accent} />
+          <Text variant="label" tone="accent" caps>
+            Back
+          </Text>
         </Pressable>
-        <Text style={styles.title}>{mode === 'ai' ? 'Versus AI' : 'Hot-seat'}</Text>
-        <Pressable onPress={openDecks} hitSlop={10}>
-          <Text style={styles.back}>🃏 Decks</Text>
+        <Text variant="title" tone="accentBright">
+          {mode === 'ai' ? 'Versus AI' : 'Hot-seat'}
+        </Text>
+        <Pressable onPress={openDecks} hitSlop={10} style={styles.headerBtn}>
+          <Icon name="deck" size={16} color={color.accent} />
+          <Text variant="label" tone="accent" caps>
+            Decks
+          </Text>
         </Pressable>
       </View>
 
       <SeatRow
-        label={mode === 'ai' ? 'YOUR DECK' : 'PLAYER 1'}
+        label={mode === 'ai' ? 'Your deck' : 'Player 1'}
         decks={decks}
         selectedId={p1DeckId}
         onSelect={setP1DeckId}
       />
       <SeatRow
-        label={mode === 'ai' ? 'AI DECK' : 'PLAYER 2'}
+        label={mode === 'ai' ? 'AI deck' : 'Player 2'}
         decks={decks}
         selectedId={p2DeckId}
         onSelect={setP2DeckId}
@@ -115,7 +126,9 @@ export function GameSetupScreen(): React.JSX.Element {
 
       {mode === 'ai' && (
         <View style={styles.diffBlock}>
-          <Text style={styles.seatLabel}>AI DIFFICULTY</Text>
+          <Text variant="label" tone="dim" caps style={styles.seatLabel}>
+            AI difficulty
+          </Text>
           <View style={styles.diffRow}>
             {(['easy', 'normal', 'hard'] as const).map((d) => (
               <Pressable
@@ -123,8 +136,8 @@ export function GameSetupScreen(): React.JSX.Element {
                 onPress={() => setDifficulty(d)}
                 style={[styles.diffButton, difficulty === d && styles.diffSelected]}
               >
-                <Text style={[styles.diffText, difficulty === d && { color: palette.goldBright }]}>
-                  {d.charAt(0).toUpperCase() + d.slice(1)}
+                <Text variant="label" tone={difficulty === d ? 'accentBright' : 'dim'} caps>
+                  {d}
                 </Text>
               </Pressable>
             ))}
@@ -132,11 +145,18 @@ export function GameSetupScreen(): React.JSX.Element {
         </View>
       )}
 
-      {error !== null && <Text style={styles.error}>{error}</Text>}
+      {error !== null && (
+        <Text variant="caption" color={color.sealRedBright} style={styles.error}>
+          {error}
+        </Text>
+      )}
 
-      <Pressable style={styles.startButton} onPress={start}>
-        <Text style={styles.startText}>⚔️ START MATCH</Text>
-      </Pressable>
+      <Button
+        label="Start Match"
+        onPress={start}
+        icon={<Icon name="sword" size={18} color={color.inkOnAccent} />}
+        style={styles.startButton}
+      />
     </ScrollView>
   );
 }
@@ -144,7 +164,7 @@ export function GameSetupScreen(): React.JSX.Element {
 const styles = StyleSheet.create({
   scroll: {
     flex: 1,
-    backgroundColor: palette.bg,
+    backgroundColor: color.bg,
   },
   screen: {
     padding: sp(4),
@@ -156,22 +176,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: sp(5),
   },
-  back: {
-    color: palette.gold,
-    fontSize: 14,
-  },
-  title: {
-    color: palette.goldBright,
-    fontSize: 18,
-    fontWeight: '800',
+  headerBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: sp(1),
   },
   seatBlock: {
     marginBottom: sp(4),
   },
   seatLabel: {
-    color: palette.textDim,
-    fontSize: 10,
-    letterSpacing: 2,
     marginBottom: sp(1),
   },
   deckRow: {
@@ -179,20 +192,17 @@ const styles = StyleSheet.create({
     paddingRight: sp(4),
   },
   deckChip: {
-    borderWidth: 1.5,
-    borderRadius: 12,
+    borderWidth: border.frame,
+    borderRadius: radius.md,
     paddingVertical: sp(2),
     paddingHorizontal: sp(3),
     minWidth: 170,
     gap: 2,
   },
-  deckName: {
-    fontWeight: '800',
-    fontSize: 13,
-  },
   deckMeta: {
-    color: palette.textDim,
-    fontSize: 11,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: sp(1),
   },
   diffBlock: {
     marginBottom: sp(4),
@@ -203,38 +213,21 @@ const styles = StyleSheet.create({
   },
   diffButton: {
     flex: 1,
-    borderWidth: 1,
-    borderColor: palette.line,
-    borderRadius: 18,
+    borderWidth: border.thin,
+    borderColor: color.line,
+    borderRadius: radius.lg,
     paddingVertical: sp(2),
     alignItems: 'center',
   },
   diffSelected: {
-    borderColor: palette.goldBright,
-    backgroundColor: palette.surfaceRaised,
-  },
-  diffText: {
-    color: palette.textDim,
-    fontWeight: '700',
-    fontSize: 13,
+    borderColor: color.accentBright,
+    backgroundColor: color.surfaceRaised,
   },
   error: {
-    color: palette.danger,
-    fontSize: 12,
     textAlign: 'center',
     marginBottom: sp(2),
   },
   startButton: {
-    backgroundColor: palette.gold,
-    borderRadius: 26,
-    paddingVertical: sp(4),
-    alignItems: 'center',
     marginTop: sp(2),
-  },
-  startText: {
-    color: '#241a12',
-    fontWeight: '900',
-    fontSize: 16,
-    letterSpacing: 1,
   },
 });

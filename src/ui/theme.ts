@@ -6,22 +6,28 @@
  */
 
 import type { Ability, Faction, RowKind, WeatherKind } from '../engine/types';
+import { color } from './tokens';
 
+/**
+ * Legacy palette — now a thin compatibility alias over the design tokens
+ * (src/ui/tokens.ts) so any not-yet-fully-migrated screen picks up the
+ * Witcher-tavern colors. New code should import from tokens directly.
+ */
 export const palette = {
-  bg: '#16100b', // dark tavern wood
-  surface: '#241a12',
-  surfaceRaised: '#2f2318',
-  line: '#4a3826',
-  text: '#f0e6d2',
-  textDim: '#a08c6e',
-  gold: '#d4af6a',
-  goldBright: '#f1c87a',
-  danger: '#d9534f',
-  success: '#7ab648',
-  info: '#5b9bd5',
-  weatherTint: 'rgba(91, 155, 213, 0.18)',
-  targetGlow: '#f1c87a',
-  overlay: 'rgba(0, 0, 0, 0.72)',
+  bg: color.bg,
+  surface: color.surface,
+  surfaceRaised: color.surfaceRaised,
+  line: color.line,
+  text: color.ink,
+  textDim: color.inkDim,
+  gold: color.accent,
+  goldBright: color.accentBright,
+  danger: color.sealRed,
+  success: color.buff,
+  info: color.debuff,
+  weatherTint: color.weatherTint,
+  targetGlow: color.targetable,
+  overlay: color.overlay,
 } as const;
 
 export const factionTheme: Record<Faction, { frame: string; accent: string; label: string }> = {

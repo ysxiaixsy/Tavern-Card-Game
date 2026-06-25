@@ -14,12 +14,14 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   TextInput,
   View,
 } from 'react-native';
 import type { Move, PlayerView } from '../../engine/types';
 import { factionTheme, palette, sp } from '../theme';
+import { color } from '../tokens';
+import { Icon } from '../components/Icon';
+import { Text } from '../components/Text';
 import {
   allDecks,
   leaderShortName,
@@ -296,7 +298,7 @@ export function OnlineScreen(): React.JSX.Element {
   if (phase.kind === 'error') {
     return (
       <Centered>
-        <Text style={styles.title}>⚠️ {phase.message}</Text>
+        <Text style={styles.title}>{phase.message}</Text>
         <BigButton label="Back to lobby" onPress={() => setPhase({ kind: 'menu' })} />
         <BigButton label="Home" onPress={leave} ghost />
       </Centered>
@@ -336,7 +338,7 @@ export function OnlineScreen(): React.JSX.Element {
       return (
         <Centered>
           <Text style={styles.title}>
-            {view.result.winner === null ? 'A draw!' : won ? '🏆 You win!' : 'Defeat.'}
+            {view.result.winner === null ? 'A draw' : won ? 'You win' : 'Defeat'}
           </Text>
           {view.roundHistory.map((r) => (
             <Text key={r.round} style={styles.dim}>
@@ -373,8 +375,8 @@ export function OnlineScreen(): React.JSX.Element {
         view={view}
         notice={notice}
         headerText={`Round ${Math.max(view.round, 1)} · ${you}${
-          waitingForOpponent ? '   ⏳ opponent…' : ''
-        }${submitting ? '   ↑ sending…' : ''}`}
+          waitingForOpponent ? '  ·  opponent…' : ''
+        }${submitting ? '  ·  sending…' : ''}`}
         yourName={you}
         opponentName={opp}
         onMove={(move) => void handleMove(move)}
@@ -388,15 +390,18 @@ export function OnlineScreen(): React.JSX.Element {
   return (
     <ScrollView style={styles.scroll} contentContainerStyle={styles.menu}>
       <View style={styles.header}>
-        <Pressable onPress={leave} hitSlop={10}>
-          <Text style={styles.back}>‹ Home</Text>
+        <Pressable onPress={leave} hitSlop={10} style={styles.backRow}>
+          <Icon name="back" size={16} color={color.accent} />
+          <Text variant="label" tone="accent" caps>
+            Home
+          </Text>
         </Pressable>
         <Text style={styles.titleSmall}>Online — room codes</Text>
-        <Text style={styles.back}> </Text>
+        <View style={styles.backRow} />
       </View>
 
       {lastOnlineGame !== null && (
-        <BigButton label={`▶ Resume game (${lastOnlineGame.roomCode})`} onPress={() => void handleResume()} />
+        <BigButton label={`Resume game (${lastOnlineGame.roomCode})`} onPress={() => void handleResume()} />
       )}
 
       <Text style={styles.sectionLabel}>YOUR DECK</Text>
@@ -417,15 +422,18 @@ export function OnlineScreen(): React.JSX.Element {
               <Text style={[styles.deckName, { color: selected ? theme.accent : palette.text }]} numberOfLines={1}>
                 {deck.name}
               </Text>
-              <Text style={styles.deckMeta} numberOfLines={1}>
-                👑 {leaderShortName(deck.leaderId)}
-              </Text>
+              <View style={styles.deckMetaRow}>
+                <Icon name="crown" size={12} color={color.inkDim} />
+                <Text style={styles.deckMeta} numberOfLines={1}>
+                  {leaderShortName(deck.leaderId)}
+                </Text>
+              </View>
             </Pressable>
           );
         })}
       </ScrollView>
 
-      <BigButton label="🏠 Create a room" onPress={() => void handleCreate()} />
+      <BigButton label="Create a room" onPress={() => void handleCreate()} />
 
       <Text style={styles.sectionLabel}>OR JOIN A FRIEND</Text>
       <TextInput
@@ -438,7 +446,7 @@ export function OnlineScreen(): React.JSX.Element {
         maxLength={6}
         style={styles.codeInput}
       />
-      <BigButton label="⚔️ Join room" onPress={() => void handleJoin()} />
+      <BigButton label="Join room" onPress={() => void handleJoin()} />
 
       {notice !== null && <Text style={styles.notice}>{notice}</Text>}
       <Text style={styles.dim}>
@@ -496,6 +504,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     minWidth: 52,
   },
+  backRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: sp(1),
+    minWidth: 64,
+  },
   title: {
     color: palette.goldBright,
     fontSize: 20,
@@ -533,6 +547,11 @@ const styles = StyleSheet.create({
   deckName: {
     fontWeight: '800',
     fontSize: 13,
+  },
+  deckMetaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: sp(1),
   },
   deckMeta: {
     color: palette.textDim,
@@ -575,7 +594,7 @@ const styles = StyleSheet.create({
     borderColor: palette.line,
   },
   bigButtonText: {
-    color: '#241a12',
+    color: color.inkOnAccent,
     fontWeight: '800',
     fontSize: 14,
   },
