@@ -103,7 +103,8 @@ export function GraveyardSheet({
   return (
     <Sheet visible={visible} title={title} onClose={onClose}>
       {inspect !== null && inspectId !== null && (
-        <View style={styles.inspect}>
+        <View style={styles.zoomBody}>
+          <CardView defId={inspectId} size="large" />
           <Text style={styles.typeLine}>{inspect.name} — {cardTypeLine(inspect)}</Text>
           {describeCard(inspectId).map((line, i) => (
             <Text key={i} style={styles.abilityLine}>
@@ -419,12 +420,6 @@ const styles = StyleSheet.create({
   rowTag: {
     color: palette.gold,
     fontSize: 10,
-  },
-  inspect: {
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderColor: palette.line,
-    paddingBottom: sp(2),
-    gap: 2,
   },
   bigButton: {
     backgroundColor: palette.gold,

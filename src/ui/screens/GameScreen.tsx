@@ -171,6 +171,8 @@ export function BattleScreen({
             row={view.opponent.rows[rowKind]}
             rowKind={rowKind}
             underWeather={weatherForRow(rowKind)}
+            // Single tap opens card info — suppressed while picking a target.
+            onUnitPress={targeting ? undefined : (_id, defId) => setZoomDefId(defId)}
             onUnitLongPress={setZoomDefId}
           />
         ))}
@@ -204,16 +206,18 @@ export function BattleScreen({
                   )
                 : undefined
             }
-            onUnitPress={
-              targeting
-                ? (id) => {
-                    const move = targeting.targets.get(id);
-                    if (move) {
-                      submit(move);
-                    }
-                  }
-                : undefined
-            }
+            // While targeting: tap a gold-framed unit to pick it. Otherwise a
+            // tap opens card info (precedence: targeting wins; info suppressed).
+            onUnitPress={(id, defId) => {
+              if (targeting) {
+                const move = targeting.targets.get(id);
+                if (move) {
+                  submit(move);
+                }
+              } else {
+                setZoomDefId(defId);
+              }
+            }}
             onUnitLongPress={setZoomDefId}
           />
         ))}

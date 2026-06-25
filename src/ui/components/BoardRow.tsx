@@ -20,7 +20,7 @@ interface Props {
   underWeather: boolean;
   /** Decoy targeting: instanceIds that may be tapped right now. */
   targetIds?: ReadonlySet<string>;
-  onUnitPress?: (instanceId: string) => void;
+  onUnitPress?: (instanceId: string, defId: string) => void;
   onUnitLongPress?: (defId: string) => void;
 }
 
@@ -63,7 +63,7 @@ function BoardRowInner({
                 effective={unit.effectiveStrength}
                 highlighted={isTarget}
                 dimmed={targeting && !isTarget}
-                onPress={onUnitPress ? () => onUnitPress(unit.instanceId) : undefined}
+                onPress={onUnitPress ? () => onUnitPress(unit.instanceId, unit.defId) : undefined}
                 onLongPress={onUnitLongPress ? () => onUnitLongPress(unit.defId) : undefined}
               />
             </Appear>
