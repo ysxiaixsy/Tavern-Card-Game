@@ -61,6 +61,7 @@ function BoardRowInner({
                 instanceId={unit.instanceId}
                 size="board"
                 effective={unit.effectiveStrength}
+                onField
                 highlighted={isTarget}
                 dimmed={targeting && !isTarget}
                 onPress={onUnitPress ? () => onUnitPress(unit.instanceId, unit.defId) : undefined}

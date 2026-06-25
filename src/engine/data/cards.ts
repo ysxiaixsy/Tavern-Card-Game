@@ -156,10 +156,10 @@ export const CARD_DEFS: readonly CardDef[] = [
     name: 'Cow',
     faction: 'neutral',
     type: 'unit',
-    row: 'melee',
+    row: 'ranged',
     strength: 0,
     abilities: [],
-    summonAvenger: 'neu_bovine', // turns into the Bovine Defense Force next round
+    summonAvenger: 'neu_bovine', // turns into the Bovine Defense Force (melee) next round
   },
   {
     id: 'neu_bovine',

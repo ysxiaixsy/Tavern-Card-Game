@@ -26,6 +26,8 @@ interface Props {
   /** Valid target glow (decoy targeting, pickers). */
   highlighted?: boolean;
   dimmed?: boolean;
+  /** Strength values show only for cards on the battlefield. */
+  onField?: boolean;
   onPress?: () => void;
   onLongPress?: () => void;
 }
@@ -89,6 +91,7 @@ function CardViewInner({
   selected,
   highlighted,
   dimmed,
+  onField,
   onPress,
   onLongPress,
 }: Props): React.JSX.Element {
@@ -117,7 +120,8 @@ function CardViewInner({
     transform: selected && size === 'hand' ? [{ translateY: -8 }] : [],
   };
 
-  const badge = isUnit && (
+  // Strength is shown only for cards on the battlefield.
+  const badge = isUnit && onField && (
     <View
       style={[
         styles.badge,

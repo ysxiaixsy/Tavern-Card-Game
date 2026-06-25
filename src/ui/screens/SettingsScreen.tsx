@@ -148,7 +148,7 @@ export function SettingsScreen(): React.JSX.Element {
 
       <Text variant="caption" tone="dim" style={styles.footer}>
         GWENT — fan-made recreation of The Witcher 3's tavern game.{'\n'}
-        Non-commercial · placeholder art only · no CDPR assets.
+        Non-commercial.
       </Text>
     </ScrollView>
   );

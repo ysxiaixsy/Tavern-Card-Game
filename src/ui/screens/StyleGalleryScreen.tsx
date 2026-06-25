@@ -64,25 +64,25 @@ export function StyleGalleryScreen(): React.JSX.Element {
         <Section title="Card states">
           <View style={styles.cardRow}>
             <CardCell label="normal">
-              <CardView defId="mon_forktail" size="hand" />
+              <CardView defId="mon_forktail" size="hand" onField />
             </CardCell>
             <CardCell label="buffed">
-              <CardView defId="mon_forktail" size="hand" effective={9} />
+              <CardView defId="mon_forktail" size="hand" onField effective={9} />
             </CardCell>
             <CardCell label="weakened">
-              <CardView defId="mon_forktail" size="hand" effective={2} />
+              <CardView defId="mon_forktail" size="hand" onField effective={2} />
             </CardCell>
             <CardCell label="hero">
-              <CardView defId="neu_geralt" size="hand" />
+              <CardView defId="neu_geralt" size="hand" onField />
             </CardCell>
             <CardCell label="selected">
-              <CardView defId="mon_forktail" size="hand" selected />
+              <CardView defId="mon_forktail" size="hand" onField selected />
             </CardCell>
             <CardCell label="targetable">
-              <CardView defId="mon_forktail" size="hand" highlighted />
+              <CardView defId="mon_forktail" size="hand" onField highlighted />
             </CardCell>
             <CardCell label="dimmed">
-              <CardView defId="mon_forktail" size="hand" dimmed />
+              <CardView defId="mon_forktail" size="hand" onField dimmed />
             </CardCell>
           </View>
         </Section>

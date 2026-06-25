@@ -45,9 +45,6 @@ export function HomeScreen(): React.JSX.Element {
         <Text variant="hero" tone="accentBright" style={styles.title}>
           GWENT
         </Text>
-        <Text variant="caption" tone="dim" style={styles.sub}>
-          best of 3 · 10 cards · no draw step
-        </Text>
       </Appear>
 
       <Appear delay={120} style={styles.menu}>
@@ -79,7 +76,7 @@ export function HomeScreen(): React.JSX.Element {
       </Appear>
 
       <Text variant="caption" tone="dim" style={styles.footer}>
-        Fan-made, non-commercial. Placeholder art only — no CDPR assets.
+        Fan-made, non-commercial.
       </Text>
     </View>
   );
@@ -102,14 +99,12 @@ const styles = StyleSheet.create({
   titleBlock: {
     alignItems: 'center',
     alignSelf: 'stretch',
+    marginBottom: space.xxl,
   },
   title: {
     fontSize: 56,
     letterSpacing: 8,
     marginVertical: space.xs,
-  },
-  sub: {
-    marginBottom: space.xxl,
   },
   menu: {
     gap: space.md,
