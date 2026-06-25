@@ -19,6 +19,7 @@ import type {
 } from '../../engine/types';
 import { cardTypeLine, describeCard } from '../cardInfo';
 import { palette, rowLabel, sp } from '../theme';
+import { Button } from './Button';
 import { CardView } from './CardView';
 
 // ---------------------------------------------------------------------------
@@ -51,6 +52,48 @@ export function Sheet({ visible, title, onClose, children }: SheetProps): React.
         </Pressable>
       </Pressable>
     </Modal>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Confirm step for card-pick abilities (medic, leader steal/restore, decoy).
+// Shows the chosen card enlarged + its rules text, with Confirm / Cancel. The
+// underlying Move is only dispatched on confirm, so cancel is always safe.
+// ---------------------------------------------------------------------------
+
+export function ConfirmCard({
+  defId,
+  instanceId,
+  rowTag,
+  confirmLabel,
+  onConfirm,
+  onCancel,
+}: {
+  defId: string;
+  instanceId?: string;
+  rowTag?: string | null;
+  confirmLabel?: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+}): React.JSX.Element {
+  const def = getCardDef(defId);
+  return (
+    <View style={styles.zoomBody}>
+      <CardView defId={defId} instanceId={instanceId} size="large" selected />
+      <Text style={styles.typeLine}>
+        {def.name} — {cardTypeLine(def)}
+      </Text>
+      {rowTag != null && <Text style={styles.typeLine}>Row: {rowTag}</Text>}
+      {describeCard(defId).map((line, i) => (
+        <Text key={i} style={styles.abilityLine}>
+          {line}
+        </Text>
+      ))}
+      <View style={styles.confirmRow}>
+        <Button label="Cancel" variant="ghost" onPress={onCancel} />
+        <Button label={confirmLabel ?? 'Confirm'} onPress={onConfirm} />
+      </View>
+    </View>
   );
 }
 
@@ -145,24 +188,47 @@ export function MedicSheet({
   const options = mine
     ? view.legalMoves.filter((m): m is ResolveMedicMove => m.type === 'RESOLVE_MEDIC')
     : [];
+  const [pick, setPick] = useState<ResolveMedicMove | null>(null);
+  useEffect(() => {
+    if (!mine) {
+      setPick(null);
+    }
+  }, [mine]);
+
   return (
-    <Sheet visible={mine} title="Medic — choose a unit to revive">
-      <Text style={styles.dimText}>
-        The revived unit is played instantly with its full effect.
-      </Text>
-      <View style={styles.cardGrid}>
-        {options.map((move, i) => (
-          <View key={i} style={styles.pickEntry}>
-            <CardView
-              defId={defIdInGraveyard(view, move.targetInstanceId)}
-              instanceId={move.targetInstanceId}
-              size="hand"
-              onPress={() => onSubmit(move)}
-            />
-            {move.row && <Text style={styles.rowTag}>{rowLabel[move.row]}</Text>}
+    <Sheet visible={mine} title={pick ? 'Confirm revive' : 'Medic — choose a unit to revive'}>
+      {pick ? (
+        <ConfirmCard
+          defId={defIdInGraveyard(view, pick.targetInstanceId)}
+          instanceId={pick.targetInstanceId}
+          rowTag={pick.row ? rowLabel[pick.row] : null}
+          confirmLabel="Revive"
+          onConfirm={() => {
+            onSubmit(pick);
+            setPick(null);
+          }}
+          onCancel={() => setPick(null)}
+        />
+      ) : (
+        <>
+          <Text style={styles.dimText}>
+            The revived unit is played instantly with its full effect.
+          </Text>
+          <View style={styles.cardGrid}>
+            {options.map((move, i) => (
+              <View key={i} style={styles.pickEntry}>
+                <CardView
+                  defId={defIdInGraveyard(view, move.targetInstanceId)}
+                  instanceId={move.targetInstanceId}
+                  size="hand"
+                  onPress={() => setPick(move)}
+                />
+                {move.row && <Text style={styles.rowTag}>{rowLabel[move.row]}</Text>}
+              </View>
+            ))}
           </View>
-        ))}
-      </View>
+        </>
+      )}
     </Sheet>
   );
 }
@@ -202,10 +268,13 @@ export function LeaderSheet({
   // discard_draw picker state: 2 hand cards out, 1 deck card in.
   const [discardSel, setDiscardSel] = useState<string[]>([]);
   const [fetchSel, setFetchSel] = useState<string | null>(null);
+  // Targeted-pick confirm step (restore_to_hand / steal_from_graveyard).
+  const [pick, setPick] = useState<UseLeaderMove | null>(null);
   useEffect(() => {
     if (!visible) {
       setDiscardSel([]);
       setFetchSel(null);
+      setPick(null);
     }
   }, [visible]);
 
@@ -233,7 +302,19 @@ export function LeaderSheet({
   }
 
   return (
-    <Sheet visible={visible} title={def.name} onClose={onClose}>
+    <Sheet visible={visible} title={pick ? 'Confirm' : def.name} onClose={onClose}>
+      {pick ? (
+        <ConfirmCard
+          defId={defIdInGraveyard(view, pick.targetInstanceId as string)}
+          instanceId={pick.targetInstanceId as string}
+          confirmLabel="Take card"
+          onConfirm={() => {
+            onSubmit(pick);
+            setPick(null);
+          }}
+          onCancel={() => setPick(null)}
+        />
+      ) : (
       <View style={styles.zoomBody}>
         <CardView defId={def.id} size="large" dimmed={sideView.leaderUsed} />
         {describeCard(def.id).map((line, i) => (
@@ -258,7 +339,7 @@ export function LeaderSheet({
                   defId={defIdInGraveyard(view, move.targetInstanceId as string)}
                   instanceId={move.targetInstanceId as string}
                   size="hand"
-                  onPress={() => onSubmit(move)}
+                  onPress={() => setPick(move)}
                 />
               ))}
             </View>
@@ -309,6 +390,7 @@ export function LeaderSheet({
           </>
         )}
       </View>
+      )}
     </Sheet>
   );
 }
@@ -416,6 +498,11 @@ const styles = StyleSheet.create({
   pickEntry: {
     alignItems: 'center',
     gap: 2,
+  },
+  confirmRow: {
+    flexDirection: 'row',
+    gap: sp(3),
+    marginTop: sp(2),
   },
   rowTag: {
     color: palette.gold,

@@ -12,6 +12,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { getView } from '../../engine/view';
+import { getCardDef } from '../../engine/data/cards';
 import type { Move, PlayerView, RowKind } from '../../engine/types';
 import { factionTheme, sp } from '../theme';
 import { color, radius } from '../tokens';
@@ -63,6 +64,10 @@ export function BattleScreen({
 }: BattleScreenProps): React.JSX.Element {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [targeting, setTargeting] = useState<Targeting | null>(null);
+  // A target tapped but not yet confirmed (decoy). Shown as a confirm bar.
+  const [pendingTarget, setPendingTarget] = useState<{ id: string; defId: string; move: Move } | null>(
+    null,
+  );
   const [zoomDefId, setZoomDefId] = useState<string | null>(null);
   const [graveyardSide, setGraveyardSide] = useState<'you' | 'opponent' | null>(null);
   const [leaderSide, setLeaderSide] = useState<'you' | 'opponent' | null>(null);
@@ -102,9 +107,15 @@ export function BattleScreen({
         (k === 'storm' && (rowKind === 'ranged' || rowKind === 'siege')),
     );
 
+  const cancelTargeting = (): void => {
+    setTargeting(null);
+    setPendingTarget(null);
+  };
+
   const submit = (move: Move): void => {
     setSelectedId(null);
     setTargeting(null);
+    setPendingTarget(null);
     setLeaderSide(null);
     if (move.type === 'PASS') {
       feedback.pass();
@@ -197,22 +208,28 @@ export function BattleScreen({
             row={view.you.rows[rowKind]}
             rowKind={rowKind}
             underWeather={weatherForRow(rowKind)}
+            // Once a target is picked, isolate it (only it stays gold; the rest
+            // dim) so the to-be-confirmed unit is obvious.
             targetIds={
               targeting
                 ? new Set(
-                    [...targeting.targets.keys()].filter((id) =>
-                      view.you.rows[rowKind].units.some((u) => u.instanceId === id),
-                    ),
+                    view.you.rows[rowKind].units
+                      .map((u) => u.instanceId)
+                      .filter((id) => (pendingTarget ? id === pendingTarget.id : targeting.targets.has(id))),
                   )
                 : undefined
             }
-            // While targeting: tap a gold-framed unit to pick it. Otherwise a
-            // tap opens card info (precedence: targeting wins; info suppressed).
+            // While targeting: tap a gold-framed unit to pick it (then confirm).
+            // Otherwise a tap opens card info (targeting wins; info suppressed).
             onUnitPress={(id, defId) => {
               if (targeting) {
+                if (pendingTarget) {
+                  return; // the confirm bar drives from here
+                }
                 const move = targeting.targets.get(id);
                 if (move) {
-                  submit(move);
+                  feedback.tap();
+                  setPendingTarget({ id, defId, move });
                 }
               } else {
                 setZoomDefId(defId);
@@ -223,13 +240,27 @@ export function BattleScreen({
         ))}
       </ScrollView>
 
-      {/* totals / targeting bar */}
-      {targeting ? (
+      {/* totals / targeting / confirm bar */}
+      {pendingTarget ? (
+        <View style={styles.totalsBar}>
+          <Text variant="label" tone="accentBright" caps>
+            Decoy {getCardDef(pendingTarget.defId).name}?
+          </Text>
+          <Pressable onPress={() => setPendingTarget(null)} style={styles.cancelBtn} hitSlop={6}>
+            <Text variant="caption">Cancel</Text>
+          </Pressable>
+          <Pressable onPress={() => submit(pendingTarget.move)} style={styles.confirmBtn} hitSlop={6}>
+            <Text variant="caption" tone="onAccent" caps>
+              Confirm
+            </Text>
+          </Pressable>
+        </View>
+      ) : targeting ? (
         <View style={styles.totalsBar}>
           <Text variant="label" tone="accentBright" caps>
             Tap a gold-framed unit
           </Text>
-          <Pressable onPress={() => setTargeting(null)} style={styles.cancelBtn} hitSlop={6}>
+          <Pressable onPress={cancelTargeting} style={styles.cancelBtn} hitSlop={6}>
             <Text variant="caption">Cancel</Text>
           </Pressable>
         </View>
@@ -396,6 +427,12 @@ const styles = StyleSheet.create({
   cancelBtn: {
     borderColor: color.line,
     borderWidth: 1,
+    borderRadius: radius.md,
+    paddingHorizontal: sp(3),
+    paddingVertical: 2,
+  },
+  confirmBtn: {
+    backgroundColor: color.accent,
     borderRadius: radius.md,
     paddingHorizontal: sp(3),
     paddingVertical: 2,
