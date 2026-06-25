@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import type { RowKind, RowView } from '../../engine/types';
 import { border, color, radius, space } from '../tokens';
 import { Appear, Pulse } from './anim';
@@ -22,6 +22,12 @@ interface Props {
   targetIds?: ReadonlySet<string>;
   onUnitPress?: (instanceId: string, defId: string) => void;
   onUnitLongPress?: (defId: string) => void;
+  /** Drop-target state when playing a card onto a row (tap-choose or drag). */
+  dropState?: 'valid' | 'hover';
+  /** Tap handler for the whole-row drop overlay (row-choose); omit for drag. */
+  onDropPress?: () => void;
+  /** Reports the row's on-screen rect (window coords) for drag hit-testing. */
+  onMeasure?: (rect: { x: number; y: number; width: number; height: number }) => void;
 }
 
 function BoardRowInner({
@@ -31,10 +37,23 @@ function BoardRowInner({
   targetIds,
   onUnitPress,
   onUnitLongPress,
+  dropState,
+  onDropPress,
+  onMeasure,
 }: Props): React.JSX.Element {
   const targeting = targetIds !== undefined;
+  const rowRef = React.useRef<View>(null);
+  const reportRect = (): void => {
+    if (onMeasure) {
+      rowRef.current?.measureInWindow((x, y, width, height) => onMeasure({ x, y, width, height }));
+    }
+  };
   return (
-    <View style={[styles.row, underWeather && { backgroundColor: color.weatherTint }]}>
+    <View
+      ref={rowRef}
+      onLayout={reportRect}
+      style={[styles.row, underWeather && { backgroundColor: color.weatherTint }]}
+    >
       <View style={styles.meta}>
         <Icon name={ROW_ICON[rowKind]} size={13} color={color.inkDim} />
         <Pulse trigger={row.total}>
@@ -71,6 +90,19 @@ function BoardRowInner({
           );
         })}
       </ScrollView>
+      {dropState && (
+        <Pressable
+          style={[styles.dropOverlay, dropState === 'hover' && styles.dropOverlayHover]}
+          pointerEvents={onDropPress ? 'auto' : 'none'}
+          onPress={onDropPress}
+        >
+          {onDropPress && (
+            <Text variant="label" tone="accentBright" caps>
+              Play here
+            </Text>
+          )}
+        </Pressable>
+      )}
     </View>
   );
 }
@@ -112,6 +144,25 @@ const styles = StyleSheet.create({
     gap: space.xs,
     paddingRight: space.sm,
     alignItems: 'center',
+  },
+  dropOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderWidth: border.frame,
+    borderColor: color.accent,
+    borderStyle: 'dashed',
+    borderRadius: radius.sm,
+    backgroundColor: 'rgba(200,162,74,0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dropOverlayHover: {
+    borderStyle: 'solid',
+    borderColor: color.accentBright,
+    backgroundColor: 'rgba(239,206,134,0.22)',
   },
 });
 

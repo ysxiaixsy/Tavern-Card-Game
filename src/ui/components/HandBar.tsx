@@ -24,16 +24,13 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import type { CardInstance, Move, PlayCardMove, PlayerView, RowKind } from '../../engine/types';
+import type { CardInstance, Move, PlayCardMove, PlayerView } from '../../engine/types';
 import { getCardDef } from '../../engine/data/cards';
-import { CARD_SIZE, rowLabel, sp } from '../theme';
+import { CARD_SIZE, sp } from '../theme';
 import { color, radius } from '../tokens';
 import { Button } from './Button';
 import { CardView } from './CardView';
-import { Icon, type IconName } from './Icon';
 import { Text } from './Text';
-
-const ROW_ICON: Record<RowKind, IconName> = { melee: 'sword', ranged: 'bow', siege: 'tower' };
 
 interface Props {
   view: PlayerView;
@@ -42,6 +39,8 @@ interface Props {
   onSelect: (instanceId: string | null) => void;
   onSubmit: (move: Move) => void;
   onEnterTargeting: (cardInstanceId: string, targets: ReadonlyMap<string, Move>) => void;
+  /** Multi-row card (agile/horn/mardroeme): highlight rows to tap. Keyed `${side}:${row}`. */
+  onEnterRowChoice: (cardInstanceId: string, rows: ReadonlyMap<string, Move>) => void;
   onZoom: (defId: string) => void;
 }
 
@@ -114,6 +113,7 @@ export function HandBar({
   onSelect,
   onSubmit,
   onEnterTargeting,
+  onEnterRowChoice,
   onZoom,
 }: Props): React.JSX.Element {
   const [drag, setDrag] = useState<DragState | null>(null);
@@ -134,7 +134,7 @@ export function HandBar({
   const committable = (ps: PlayCardMove[]): PlayCardMove | null =>
     ps.length === 1 && ps[0].targetInstanceId === undefined && ps[0].row === undefined ? ps[0] : null;
 
-  /** Open the right selection flow for a card that needs a choice. */
+  /** Open the right selection flow for a card that needs a choice (used by drag). */
   const choose = (instanceId: string): void => {
     const plays = playsFor(instanceId);
     if (plays.length > 0 && plays.every((m) => m.targetInstanceId !== undefined)) {
@@ -146,6 +146,36 @@ export function HandBar({
     } else {
       onSelect(instanceId);
     }
+  };
+
+  /** "Play" button: commit a single play, or start the right guided choice. */
+  const play = (instanceId: string): void => {
+    const plays = playsFor(instanceId);
+    if (plays.length === 0) {
+      return;
+    }
+    if (plays.every((m) => m.targetInstanceId !== undefined)) {
+      const map = new Map<string, Move>();
+      for (const m of plays) {
+        map.set(m.targetInstanceId as string, m);
+      }
+      onEnterTargeting(instanceId, map); // decoy
+      return;
+    }
+    if (plays.length === 1) {
+      onSubmit(plays[0]); // fixed-row unit, weather, scorch, single-row horn…
+      return;
+    }
+    // Multiple row options (agile / horn / mardroeme): highlight rows to tap.
+    const card = view.you.hand.find((c) => c.instanceId === instanceId);
+    const side = card && getCardDef(card.defId).abilities.includes('spy') ? 'opponent' : 'you';
+    const rows = new Map<string, Move>();
+    for (const m of plays) {
+      if (m.row) {
+        rows.set(`${side}:${m.row}`, m);
+      }
+    }
+    onEnterRowChoice(instanceId, rows);
   };
 
   // --- drag wiring (the dragged card is rendered as the overlay below) ---
@@ -187,40 +217,24 @@ export function HandBar({
     }
   };
 
-  // --- action bar (tap flow) ---
+  // --- action bar (tap flow): View + Play, the drag hint takes precedence ---
+  const selectedCard = selectedId !== null ? view.you.hand.find((c) => c.instanceId === selectedId) : undefined;
   const selectedPlays = selectedId !== null ? playsFor(selectedId) : [];
-  const targeted = selectedPlays.filter((m) => m.targetInstanceId !== undefined);
 
-  // Tap-flow action bar. The drag hint is rendered separately as a
-  // non-layout overlay so it can't shift the cards mid-drag.
   let actionBar: React.JSX.Element | null = null;
-  if (hint === null && selectedId !== null && myAction) {
-    if (selectedPlays.length === 0) {
-      actionBar = (
-        <Text variant="caption" tone="dim" style={styles.hint}>
-          No legal play for this card right now.
-        </Text>
-      );
-    } else if (targeted.length === selectedPlays.length) {
-      actionBar = <Button label="Choose a target" onPress={() => choose(selectedId)} />;
-    } else {
-      actionBar = (
-        <View style={styles.actionRow}>
-          {selectedPlays.map((move, i) => (
-            <Button
-              key={i}
-              label={move.row ? rowLabel[move.row] : 'Play'}
-              onPress={() => onSubmit(move)}
-              icon={
-                move.row ? (
-                  <Icon name={ROW_ICON[move.row]} size={14} color={color.inkOnAccent} />
-                ) : undefined
-              }
-            />
-          ))}
-        </View>
-      );
-    }
+  if (hint === null && selectedId !== null && selectedCard) {
+    actionBar = (
+      <View style={styles.actionRow}>
+        <Button label="View" variant="ghost" onPress={() => onZoom(selectedCard.defId)} />
+        {myAction && selectedPlays.length > 0 ? (
+          <Button label="Play" onPress={() => play(selectedId)} />
+        ) : myAction ? (
+          <Text variant="caption" tone="dim" style={styles.hint}>
+            No legal play
+          </Text>
+        ) : null}
+      </View>
+    );
   }
 
   const onLayout = (_e: LayoutChangeEvent): void => {

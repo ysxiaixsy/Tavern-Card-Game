@@ -71,6 +71,10 @@ export function BattleScreen({
   const [zoomDefId, setZoomDefId] = useState<string | null>(null);
   const [graveyardSide, setGraveyardSide] = useState<'you' | 'opponent' | null>(null);
   const [leaderSide, setLeaderSide] = useState<'you' | 'opponent' | null>(null);
+  // Tap-to-play row choice (agile/horn/mardroeme): valid rows keyed `${side}:${row}`.
+  const [rowChoice, setRowChoice] = useState<{ cardInstanceId: string; rows: ReadonlyMap<string, Move> } | null>(
+    null,
+  );
   const confirmPassPref = useAppStore((s) => s.prefs.confirmPass);
 
   // Haptics on round / match results, fired once per new result.
@@ -110,12 +114,14 @@ export function BattleScreen({
   const cancelTargeting = (): void => {
     setTargeting(null);
     setPendingTarget(null);
+    setRowChoice(null);
   };
 
   const submit = (move: Move): void => {
     setSelectedId(null);
     setTargeting(null);
     setPendingTarget(null);
+    setRowChoice(null);
     setLeaderSide(null);
     if (move.type === 'PASS') {
       feedback.pass();
@@ -123,6 +129,23 @@ export function BattleScreen({
       feedback.play();
     }
     onMove(move);
+  };
+
+  // Row-choose drop props for a given board row (tap a highlighted row to play).
+  const dropFor = (side: 'you' | 'opponent', rowKind: RowKind): { dropState?: 'valid'; onDropPress?: () => void } => {
+    const key = `${side}:${rowKind}`;
+    if (!rowChoice || !rowChoice.rows.has(key)) {
+      return {};
+    }
+    return {
+      dropState: 'valid',
+      onDropPress: () => {
+        const move = rowChoice.rows.get(key);
+        if (move) {
+          submit(move);
+        }
+      },
+    };
   };
 
   const doPass = (): void => submit({ type: 'PASS', player: view.player });
@@ -182,9 +205,10 @@ export function BattleScreen({
             row={view.opponent.rows[rowKind]}
             rowKind={rowKind}
             underWeather={weatherForRow(rowKind)}
-            // Single tap opens card info — suppressed while picking a target.
-            onUnitPress={targeting ? undefined : (_id, defId) => setZoomDefId(defId)}
+            // Single tap opens card info — suppressed while picking a target/row.
+            onUnitPress={targeting || rowChoice ? undefined : (_id, defId) => setZoomDefId(defId)}
             onUnitLongPress={setZoomDefId}
+            {...dropFor('opponent', rowKind)}
           />
         ))}
 
@@ -220,8 +244,12 @@ export function BattleScreen({
                 : undefined
             }
             // While targeting: tap a gold-framed unit to pick it (then confirm).
+            // While row-choosing: the row overlay handles taps (info suppressed).
             // Otherwise a tap opens card info (targeting wins; info suppressed).
             onUnitPress={(id, defId) => {
+              if (rowChoice) {
+                return; // the row drop overlay drives from here
+              }
               if (targeting) {
                 if (pendingTarget) {
                   return; // the confirm bar drives from here
@@ -236,12 +264,22 @@ export function BattleScreen({
               }
             }}
             onUnitLongPress={setZoomDefId}
+            {...dropFor('you', rowKind)}
           />
         ))}
       </ScrollView>
 
-      {/* totals / targeting / confirm bar */}
-      {pendingTarget ? (
+      {/* totals / targeting / row-choose / confirm bar */}
+      {rowChoice ? (
+        <View style={styles.totalsBar}>
+          <Text variant="label" tone="accentBright" caps>
+            Tap a highlighted row
+          </Text>
+          <Pressable onPress={() => setRowChoice(null)} style={styles.cancelBtn} hitSlop={6}>
+            <Text variant="caption">Cancel</Text>
+          </Pressable>
+        </View>
+      ) : pendingTarget ? (
         <View style={styles.totalsBar}>
           <Text variant="label" tone="accentBright" caps>
             Decoy {getCardDef(pendingTarget.defId).name}?
@@ -291,6 +329,7 @@ export function BattleScreen({
       <PlayerStrip
         side={view.you}
         name={yourName}
+        handCount={view.you.hand.length}
         leaderUsable={view.legalMoves.some((m) => m.type === 'USE_LEADER')}
         onGraveyard={() => setGraveyardSide('you')}
         onLeader={() => setLeaderSide('you')}
@@ -308,6 +347,7 @@ export function BattleScreen({
         }}
         onSubmit={submit}
         onEnterTargeting={(cardInstanceId, targets) => setTargeting({ cardInstanceId, targets })}
+        onEnterRowChoice={(cardInstanceId, rows) => setRowChoice({ cardInstanceId, rows })}
         onZoom={setZoomDefId}
       />
 
