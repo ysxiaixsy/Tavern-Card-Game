@@ -5,11 +5,13 @@
  */
 
 import React from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
-import { palette, sp } from '../theme';
+import { Alert, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
+import { border, color, radius, sp } from '../tokens';
 import { feedback } from '../feedback';
 import { useAppStore, type AiSpeed, type Prefs } from '../store';
 import { Appear } from '../components/anim';
+import { Icon } from '../components/Icon';
+import { Text } from '../components/Text';
 
 function ToggleRow({
   label,
@@ -25,14 +27,16 @@ function ToggleRow({
   return (
     <View style={styles.row}>
       <View style={styles.rowText}>
-        <Text style={styles.rowLabel}>{label}</Text>
-        <Text style={styles.rowHint}>{hint}</Text>
+        <Text variant="bodyStrong">{label}</Text>
+        <Text variant="caption" tone="dim">
+          {hint}
+        </Text>
       </View>
       <Switch
         value={value}
         onValueChange={onChange}
-        trackColor={{ false: palette.line, true: palette.gold }}
-        thumbColor={value ? palette.goldBright : palette.textDim}
+        trackColor={{ false: color.line, true: color.accent }}
+        thumbColor={value ? color.accentBright : color.inkDim}
       />
     </View>
   );
@@ -54,7 +58,7 @@ export function SettingsScreen(): React.JSX.Element {
 
   const set = <K extends keyof Prefs>(key: K, value: Prefs[K]): void => {
     setPref(key, value);
-    feedback.tap(); // confirm the toggle (no-op if haptics just turned off)
+    feedback.tap();
   };
 
   const clearDecks = (): void => {
@@ -71,15 +75,22 @@ export function SettingsScreen(): React.JSX.Element {
   return (
     <ScrollView style={styles.scroll} contentContainerStyle={styles.screen}>
       <View style={styles.header}>
-        <Pressable onPress={goHome} hitSlop={10}>
-          <Text style={styles.back}>‹ Home</Text>
+        <Pressable onPress={goHome} hitSlop={10} style={styles.back}>
+          <Icon name="back" size={16} color={color.accent} />
+          <Text variant="label" tone="accent" caps>
+            Home
+          </Text>
         </Pressable>
-        <Text style={styles.title}>Settings</Text>
-        <Text style={styles.back}> </Text>
+        <Text variant="title" tone="accentBright">
+          Settings
+        </Text>
+        <View style={styles.back} />
       </View>
 
       <Appear>
-        <Text style={styles.sectionLabel}>GAMEPLAY</Text>
+        <Text variant="label" tone="dim" caps style={styles.sectionLabel}>
+          Gameplay
+        </Text>
         <ToggleRow
           label="Animations"
           hint="Card and screen transitions"
@@ -99,7 +110,9 @@ export function SettingsScreen(): React.JSX.Element {
           onChange={(v) => set('confirmPass', v)}
         />
 
-        <Text style={styles.sectionLabel}>AI THINKING SPEED</Text>
+        <Text variant="label" tone="dim" caps style={styles.sectionLabel}>
+          AI thinking speed
+        </Text>
         <View style={styles.segment}>
           {AI_SPEEDS.map((s) => {
             const selected = prefs.aiSpeed === s.key;
@@ -109,7 +122,7 @@ export function SettingsScreen(): React.JSX.Element {
                 onPress={() => set('aiSpeed', s.key)}
                 style={[styles.segmentButton, selected && styles.segmentSelected]}
               >
-                <Text style={[styles.segmentText, selected && { color: palette.goldBright }]}>
+                <Text variant="label" tone={selected ? 'accentBright' : 'dim'} caps>
                   {s.label}
                 </Text>
               </Pressable>
@@ -117,13 +130,15 @@ export function SettingsScreen(): React.JSX.Element {
           })}
         </View>
 
-        <Text style={styles.sectionLabel}>DATA</Text>
+        <Text variant="label" tone="dim" caps style={styles.sectionLabel}>
+          Data
+        </Text>
         <Pressable
           style={[styles.dangerButton, customDeckCount === 0 && styles.dangerDisabled]}
           disabled={customDeckCount === 0}
           onPress={clearDecks}
         >
-          <Text style={styles.dangerText}>
+          <Text variant="label" caps color={customDeckCount === 0 ? color.inkDim : color.sealRedBright}>
             {customDeckCount === 0
               ? 'No custom decks saved'
               : `Delete all ${customDeckCount} custom deck(s)`}
@@ -131,7 +146,7 @@ export function SettingsScreen(): React.JSX.Element {
         </Pressable>
       </Appear>
 
-      <Text style={styles.footer}>
+      <Text variant="caption" tone="dim" style={styles.footer}>
         GWENT — fan-made recreation of The Witcher 3's tavern game.{'\n'}
         Non-commercial · placeholder art only · no CDPR assets.
       </Text>
@@ -142,7 +157,7 @@ export function SettingsScreen(): React.JSX.Element {
 const styles = StyleSheet.create({
   scroll: {
     flex: 1,
-    backgroundColor: palette.bg,
+    backgroundColor: color.bg,
   },
   screen: {
     padding: sp(4),
@@ -155,19 +170,12 @@ const styles = StyleSheet.create({
     marginBottom: sp(4),
   },
   back: {
-    color: palette.gold,
-    fontSize: 14,
-    minWidth: 52,
-  },
-  title: {
-    color: palette.goldBright,
-    fontSize: 18,
-    fontWeight: '800',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: sp(1),
+    minWidth: 64,
   },
   sectionLabel: {
-    color: palette.textDim,
-    fontSize: 10,
-    letterSpacing: 2,
     marginTop: sp(5),
     marginBottom: sp(1),
   },
@@ -177,21 +185,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: sp(2),
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderColor: palette.line,
+    borderColor: color.line,
   },
   rowText: {
     flex: 1,
     paddingRight: sp(3),
-  },
-  rowLabel: {
-    color: palette.text,
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  rowHint: {
-    color: palette.textDim,
-    fontSize: 11,
-    marginTop: 1,
+    gap: 1,
   },
   segment: {
     flexDirection: 'row',
@@ -199,40 +198,28 @@ const styles = StyleSheet.create({
   },
   segmentButton: {
     flex: 1,
-    borderWidth: 1,
-    borderColor: palette.line,
-    borderRadius: 18,
+    borderWidth: border.thin,
+    borderColor: color.line,
+    borderRadius: radius.lg,
     paddingVertical: sp(2),
     alignItems: 'center',
   },
   segmentSelected: {
-    borderColor: palette.goldBright,
-    backgroundColor: palette.surfaceRaised,
-  },
-  segmentText: {
-    color: palette.textDim,
-    fontWeight: '700',
-    fontSize: 13,
+    borderColor: color.accentBright,
+    backgroundColor: color.surfaceRaised,
   },
   dangerButton: {
-    borderWidth: 1,
-    borderColor: palette.danger,
-    borderRadius: 18,
+    borderWidth: border.thin,
+    borderColor: color.sealRed,
+    borderRadius: radius.lg,
     paddingVertical: sp(3),
     alignItems: 'center',
   },
   dangerDisabled: {
-    borderColor: palette.line,
+    borderColor: color.line,
     opacity: 0.6,
   },
-  dangerText: {
-    color: palette.danger,
-    fontWeight: '700',
-    fontSize: 13,
-  },
   footer: {
-    color: palette.textDim,
-    fontSize: 10,
     textAlign: 'center',
     marginTop: sp(8),
     lineHeight: 16,

@@ -3,12 +3,15 @@
  */
 
 import React, { useEffect } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { playerLabel } from '../cardInfo';
-import { palette, sp } from '../theme';
+import { color, sp } from '../tokens';
 import { useAppStore } from '../store';
 import { feedback } from '../feedback';
 import { Appear } from '../components/anim';
+import { Button } from '../components/Button';
+import { Panel } from '../components/Panel';
+import { Text } from '../components/Text';
 
 export function ResultScreen(): React.JSX.Element | null {
   const session = useAppStore((s) => s.session);
@@ -38,37 +41,37 @@ export function ResultScreen(): React.JSX.Element | null {
 
   return (
     <Appear style={styles.screen}>
-      <Text style={styles.eyebrow}>MATCH OVER</Text>
-      <Text style={styles.title}>
-        {result.winner === null ? 'A draw!' : `${playerLabel(state, result.winner)} wins!`}
+      <Text variant="label" tone="dim" caps>
+        Match Over
+      </Text>
+      <Text variant="display" tone="accentBright" style={styles.title}>
+        {result.winner === null ? 'A draw' : `${playerLabel(state, result.winner)} wins`}
       </Text>
       {result.winner === null && (
-        <Text style={styles.sub}>Both players ran out of gems at once.</Text>
+        <Text variant="caption" tone="dim">
+          Both players ran out of gems at once.
+        </Text>
       )}
 
-      <View style={styles.rounds}>
+      <Panel style={styles.rounds}>
         {result.rounds.map((r) => (
-          <Text key={r.round} style={styles.roundLine}>
+          <Text key={r.round} variant="body">
             Round {r.round}: {r.totals.p1} – {r.totals.p2}
             {'  '}
-            <Text style={styles.roundWinner}>
+            <Text variant="bodyStrong" tone="accent">
               {r.winner === null
                 ? 'tied'
                 : `${r.winner === 'p1' ? 'P1' : 'P2'}${r.tieBrokenByNilfgaard ? ' (NG tiebreak)' : ''}`}
             </Text>
           </Text>
         ))}
-        <Text style={styles.gems}>
+        <Text variant="caption" tone="dim" style={styles.gems}>
           Final gems — P1: {result.gems.p1} · P2: {result.gems.p2}
         </Text>
-      </View>
+      </Panel>
 
-      <Pressable style={styles.button} onPress={rematch}>
-        <Text style={styles.buttonText}>Rematch (new shuffle)</Text>
-      </Pressable>
-      <Pressable style={[styles.button, styles.buttonGhost]} onPress={quitToHome}>
-        <Text style={styles.buttonGhostText}>Back to the tavern</Text>
-      </Pressable>
+      <Button label="Rematch — new shuffle" onPress={rematch} style={styles.button} />
+      <Button label="Back to the tavern" variant="ghost" onPress={quitToHome} style={styles.button} />
     </Appear>
   );
 }
@@ -76,72 +79,26 @@ export function ResultScreen(): React.JSX.Element | null {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: palette.bg,
+    backgroundColor: color.bg,
     alignItems: 'center',
     justifyContent: 'center',
     padding: sp(6),
     gap: sp(2),
   },
-  eyebrow: {
-    color: palette.textDim,
-    fontSize: 12,
-    letterSpacing: 4,
-  },
   title: {
-    color: palette.goldBright,
-    fontSize: 26,
-    fontWeight: '800',
     textAlign: 'center',
   },
-  sub: {
-    color: palette.textDim,
-    fontSize: 13,
-  },
   rounds: {
-    backgroundColor: palette.surface,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: palette.line,
     padding: sp(4),
     gap: sp(1),
     marginVertical: sp(4),
     minWidth: 240,
     alignItems: 'center',
   },
-  roundLine: {
-    color: palette.text,
-    fontSize: 14,
-  },
-  roundWinner: {
-    color: palette.gold,
-    fontWeight: '700',
-  },
   gems: {
-    color: palette.textDim,
-    fontSize: 12,
     marginTop: sp(1),
   },
   button: {
-    backgroundColor: palette.gold,
-    borderRadius: 24,
-    paddingVertical: sp(3),
-    paddingHorizontal: sp(6),
     minWidth: 240,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: '#241a12',
-    fontWeight: '800',
-    fontSize: 14,
-  },
-  buttonGhost: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: palette.line,
-  },
-  buttonGhostText: {
-    color: palette.text,
-    fontWeight: '700',
-    fontSize: 14,
   },
 });

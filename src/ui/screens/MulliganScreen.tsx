@@ -5,13 +5,15 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { getView } from '../../engine/view';
 import type { Move, PlayerView } from '../../engine/types';
 import { playerLabel } from '../cardInfo';
-import { palette, sp } from '../theme';
+import { color, sp } from '../tokens';
 import { useAppStore } from '../store';
+import { Button } from '../components/Button';
 import { CardView } from '../components/CardView';
+import { Text } from '../components/Text';
 import { CardZoomSheet, ChooseFirstSheet } from '../components/Sheets';
 
 export interface MulliganViewProps {
@@ -31,8 +33,12 @@ export function MulliganView({ view, title, waitingText, onMove }: MulliganViewP
   if (waitingText !== null) {
     return (
       <View style={[styles.screen, styles.waiting]}>
-        <Text style={styles.title}>{waitingText}</Text>
-        <Text style={styles.subtitle}>The battle begins in a moment.</Text>
+        <Text variant="title" tone="accentBright" style={styles.center}>
+          {waitingText}
+        </Text>
+        <Text variant="caption" tone="dim">
+          The battle begins in a moment.
+        </Text>
         <ChooseFirstSheet view={view} onSubmit={onMove} />
       </View>
     );
@@ -55,8 +61,10 @@ export function MulliganView({ view, title, waitingText, onMove }: MulliganViewP
 
   return (
     <View style={styles.screen}>
-      <Text style={styles.title}>{title}</Text>
-      <Text style={styles.subtitle}>
+      <Text variant="title" tone="accentBright" style={styles.center}>
+        {title}
+      </Text>
+      <Text variant="caption" tone="dim" style={styles.subtitle}>
         Swap up to 2 cards. There is no draw step — these cards must last all three rounds.
       </Text>
 
@@ -71,26 +79,29 @@ export function MulliganView({ view, title, waitingText, onMove }: MulliganViewP
               onPress={() => toggle(card.instanceId)}
               onLongPress={() => setZoomDefId(card.defId)}
             />
-            {selected.includes(card.instanceId) && <Text style={styles.swapTag}>↻ redraw</Text>}
+            {selected.includes(card.instanceId) && (
+              <Text variant="caption" tone="accentBright" caps>
+                redraw
+              </Text>
+            )}
           </View>
         ))}
       </ScrollView>
 
       <View style={styles.buttons}>
-        <Pressable
-          style={[styles.button, styles.buttonGhost]}
+        <Button
+          label="Keep hand"
+          variant="ghost"
           disabled={choicePending}
           onPress={() => submit([])}
-        >
-          <Text style={styles.buttonGhostText}>Keep hand</Text>
-        </Pressable>
-        <Pressable
-          style={[styles.button, selected.length === 0 && styles.buttonDisabled]}
+          style={styles.button}
+        />
+        <Button
+          label={`Redraw ${selected.length || ''}`.trim()}
           disabled={selected.length === 0 || choicePending}
           onPress={() => submit(selected)}
-        >
-          <Text style={styles.buttonText}>Redraw {selected.length || ''}</Text>
-        </Pressable>
+          style={styles.button}
+        />
       </View>
 
       <CardZoomSheet defId={zoomDefId} onClose={() => setZoomDefId(null)} />
@@ -125,22 +136,18 @@ export function MulliganScreen(): React.JSX.Element | null {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: palette.bg,
+    backgroundColor: color.bg,
     paddingTop: sp(4),
   },
   waiting: {
     alignItems: 'center',
     justifyContent: 'center',
+    gap: sp(1),
   },
-  title: {
-    color: palette.goldBright,
-    fontSize: 18,
-    fontWeight: '800',
+  center: {
     textAlign: 'center',
   },
   subtitle: {
-    color: palette.textDim,
-    fontSize: 12,
     textAlign: 'center',
     marginTop: sp(1),
     marginBottom: sp(3),
@@ -158,11 +165,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 2,
   },
-  swapTag: {
-    color: palette.goldBright,
-    fontSize: 10,
-    fontWeight: '700',
-  },
   buttons: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -170,29 +172,6 @@ const styles = StyleSheet.create({
     padding: sp(3),
   },
   button: {
-    backgroundColor: palette.gold,
-    borderRadius: 22,
-    paddingVertical: sp(3),
-    paddingHorizontal: sp(6),
     minWidth: 140,
-    alignItems: 'center',
-  },
-  buttonDisabled: {
-    opacity: 0.4,
-  },
-  buttonText: {
-    color: '#241a12',
-    fontWeight: '800',
-    fontSize: 14,
-  },
-  buttonGhost: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: palette.line,
-  },
-  buttonGhostText: {
-    color: palette.text,
-    fontWeight: '700',
-    fontSize: 14,
   },
 });

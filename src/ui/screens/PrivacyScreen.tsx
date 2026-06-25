@@ -5,12 +5,26 @@
  */
 
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { playerLabel } from '../cardInfo';
-import { GEM, palette, sp } from '../theme';
+import { color, sp } from '../tokens';
 import { useAppStore } from '../store';
 import { feedback } from '../feedback';
 import { Appear } from '../components/anim';
+import { Button } from '../components/Button';
+import { Icon } from '../components/Icon';
+import { Panel } from '../components/Panel';
+import { Text } from '../components/Text';
+
+function Gems({ count }: { count: number }): React.JSX.Element {
+  return (
+    <View style={styles.gemRow}>
+      {Array.from({ length: Math.max(count, 0) }).map((_, i) => (
+        <Icon key={i} name="gem" size={12} color={color.sealRedBright} />
+      ))}
+    </View>
+  );
+}
 
 export function PrivacyScreen(): React.JSX.Element | null {
   const session = useAppStore((s) => s.session);
@@ -22,9 +36,7 @@ export function PrivacyScreen(): React.JSX.Element | null {
   const state = session.state;
   const toLabel = playerLabel(state, session.handoffTo);
   const phaseLine =
-    state.phase === 'mulligan'
-      ? 'Opening hand — swap up to 2 cards'
-      : `Round ${state.round} of 3`;
+    state.phase === 'mulligan' ? 'Opening hand — swap up to 2 cards' : `Round ${state.round} of 3`;
 
   const reveal = (): void => {
     feedback.tap();
@@ -33,25 +45,51 @@ export function PrivacyScreen(): React.JSX.Element | null {
 
   return (
     <Appear key={session.handoffTo} style={styles.screen}>
-      <Text style={styles.eyebrow}>HOT-SEAT</Text>
-      <Text style={styles.title}>Pass the phone</Text>
-      <Text style={styles.to}>{toLabel}</Text>
+      <Text variant="label" tone="dim" caps>
+        Hot-seat
+      </Text>
+      <Text variant="display" tone="ink">
+        Pass the Phone
+      </Text>
+      <Text variant="title" tone="accentBright" style={styles.to}>
+        {toLabel}
+      </Text>
 
-      {session.notice !== null && <Text style={styles.notice}>{session.notice}</Text>}
+      {session.notice !== null && (
+        <Panel tone="raised" style={styles.notice}>
+          <Text variant="body" style={styles.noticeText}>
+            {session.notice}
+          </Text>
+        </Panel>
+      )}
 
       <View style={styles.statusRow}>
-        <Text style={styles.status}>
-          P1 {GEM.repeat(Math.max(state.players.p1.gems, 0))}
-          {'  ·  '}
-          P2 {GEM.repeat(Math.max(state.players.p2.gems, 0))}
+        <View style={styles.gemRow}>
+          <Text variant="label" tone="dim" caps>
+            P1
+          </Text>
+          <Gems count={state.players.p1.gems} />
+          <Text variant="caption" tone="dim">
+            ·
+          </Text>
+          <Text variant="label" tone="dim" caps>
+            P2
+          </Text>
+          <Gems count={state.players.p2.gems} />
+        </View>
+        <Text variant="caption" tone="dim">
+          {phaseLine}
         </Text>
-        <Text style={styles.phase}>{phaseLine}</Text>
       </View>
 
-      <Pressable style={styles.button} onPress={reveal}>
-        <Text style={styles.buttonText}>I’m {session.handoffTo === 'p1' ? 'Player 1' : 'Player 2'} — show my cards</Text>
-      </Pressable>
-      <Text style={styles.smallprint}>No peeking. Witchers always know.</Text>
+      <Button
+        label={`I'm ${session.handoffTo === 'p1' ? 'Player 1' : 'Player 2'} — show my cards`}
+        onPress={reveal}
+        style={styles.button}
+      />
+      <Text variant="caption" tone="dim" style={styles.smallprint}>
+        No peeking. Witchers always know.
+      </Text>
     </Appear>
   );
 }
@@ -59,68 +97,37 @@ export function PrivacyScreen(): React.JSX.Element | null {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: palette.bg,
+    backgroundColor: color.bg,
     alignItems: 'center',
     justifyContent: 'center',
     padding: sp(6),
     gap: sp(2),
   },
-  eyebrow: {
-    color: palette.textDim,
-    fontSize: 12,
-    letterSpacing: 4,
-  },
-  title: {
-    color: palette.text,
-    fontSize: 28,
-    fontWeight: '800',
-  },
   to: {
-    color: palette.goldBright,
-    fontSize: 18,
-    fontWeight: '700',
     marginBottom: sp(2),
   },
   notice: {
-    color: palette.text,
-    backgroundColor: palette.surfaceRaised,
-    borderColor: palette.line,
-    borderWidth: 1,
-    borderRadius: 8,
     padding: sp(3),
-    fontSize: 13,
+    maxWidth: 320,
+  },
+  noticeText: {
     textAlign: 'center',
     lineHeight: 19,
   },
   statusRow: {
     alignItems: 'center',
-    gap: 2,
+    gap: sp(1),
     marginVertical: sp(2),
   },
-  status: {
-    color: palette.danger,
-    fontSize: 14,
-    letterSpacing: 1,
-  },
-  phase: {
-    color: palette.textDim,
-    fontSize: 12,
+  gemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: sp(1),
   },
   button: {
-    backgroundColor: palette.gold,
-    borderRadius: 24,
-    paddingVertical: sp(4),
-    paddingHorizontal: sp(6),
     marginTop: sp(4),
   },
-  buttonText: {
-    color: '#241a12',
-    fontWeight: '800',
-    fontSize: 15,
-  },
   smallprint: {
-    color: palette.textDim,
-    fontSize: 11,
     marginTop: sp(2),
   },
 });
