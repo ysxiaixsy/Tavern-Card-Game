@@ -28,6 +28,8 @@ interface Props {
   onDropPress?: () => void;
   /** Reports the row's on-screen rect (window coords) for drag hit-testing. */
   onMeasure?: (rect: { x: number; y: number; width: number; height: number }) => void;
+  /** Bump to force a re-measure (e.g. when a drag starts). */
+  measureSignal?: number;
 }
 
 function BoardRowInner({
@@ -40,6 +42,7 @@ function BoardRowInner({
   dropState,
   onDropPress,
   onMeasure,
+  measureSignal,
 }: Props): React.JSX.Element {
   const targeting = targetIds !== undefined;
   const rowRef = React.useRef<View>(null);
@@ -48,6 +51,7 @@ function BoardRowInner({
       rowRef.current?.measureInWindow((x, y, width, height) => onMeasure({ x, y, width, height }));
     }
   };
+  React.useEffect(reportRect, [measureSignal]); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <View
       ref={rowRef}

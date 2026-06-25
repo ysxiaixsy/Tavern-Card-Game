@@ -41,17 +41,19 @@ interface Props {
   onEnterTargeting: (cardInstanceId: string, targets: ReadonlyMap<string, Move>) => void;
   /** Multi-row card (agile/horn/mardroeme): highlight rows to tap. Keyed `${side}:${row}`. */
   onEnterRowChoice: (cardInstanceId: string, rows: ReadonlyMap<string, Move>) => void;
+  /** Drag lifecycle (drag a card onto a board row). Window coords are the card's top-left. */
+  onCardDragStart: (cardInstanceId: string) => void;
+  onCardDragMove: (winX: number, winY: number) => void;
+  onCardDragEnd: () => void;
   onZoom: (defId: string) => void;
 }
-
-const ARM_AT = 38; // drag up past this and release to play
 
 interface DragState {
   instanceId: string;
   defId: string;
 }
 
-/** A hand card: tap (select), long-press (zoom), or drag up (play). */
+/** A hand card: tap (select), long-press (zoom), or drag up onto a row (play). */
 function DraggableHandCard({
   card,
   selected,
@@ -71,7 +73,7 @@ function DraggableHandCard({
   onZoom: () => void;
   onDragStart: (instanceId: string, defId: string, winX: number, winY: number) => void;
   onDragMove: (dx: number, dy: number) => void;
-  onDragEnd: (committed: boolean) => void;
+  onDragEnd: () => void;
 }): React.JSX.Element {
   const ref = useRef<View>(null);
   const latest = useRef({ playable });
@@ -86,8 +88,8 @@ function DraggableHandCard({
         ref.current?.measureInWindow((x, y) => onDragStart(card.instanceId, card.defId, x, y));
       },
       onPanResponderMove: (_e, g) => onDragMove(g.dx, g.dy),
-      onPanResponderRelease: (_e, g) => onDragEnd(g.dy < -ARM_AT),
-      onPanResponderTerminate: () => onDragEnd(false),
+      onPanResponderRelease: () => onDragEnd(),
+      onPanResponderTerminate: () => onDragEnd(),
     }),
   ).current;
 
@@ -114,39 +116,29 @@ export function HandBar({
   onSubmit,
   onEnterTargeting,
   onEnterRowChoice,
+  onCardDragStart,
+  onCardDragMove,
+  onCardDragEnd,
   onZoom,
 }: Props): React.JSX.Element {
   const [drag, setDrag] = useState<DragState | null>(null);
-  const [hint, setHint] = useState<string | null>(null);
 
   const handRef = useRef<View>(null);
   const origin = useRef({ x: 0, y: 0 });
   const base = useRef({ x: 0, y: 0 });
-  const armed = useRef(false);
+  const grantWin = useRef({ x: 0, y: 0 });
   const pos = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
   const scale = useRef(new Animated.Value(1)).current;
+
+  // Bridge to the parent's live drag handlers so the per-card PanResponder
+  // (created once) always calls the current closures.
+  const dragApi = useRef({ start: onCardDragStart, move: onCardDragMove, end: onCardDragEnd });
+  dragApi.current = { start: onCardDragStart, move: onCardDragMove, end: onCardDragEnd };
 
   const playsFor = (instanceId: string): PlayCardMove[] =>
     view.legalMoves.filter(
       (m): m is PlayCardMove => m.type === 'PLAY_CARD' && m.cardInstanceId === instanceId,
     );
-
-  const committable = (ps: PlayCardMove[]): PlayCardMove | null =>
-    ps.length === 1 && ps[0].targetInstanceId === undefined && ps[0].row === undefined ? ps[0] : null;
-
-  /** Open the right selection flow for a card that needs a choice (used by drag). */
-  const choose = (instanceId: string): void => {
-    const plays = playsFor(instanceId);
-    if (plays.length > 0 && plays.every((m) => m.targetInstanceId !== undefined)) {
-      const map = new Map<string, Move>();
-      for (const m of plays) {
-        map.set(m.targetInstanceId as string, m);
-      }
-      onEnterTargeting(instanceId, map);
-    } else {
-      onSelect(instanceId);
-    }
-  };
 
   /** "Play" button: commit a single play, or start the right guided choice. */
   const play = (instanceId: string): void => {
@@ -178,51 +170,34 @@ export function HandBar({
     onEnterRowChoice(instanceId, rows);
   };
 
-  // --- drag wiring (the dragged card is rendered as the overlay below) ---
+  // --- drag wiring (the dragged card is rendered as the overlay below; the
+  // parent decides which row it lands on and plays it) ---
   const onDragStart = (instanceId: string, defId: string, winX: number, winY: number): void => {
     base.current = { x: winX - origin.current.x, y: winY - origin.current.y };
+    grantWin.current = { x: winX, y: winY };
     pos.setValue(base.current);
     scale.setValue(1);
-    armed.current = false;
-    setHint(null);
     setDrag({ instanceId, defId });
+    dragApi.current.start(instanceId);
   };
 
   const onDragMove = (dx: number, dy: number): void => {
     pos.setValue({ x: base.current.x + dx, y: base.current.y + dy });
     scale.setValue(1 + Math.min(0.15, Math.max(0, -dy / 160)));
-    const nowArmed = dy < -ARM_AT;
-    if (nowArmed !== armed.current) {
-      armed.current = nowArmed;
-      if (!nowArmed || !drag) {
-        setHint(null);
-      } else {
-        const direct = committable(playsFor(drag.instanceId));
-        setHint(direct ? `Release to play ${getCardDef(drag.defId).name}` : 'Release to choose how to play');
-      }
-    }
+    dragApi.current.move(grantWin.current.x + dx, grantWin.current.y + dy);
   };
 
-  const onDragEnd = (committed: boolean): void => {
-    const current = drag;
-    setHint(null);
+  const onDragEnd = (): void => {
     setDrag(null);
-    if (committed && current) {
-      const direct = committable(playsFor(current.instanceId));
-      if (direct) {
-        onSubmit(direct);
-      } else {
-        choose(current.instanceId);
-      }
-    }
+    dragApi.current.end();
   };
 
-  // --- action bar (tap flow): View + Play, the drag hint takes precedence ---
+  // --- action bar (tap flow): View + Play, hidden while dragging ---
   const selectedCard = selectedId !== null ? view.you.hand.find((c) => c.instanceId === selectedId) : undefined;
   const selectedPlays = selectedId !== null ? playsFor(selectedId) : [];
 
   let actionBar: React.JSX.Element | null = null;
-  if (hint === null && selectedId !== null && selectedCard) {
+  if (drag === null && selectedId !== null && selectedCard) {
     actionBar = (
       <View style={styles.actionRow}>
         <Button label="View" variant="ghost" onPress={() => onZoom(selectedCard.defId)} />
@@ -275,10 +250,10 @@ export function HandBar({
         )}
       </ScrollView>
 
-      {hint !== null && (
+      {drag !== null && (
         <View pointerEvents="none" style={styles.hintOverlay}>
           <Text variant="label" tone="accentBright" caps style={styles.dragHint}>
-            ↑ {hint}
+            Drop on a highlighted row
           </Text>
         </View>
       )}

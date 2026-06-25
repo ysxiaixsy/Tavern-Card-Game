@@ -9,12 +9,12 @@
  * view.legalMoves; the UI never re-implements rules.
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { getView } from '../../engine/view';
 import { getCardDef } from '../../engine/data/cards';
-import type { Move, PlayerView, RowKind } from '../../engine/types';
-import { factionTheme, sp } from '../theme';
+import type { Move, PlayCardMove, PlayerView, RowKind } from '../../engine/types';
+import { CARD_SIZE, factionTheme, sp } from '../theme';
 import { color, radius } from '../tokens';
 import { useAppStore } from '../store';
 import { feedback } from '../feedback';
@@ -76,6 +76,20 @@ export function BattleScreen({
     null,
   );
   const confirmPassPref = useAppStore((s) => s.prefs.confirmPass);
+  const confirmDragPref = useAppStore((s) => s.prefs.confirmDrag);
+
+  // --- drag-to-play (a card dropped on a highlighted row) ---
+  // A play staged for confirmation (drag-drop with the confirm pref on).
+  const [pendingPlay, setPendingPlay] = useState<{ move: Move; defId: string } | null>(null);
+  const [dragValidKeys, setDragValidKeys] = useState<ReadonlySet<string> | null>(null);
+  const [dragHover, setDragHover] = useState<string | null>(null);
+  const [measureSignal, setMeasureSignal] = useState(0);
+  // Live mirrors so the per-card PanResponder's stable handlers read fresh data.
+  const viewRef = useRef(view);
+  viewRef.current = view;
+  const rowRects = useRef<Map<string, { x: number; y: number; width: number; height: number }>>(new Map());
+  const dragValidRef = useRef<ReadonlyMap<string, PlayCardMove>>(new Map());
+  const dragHoverRef = useRef<string | null>(null);
 
   // Haptics on round / match results, fired once per new result.
   const roundsSeen = useRef(view.roundHistory.length);
@@ -122,6 +136,7 @@ export function BattleScreen({
     setTargeting(null);
     setPendingTarget(null);
     setRowChoice(null);
+    setPendingPlay(null);
     setLeaderSide(null);
     if (move.type === 'PASS') {
       feedback.pass();
@@ -131,21 +146,111 @@ export function BattleScreen({
     onMove(move);
   };
 
-  // Row-choose drop props for a given board row (tap a highlighted row to play).
-  const dropFor = (side: 'you' | 'opponent', rowKind: RowKind): { dropState?: 'valid'; onDropPress?: () => void } => {
-    const key = `${side}:${rowKind}`;
-    if (!rowChoice || !rowChoice.rows.has(key)) {
-      return {};
-    }
-    return {
-      dropState: 'valid',
-      onDropPress: () => {
-        const move = rowChoice.rows.get(key);
-        if (move) {
-          submit(move);
+  // Stable mirrors for the drag handlers (created once, called by the
+  // per-card PanResponder).
+  const submitRef = useRef(submit);
+  submitRef.current = submit;
+  const confirmDragRef = useRef(confirmDragPref);
+  confirmDragRef.current = confirmDragPref;
+
+  const onCardDragStart = useCallback((cardInstanceId: string) => {
+    const v = viewRef.current;
+    const card = v.you.hand.find((c) => c.instanceId === cardInstanceId);
+    const valid = new Map<string, PlayCardMove>();
+    if (card) {
+      const sideKey = getCardDef(card.defId).abilities.includes('spy') ? 'opponent' : 'you';
+      for (const m of v.legalMoves) {
+        if (m.type === 'PLAY_CARD' && m.cardInstanceId === cardInstanceId && m.row) {
+          valid.set(`${sideKey}:${m.row}`, m);
         }
+      }
+    }
+    dragValidRef.current = valid;
+    dragHoverRef.current = null;
+    setDragValidKeys(new Set(valid.keys()));
+    setDragHover(null);
+    setMeasureSignal((n) => n + 1); // re-measure rows where they currently sit
+  }, []);
+
+  const onCardDragMove = useCallback((winX: number, winY: number) => {
+    const valid = dragValidRef.current;
+    if (valid.size === 0) {
+      return;
+    }
+    const cw = CARD_SIZE.hand.width;
+    const ch = CARD_SIZE.hand.height;
+    let best: string | null = null;
+    let bestArea = 0;
+    for (const key of valid.keys()) {
+      const r = rowRects.current.get(key);
+      if (!r) {
+        continue;
+      }
+      const ox = Math.max(0, Math.min(winX + cw, r.x + r.width) - Math.max(winX, r.x));
+      const oy = Math.max(0, Math.min(winY + ch, r.y + r.height) - Math.max(winY, r.y));
+      const area = ox * oy; // any overlap counts; pick the largest
+      if (area > bestArea) {
+        bestArea = area;
+        best = key;
+      }
+    }
+    if (dragHoverRef.current !== best) {
+      dragHoverRef.current = best;
+      setDragHover(best);
+    }
+  }, []);
+
+  const onCardDragEnd = useCallback(() => {
+    const key = dragHoverRef.current;
+    const move = key ? dragValidRef.current.get(key) : undefined;
+    dragValidRef.current = new Map();
+    dragHoverRef.current = null;
+    setDragValidKeys(null);
+    setDragHover(null);
+    if (!move) {
+      return; // released off any valid row → no play (illegal moves blocked)
+    }
+    if (confirmDragRef.current) {
+      const card = viewRef.current.you.hand.find((c) => c.instanceId === move.cardInstanceId);
+      setPendingPlay({ move, defId: card?.defId ?? '' });
+    } else {
+      submitRef.current(move);
+    }
+  }, []);
+
+  // Drop props for a board row: row-choose (tap) or live drag highlight.
+  const rowProps = (
+    side: 'you' | 'opponent',
+    rowKind: RowKind,
+  ): {
+    dropState?: 'valid' | 'hover';
+    onDropPress?: () => void;
+    onMeasure: (rect: { x: number; y: number; width: number; height: number }) => void;
+    measureSignal: number;
+  } => {
+    const key = `${side}:${rowKind}`;
+    const base = {
+      onMeasure: (rect: { x: number; y: number; width: number; height: number }) => {
+        rowRects.current.set(key, rect);
       },
+      measureSignal,
     };
+    if (rowChoice && rowChoice.rows.has(key)) {
+      return {
+        ...base,
+        dropState: 'valid',
+        onDropPress: () => {
+          const move = rowChoice.rows.get(key);
+          if (move) {
+            submit(move);
+          }
+        },
+      };
+    }
+    if (dragValidKeys?.has(key)) {
+      return { ...base, dropState: dragHover === key ? 'hover' : 'valid' };
+    }
+    return base;
   };
 
   const doPass = (): void => submit({ type: 'PASS', player: view.player });
@@ -208,7 +313,7 @@ export function BattleScreen({
             // Single tap opens card info — suppressed while picking a target/row.
             onUnitPress={targeting || rowChoice ? undefined : (_id, defId) => setZoomDefId(defId)}
             onUnitLongPress={setZoomDefId}
-            {...dropFor('opponent', rowKind)}
+            {...rowProps('opponent', rowKind)}
           />
         ))}
 
@@ -264,13 +369,27 @@ export function BattleScreen({
               }
             }}
             onUnitLongPress={setZoomDefId}
-            {...dropFor('you', rowKind)}
+            {...rowProps('you', rowKind)}
           />
         ))}
       </ScrollView>
 
       {/* totals / targeting / row-choose / confirm bar */}
-      {rowChoice ? (
+      {pendingPlay ? (
+        <View style={styles.totalsBar}>
+          <Text variant="label" tone="accentBright" caps>
+            Play {getCardDef(pendingPlay.defId).name}?
+          </Text>
+          <Pressable onPress={() => setPendingPlay(null)} style={styles.cancelBtn} hitSlop={6}>
+            <Text variant="caption">Cancel</Text>
+          </Pressable>
+          <Pressable onPress={() => submit(pendingPlay.move)} style={styles.confirmBtn} hitSlop={6}>
+            <Text variant="caption" tone="onAccent" caps>
+              Confirm
+            </Text>
+          </Pressable>
+        </View>
+      ) : rowChoice ? (
         <View style={styles.totalsBar}>
           <Text variant="label" tone="accentBright" caps>
             Tap a highlighted row
@@ -348,6 +467,9 @@ export function BattleScreen({
         onSubmit={submit}
         onEnterTargeting={(cardInstanceId, targets) => setTargeting({ cardInstanceId, targets })}
         onEnterRowChoice={(cardInstanceId, rows) => setRowChoice({ cardInstanceId, rows })}
+        onCardDragStart={onCardDragStart}
+        onCardDragMove={onCardDragMove}
+        onCardDragEnd={onCardDragEnd}
         onZoom={setZoomDefId}
       />
 

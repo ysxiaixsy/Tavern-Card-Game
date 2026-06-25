@@ -69,6 +69,8 @@ export interface Prefs {
   animations: boolean;
   haptics: boolean;
   confirmPass: boolean;
+  /** Require a confirm step after dropping a dragged card on a row. */
+  confirmDrag: boolean;
   aiSpeed: AiSpeed;
 }
 
@@ -76,6 +78,7 @@ export const DEFAULT_PREFS: Prefs = {
   animations: true,
   haptics: true,
   confirmPass: true,
+  confirmDrag: false,
   aiSpeed: 'normal',
 };
 

@@ -109,6 +109,12 @@ export function SettingsScreen(): React.JSX.Element {
           value={prefs.confirmPass}
           onChange={(v) => set('confirmPass', v)}
         />
+        <ToggleRow
+          label="Confirm before dropping a card"
+          hint="Ask to confirm when you drag a card onto a row"
+          value={prefs.confirmDrag}
+          onChange={(v) => set('confirmDrag', v)}
+        />
 
         <Text variant="label" tone="dim" caps style={styles.sectionLabel}>
           AI thinking speed
