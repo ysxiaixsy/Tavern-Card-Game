@@ -30,6 +30,7 @@ import { CARD_SIZE, sp } from '../theme';
 import { color, radius } from '../tokens';
 import { Button } from './Button';
 import { CardView } from './CardView';
+import { ScrollHint, useScrollHint } from './ScrollHint';
 import { Text } from './Text';
 
 interface Props {
@@ -122,6 +123,7 @@ export function HandBar({
   onZoom,
 }: Props): React.JSX.Element {
   const [drag, setDrag] = useState<DragState | null>(null);
+  const { scrollProps, metrics } = useScrollHint();
 
   const handRef = useRef<View>(null);
   const origin = useRef({ x: 0, y: 0 });
@@ -228,6 +230,7 @@ export function HandBar({
         showsHorizontalScrollIndicator={false}
         scrollEnabled={drag === null}
         contentContainerStyle={styles.hand}
+        {...scrollProps}
       >
         {view.you.hand.map((card) => (
           <DraggableHandCard
@@ -249,6 +252,7 @@ export function HandBar({
           </Text>
         )}
       </ScrollView>
+      <ScrollHint metrics={metrics} />
 
       {drag !== null && (
         <View pointerEvents="none" style={styles.hintOverlay}>

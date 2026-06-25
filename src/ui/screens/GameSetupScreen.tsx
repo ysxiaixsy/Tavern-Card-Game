@@ -10,6 +10,7 @@ import { allDecks, leaderShortName, useAppStore, type SavedDeck } from '../store
 import type { Difficulty } from '../../ai/agent';
 import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
+import { ScrollHint, useScrollHint } from '../components/ScrollHint';
 import { Text } from '../components/Text';
 
 function DeckChip({
@@ -55,12 +56,18 @@ function SeatRow({
   selectedId: string;
   onSelect: (id: string) => void;
 }): React.JSX.Element {
+  const { scrollProps, metrics } = useScrollHint();
   return (
     <View style={styles.seatBlock}>
       <Text variant="label" tone="dim" caps style={styles.seatLabel}>
         {label}
       </Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.deckRow}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.deckRow}
+        {...scrollProps}
+      >
         {decks.map((deck) => (
           <DeckChip
             key={deck.id}
@@ -70,6 +77,7 @@ function SeatRow({
           />
         ))}
       </ScrollView>
+      <ScrollHint metrics={metrics} />
     </View>
   );
 }
