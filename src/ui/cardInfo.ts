@@ -17,8 +17,6 @@ export const abilityText: Record<Ability, string> = {
   agile: 'Agile: can be played in Close Combat or Ranged; choose on every play.',
   scorch_row:
     'Scorch (row): on play, if the opponent’s matching row totals 10 or more, destroys its strongest non-hero unit(s).',
-  scorch_global:
-    'Scorch: on play, destroys the strongest non-hero unit(s) on the entire board, both sides.',
 };
 
 const weatherText: Record<WeatherKind, string> = {

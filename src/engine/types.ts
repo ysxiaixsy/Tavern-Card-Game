@@ -76,8 +76,7 @@ export type Ability =
   | 'moral' // Moral Boost
   | 'horn' // Commander's Horn as a unit ability (e.g. Dandelion)
   | 'agile'
-  | 'scorch_row' // unit-scorch (Villentretenmerth/Toad/Schirru): on play, scorch the opponent row named by CardDef.scorchRow if its total ≥ 10
-  | 'scorch_global'; // unit with a built-in Scorch (Clan Dimun Pirate): on play, destroy the strongest non-hero unit(s) on the whole board
+  | 'scorch_row'; // unit-scorch (Villentretenmerth/Toad/Schirru/Clan Dimun Pirate): on play, scorch the opponent row named by CardDef.scorchRow if its total ≥ 10
 
 export type LeaderAbilityId =
   | 'weather_from_deck' // play this leader's weather kind straight from your deck (see CardDef.leaderWeather)

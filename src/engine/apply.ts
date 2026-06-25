@@ -267,11 +267,6 @@ function resolveUnitPlay(
     resolveRowScorch(s, actor, def.scorchRow);
   }
 
-  // Built-in global Scorch (Clan Dimun Pirate): strongest unit(s), whole board.
-  if (def.abilities.includes('scorch_global')) {
-    resolveGlobalScorch(s);
-  }
-
   // Built-in Mardroeme (Ermion): transform Berserkers on his own row.
   if (def.triggersTransform) {
     resolveTransform(s, side, rowKind);

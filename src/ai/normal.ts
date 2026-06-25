@@ -212,9 +212,6 @@ export function estimateGain(view: PlayerView, move: Move): number {
       if (def.abilities.includes('spy')) {
         return -printed; // strengthens THEIR side
       }
-      if (def.abilities.includes('scorch_global')) {
-        return printed + scorchNetGain(view); // body + the Scorch it triggers
-      }
       const rowKind = (move.row ?? def.row) as RowKind;
       const weathered = view.weather.kinds.some((k) => WEATHER_ROWS[k].includes(rowKind));
       if (weathered && def.type === 'unit') {
@@ -621,10 +618,6 @@ export function scoreMoves(view: PlayerView): ScoredMove[] {
         return 26 + (def.strength ?? 0) * 0.5;
       }
       case 'unit': {
-        if (def.abilities.includes('scorch_global')) {
-          const g = scorchNetGain(view);
-          return g >= 6 ? 60 + g : bodyScore(def);
-        }
         if (def.abilities.includes('scorch_row') && def.scorchRow) {
           const g = rowScorchGain(view, def.scorchRow);
           return g >= 6 ? 60 + g : bodyScore(def) - 2;

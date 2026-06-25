@@ -60,7 +60,6 @@ const ABILITY_ICON: Record<Ability, IconName> = {
   horn: 'horn',
   agile: 'agile',
   scorch_row: 'scorch',
-  scorch_global: 'scorch',
 };
 
 /** Center glyph for non-unit special cards. */
