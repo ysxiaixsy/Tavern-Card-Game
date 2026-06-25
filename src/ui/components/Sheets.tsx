@@ -276,11 +276,14 @@ export function LeaderSheet({
   const [fetchSel, setFetchSel] = useState<string | null>(null);
   // Targeted-pick confirm step (restore_to_hand / steal_from_graveyard).
   const [pick, setPick] = useState<UseLeaderMove | null>(null);
+  // Active leaders require a deliberate "Play" before the ability UI appears.
+  const [activated, setActivated] = useState(false);
   useEffect(() => {
     if (!visible) {
       setDiscardSel([]);
       setFetchSel(null);
       setPick(null);
+      setActivated(false);
     }
   }, [visible]);
 
@@ -330,10 +333,22 @@ export function LeaderSheet({
         ))}
         {status !== null && <Text variant="caption" tone="dim" style={styles.centerText}>{status}</Text>}
 
-        {!isDiscardDraw && leaderMoves.length === 1 && leaderMoves[0].targetInstanceId === undefined && (
-          <Button label="Use ability (ends your turn)" onPress={() => onSubmit(leaderMoves[0])} />
+        {/* Active leaders: a deliberate Play step before the ability is used. */}
+        {leaderMoves.length > 0 && !activated && (
+          <Button
+            label="Play"
+            onPress={() => {
+              // A single no-target ability commits straight away; anything that
+              // needs a pick/discard reveals its UI first.
+              if (!isDiscardDraw && leaderMoves.length === 1 && leaderMoves[0].targetInstanceId === undefined) {
+                onSubmit(leaderMoves[0]);
+              } else {
+                setActivated(true);
+              }
+            }}
+          />
         )}
-        {leaderMoves.length > 0 && leaderMoves[0].targetInstanceId !== undefined && (
+        {activated && leaderMoves.length > 0 && leaderMoves[0].targetInstanceId !== undefined && (
           <>
             <Text variant="caption" tone="accent" style={styles.centerText}>Pick a unit:</Text>
             <View style={styles.cardGrid}>
@@ -349,7 +364,7 @@ export function LeaderSheet({
             </View>
           </>
         )}
-        {isDiscardDraw && (
+        {activated && isDiscardDraw && (
           <>
             <Text variant="caption" tone="accent" style={styles.centerText}>1 · Choose 2 cards to discard ({discardSel.length}/2)</Text>
             <View style={styles.cardGrid}>
