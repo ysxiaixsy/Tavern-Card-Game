@@ -1,12 +1,12 @@
 /**
  * Modal sheets: card zoom, graveyard browser, medic revive picker, leader
- * preview/confirm, and the Scoia'tael first-player choice. All bottom-anchored
- * panels over a dimmed backdrop; no animation polish until M5.
+ * preview/confirm, the per-pick confirm step, and the Scoia'tael first-player
+ * choice. All centered modal cards over a dimmed backdrop.
  */
 
 import React, { useEffect, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { color } from '../tokens';
+import { border, color, radius } from '../tokens';
 import { Icon } from './Icon';
 import { Text } from './Text';
 import { getCardDef } from '../../engine/data/cards';
@@ -18,7 +18,7 @@ import type {
   UseLeaderMove,
 } from '../../engine/types';
 import { cardTypeLine, describeCard } from '../cardInfo';
-import { palette, rowLabel, sp } from '../theme';
+import { rowLabel, sp } from '../theme';
 import { Button } from './Button';
 import { CardView } from './CardView';
 
@@ -39,7 +39,9 @@ export function Sheet({ visible, title, onClose, children }: SheetProps): React.
       <Pressable style={styles.backdrop} onPress={onClose} disabled={!onClose}>
         <Pressable style={styles.panel} onPress={() => undefined}>
           <View style={styles.panelHeader}>
-            <Text style={styles.panelTitle}>{title}</Text>
+            <Text variant="heading" tone="accentBright" style={styles.title}>
+              {title}
+            </Text>
             {onClose && (
               <Pressable onPress={onClose} hitSlop={10}>
                 <Icon name="close" size={18} color={color.inkDim} />
@@ -80,12 +82,12 @@ export function ConfirmCard({
   return (
     <View style={styles.zoomBody}>
       <CardView defId={defId} instanceId={instanceId} size="large" selected />
-      <Text style={styles.typeLine}>
+      <Text variant="caption" tone="accent" style={styles.centerText}>
         {def.name} — {cardTypeLine(def)}
       </Text>
-      {rowTag != null && <Text style={styles.typeLine}>Row: {rowTag}</Text>}
+      {rowTag != null && <Text variant="caption" tone="accent" style={styles.centerText}>Row: {rowTag}</Text>}
       {describeCard(defId).map((line, i) => (
-        <Text key={i} style={styles.abilityLine}>
+        <Text key={i} variant="body" style={styles.centerText}>
           {line}
         </Text>
       ))}
@@ -114,9 +116,9 @@ export function CardZoomSheet({
       {def !== null && defId !== null && (
         <View style={styles.zoomBody}>
           <CardView defId={defId} size="large" />
-          <Text style={styles.typeLine}>{cardTypeLine(def)}</Text>
+          <Text variant="caption" tone="accent" style={styles.centerText}>{cardTypeLine(def)}</Text>
           {describeCard(defId).map((line, i) => (
-            <Text key={i} style={styles.abilityLine}>
+            <Text key={i} variant="body" style={styles.centerText}>
               {line}
             </Text>
           ))}
@@ -148,9 +150,9 @@ export function GraveyardSheet({
       {inspect !== null && inspectId !== null && (
         <View style={styles.zoomBody}>
           <CardView defId={inspectId} size="large" />
-          <Text style={styles.typeLine}>{inspect.name} — {cardTypeLine(inspect)}</Text>
+          <Text variant="caption" tone="accent" style={styles.centerText}>{inspect.name} — {cardTypeLine(inspect)}</Text>
           {describeCard(inspectId).map((line, i) => (
-            <Text key={i} style={styles.abilityLine}>
+            <Text key={i} variant="body" style={styles.centerText}>
               {line}
             </Text>
           ))}
@@ -166,7 +168,7 @@ export function GraveyardSheet({
             onPress={() => setInspectId(card.defId === inspectId ? null : card.defId)}
           />
         ))}
-        {cards.length === 0 && <Text style={styles.dimText}>Empty — nobody has died here yet.</Text>}
+        {cards.length === 0 && <Text variant="caption" tone="dim" style={styles.centerText}>Empty — nobody has died here yet.</Text>}
       </View>
     </Sheet>
   );
@@ -211,7 +213,7 @@ export function MedicSheet({
         />
       ) : (
         <>
-          <Text style={styles.dimText}>
+          <Text variant="caption" tone="dim" style={styles.centerText}>
             The revived unit is played instantly with its full effect.
           </Text>
           <View style={styles.cardGrid}>
@@ -223,7 +225,11 @@ export function MedicSheet({
                   size="hand"
                   onPress={() => setPick(move)}
                 />
-                {move.row && <Text style={styles.rowTag}>{rowLabel[move.row]}</Text>}
+                {move.row && (
+                  <Text variant="caption" tone="accent">
+                    {rowLabel[move.row]}
+                  </Text>
+                )}
               </View>
             ))}
           </View>
@@ -318,20 +324,18 @@ export function LeaderSheet({
       <View style={styles.zoomBody}>
         <CardView defId={def.id} size="large" dimmed={sideView.leaderUsed} />
         {describeCard(def.id).map((line, i) => (
-          <Text key={i} style={styles.abilityLine}>
+          <Text key={i} variant="body" style={styles.centerText}>
             {line}
           </Text>
         ))}
-        {status !== null && <Text style={styles.dimText}>{status}</Text>}
+        {status !== null && <Text variant="caption" tone="dim" style={styles.centerText}>{status}</Text>}
 
         {!isDiscardDraw && leaderMoves.length === 1 && leaderMoves[0].targetInstanceId === undefined && (
-          <Pressable style={styles.bigButton} onPress={() => onSubmit(leaderMoves[0])}>
-            <Text style={styles.bigButtonText}>Use ability (ends your turn)</Text>
-          </Pressable>
+          <Button label="Use ability (ends your turn)" onPress={() => onSubmit(leaderMoves[0])} />
         )}
         {leaderMoves.length > 0 && leaderMoves[0].targetInstanceId !== undefined && (
           <>
-            <Text style={styles.typeLine}>Pick a unit:</Text>
+            <Text variant="caption" tone="accent" style={styles.centerText}>Pick a unit:</Text>
             <View style={styles.cardGrid}>
               {leaderMoves.map((move, i) => (
                 <CardView
@@ -347,7 +351,7 @@ export function LeaderSheet({
         )}
         {isDiscardDraw && (
           <>
-            <Text style={styles.typeLine}>1 · Choose 2 cards to discard ({discardSel.length}/2)</Text>
+            <Text variant="caption" tone="accent" style={styles.centerText}>1 · Choose 2 cards to discard ({discardSel.length}/2)</Text>
             <View style={styles.cardGrid}>
               {view.you.hand.map((card) => (
                 <CardView
@@ -368,7 +372,7 @@ export function LeaderSheet({
                 />
               ))}
             </View>
-            <Text style={styles.typeLine}>2 · Fetch any card from your deck</Text>
+            <Text variant="caption" tone="accent" style={styles.centerText}>2 · Fetch any card from your deck</Text>
             <View style={styles.cardGrid}>
               {fetchOptions.map((defId) => (
                 <CardView
@@ -380,13 +384,15 @@ export function LeaderSheet({
                 />
               ))}
             </View>
-            <Pressable
-              style={[styles.bigButton, !discardDrawMove && { opacity: 0.4 }]}
+            <Button
+              label="Confirm (ends your turn)"
               disabled={!discardDrawMove}
-              onPress={() => discardDrawMove && onSubmit(discardDrawMove)}
-            >
-              <Text style={styles.bigButtonText}>Confirm (ends your turn)</Text>
-            </Pressable>
+              onPress={() => {
+                if (discardDrawMove) {
+                  onSubmit(discardDrawMove);
+                }
+              }}
+            />
           </>
         )}
       </View>
@@ -411,14 +417,13 @@ export function ChooseFirstSheet({
   return (
     <Sheet visible={mine} title="Scoia'tael — who goes first?">
       <View style={{ gap: sp(2) }}>
-        <Pressable
-          style={styles.bigButton}
+        <Button
+          label="I go first"
           onPress={() => onSubmit({ type: 'CHOOSE_FIRST_PLAYER', player: view.player, first: view.player })}
-        >
-          <Text style={styles.bigButtonText}>I go first</Text>
-        </Pressable>
-        <Pressable
-          style={styles.bigButton}
+        />
+        <Button
+          label="Opponent goes first"
+          variant="ghost"
           onPress={() =>
             onSubmit({
               type: 'CHOOSE_FIRST_PLAYER',
@@ -426,9 +431,7 @@ export function ChooseFirstSheet({
               first: view.player === 'p1' ? 'p2' : 'p1',
             })
           }
-        >
-          <Text style={styles.bigButtonText}>Opponent goes first</Text>
-        </Pressable>
+        />
       </View>
     </Sheet>
   );
@@ -439,16 +442,17 @@ export function ChooseFirstSheet({
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: palette.overlay,
-    justifyContent: 'flex-end',
+    backgroundColor: color.overlay,
+    justifyContent: 'center',
+    padding: sp(4),
   },
   panel: {
-    backgroundColor: palette.surface,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
+    backgroundColor: color.surface,
+    borderRadius: radius.lg,
     padding: sp(4),
-    borderTopWidth: 1,
-    borderColor: palette.line,
+    borderWidth: border.thin,
+    borderColor: color.line,
+    maxHeight: '88%',
   },
   panelHeader: {
     flexDirection: 'row',
@@ -456,37 +460,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: sp(2),
   },
-  panelTitle: {
-    color: palette.goldBright,
-    fontSize: 16,
-    fontWeight: '700',
+  title: {
     flex: 1,
-  },
-  close: {
-    color: palette.textDim,
-    fontSize: 18,
-    paddingLeft: sp(3),
   },
   zoomBody: {
     alignItems: 'center',
     gap: sp(2),
   },
-  typeLine: {
-    color: palette.gold,
-    fontSize: 12,
+  centerText: {
     textAlign: 'center',
-  },
-  abilityLine: {
-    color: palette.text,
-    fontSize: 13,
-    lineHeight: 19,
-    textAlign: 'center',
-  },
-  dimText: {
-    color: palette.textDim,
-    fontSize: 12,
-    textAlign: 'center',
-    marginVertical: sp(1),
   },
   cardGrid: {
     flexDirection: 'row',
@@ -503,23 +485,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: sp(3),
     marginTop: sp(2),
-  },
-  rowTag: {
-    color: palette.gold,
-    fontSize: 10,
-  },
-  bigButton: {
-    backgroundColor: palette.gold,
-    borderRadius: 22,
-    paddingVertical: sp(3),
-    paddingHorizontal: sp(6),
-    alignItems: 'center',
-    alignSelf: 'center',
-    minWidth: 220,
-  },
-  bigButtonText: {
-    color: color.inkOnAccent,
-    fontWeight: '800',
-    fontSize: 14,
   },
 });

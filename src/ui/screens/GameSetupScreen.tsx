@@ -189,7 +189,10 @@ const styles = StyleSheet.create({
   },
   deckRow: {
     gap: sp(2),
-    paddingRight: sp(4),
+    // Center the chips when they fit; scroll from the left when they overflow.
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingHorizontal: sp(2),
   },
   deckChip: {
     borderWidth: border.frame,
@@ -229,5 +232,7 @@ const styles = StyleSheet.create({
   },
   startButton: {
     marginTop: sp(2),
+    alignSelf: 'center',
+    minWidth: 240,
   },
 });

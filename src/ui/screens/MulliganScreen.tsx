@@ -157,6 +157,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
+    // Center the hand vertically when it fits; scroll when it overflows.
+    flexGrow: 1,
+    alignContent: 'center',
     gap: sp(2),
     paddingHorizontal: sp(2),
     paddingBottom: sp(4),
