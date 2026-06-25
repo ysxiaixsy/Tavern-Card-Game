@@ -10,6 +10,7 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { color, faction, radius, space, typography } from '../tokens';
 import { useAppStore } from '../store';
 import { Button } from '../components/Button';
+import { CardView } from '../components/CardView';
 import { Chip } from '../components/Chip';
 import { Icon, type IconName } from '../components/Icon';
 import { Panel } from '../components/Panel';
@@ -34,6 +35,17 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
+function CardCell({ label, children }: { label: string; children: React.ReactNode }): React.JSX.Element {
+  return (
+    <View style={styles.cardCell}>
+      {children}
+      <Text variant="caption" tone="dim">
+        {label}
+      </Text>
+    </View>
+  );
+}
+
 export function StyleGalleryScreen(): React.JSX.Element {
   const goHome = useAppStore((s) => s.goHome);
 
@@ -49,6 +61,32 @@ export function StyleGalleryScreen(): React.JSX.Element {
       </View>
 
       <ScrollView contentContainerStyle={{ paddingBottom: space.xxl, gap: space.lg }}>
+        <Section title="Card states">
+          <View style={styles.cardRow}>
+            <CardCell label="normal">
+              <CardView defId="mon_forktail" size="hand" />
+            </CardCell>
+            <CardCell label="buffed">
+              <CardView defId="mon_forktail" size="hand" effective={9} />
+            </CardCell>
+            <CardCell label="weakened">
+              <CardView defId="mon_forktail" size="hand" effective={2} />
+            </CardCell>
+            <CardCell label="hero">
+              <CardView defId="neu_geralt" size="hand" />
+            </CardCell>
+            <CardCell label="selected">
+              <CardView defId="mon_forktail" size="hand" selected />
+            </CardCell>
+            <CardCell label="targetable">
+              <CardView defId="mon_forktail" size="hand" highlighted />
+            </CardCell>
+            <CardCell label="dimmed">
+              <CardView defId="mon_forktail" size="hand" dimmed />
+            </CardCell>
+          </View>
+        </Section>
+
         <Section title="Type scale">
           {TYPE_VARIANTS.map((v) => (
             <View key={v} style={styles.typeRow}>
@@ -187,4 +225,6 @@ const styles = StyleSheet.create({
   },
   iconGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: space.md },
   iconCell: { width: 56, alignItems: 'center', gap: 4 },
+  cardRow: { flexDirection: 'row', flexWrap: 'wrap', gap: space.md },
+  cardCell: { alignItems: 'center', gap: 4 },
 });

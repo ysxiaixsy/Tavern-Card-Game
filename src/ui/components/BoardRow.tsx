@@ -7,6 +7,7 @@ import React from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import type { RowKind, RowView } from '../../engine/types';
 import { border, color, radius, space } from '../tokens';
+import { Appear, Pulse } from './anim';
 import { CardView } from './CardView';
 import { Icon, type IconName } from './Icon';
 import { Text } from './Text';
@@ -36,9 +37,11 @@ function BoardRowInner({
     <View style={[styles.row, underWeather && { backgroundColor: color.weatherTint }]}>
       <View style={styles.meta}>
         <Icon name={ROW_ICON[rowKind]} size={13} color={color.inkDim} />
-        <Text variant="numeral" color={color.accent} style={styles.total}>
-          {row.total}
-        </Text>
+        <Pulse trigger={row.total}>
+          <Text variant="numeral" color={color.accent} style={styles.total}>
+            {row.total}
+          </Text>
+        </Pulse>
       </View>
       <View style={[styles.hornSlot, row.horn !== null && styles.hornFilled]}>
         {row.horn !== null && <Icon name="horn" size={12} color={color.accent} />}
@@ -51,17 +54,19 @@ function BoardRowInner({
         {row.units.map((unit) => {
           const isTarget = targetIds?.has(unit.instanceId) ?? false;
           return (
-            <CardView
-              key={unit.instanceId}
-              defId={unit.defId}
-              instanceId={unit.instanceId}
-              size="board"
-              effective={unit.effectiveStrength}
-              highlighted={isTarget}
-              dimmed={targeting && !isTarget}
-              onPress={onUnitPress ? () => onUnitPress(unit.instanceId) : undefined}
-              onLongPress={onUnitLongPress ? () => onUnitLongPress(unit.defId) : undefined}
-            />
+            // Appear keyed by instanceId → only newly-played cards animate in.
+            <Appear key={unit.instanceId} distance={10} duration={180}>
+              <CardView
+                defId={unit.defId}
+                instanceId={unit.instanceId}
+                size="board"
+                effective={unit.effectiveStrength}
+                highlighted={isTarget}
+                dimmed={targeting && !isTarget}
+                onPress={onUnitPress ? () => onUnitPress(unit.instanceId) : undefined}
+                onLongPress={onUnitLongPress ? () => onUnitLongPress(unit.defId) : undefined}
+              />
+            </Appear>
           );
         })}
       </ScrollView>
