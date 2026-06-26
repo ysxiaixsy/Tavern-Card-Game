@@ -48,7 +48,10 @@ export function Sheet({ visible, title, onClose, children }: SheetProps): React.
               </Pressable>
             )}
           </View>
-          <ScrollView style={{ maxHeight: 460 }} contentContainerStyle={{ paddingBottom: sp(4) }}>
+          {/* flexShrink (not a hard maxHeight) lets the card use the full
+              centered panel, so confirm/Play buttons stay visible without a
+              hidden scroll region. */}
+          <ScrollView style={styles.scrollArea} contentContainerStyle={{ paddingBottom: sp(4) }}>
             {children}
           </ScrollView>
         </Pressable>
@@ -311,7 +314,7 @@ export function LeaderSheet({
   }
 
   return (
-    <Sheet visible={visible} title={pick ? 'Confirm' : def.name} onClose={onClose}>
+    <Sheet visible={visible} title={pick ? 'Confirm' : activated ? 'Choose a card' : def.name} onClose={onClose}>
       {pick ? (
         <ConfirmCard
           defId={defIdInGraveyard(view, pick.targetInstanceId as string)}
@@ -323,94 +326,100 @@ export function LeaderSheet({
           }}
           onCancel={() => setPick(null)}
         />
-      ) : (
-      <View style={styles.zoomBody}>
-        <CardView defId={def.id} size="large" dimmed={sideView.leaderUsed} />
-        {describeCard(def.id).map((line, i) => (
-          <Text key={i} variant="body" style={styles.centerText}>
-            {line}
-          </Text>
-        ))}
-        {status !== null && <Text variant="caption" tone="dim" style={styles.centerText}>{status}</Text>}
-
-        {/* Active leaders: a deliberate Play step before the ability is used. */}
-        {leaderMoves.length > 0 && !activated && (
-          <Button
-            label="Play"
-            onPress={() => {
-              // A single no-target ability commits straight away; anything that
-              // needs a pick/discard reveals its UI first.
-              if (!isDiscardDraw && leaderMoves.length === 1 && leaderMoves[0].targetInstanceId === undefined) {
-                onSubmit(leaderMoves[0]);
-              } else {
-                setActivated(true);
-              }
-            }}
-          />
-        )}
-        {activated && leaderMoves.length > 0 && leaderMoves[0].targetInstanceId !== undefined && (
-          <>
-            <Text variant="caption" tone="accent" style={styles.centerText}>Pick a unit:</Text>
-            <View style={styles.cardGrid}>
-              {leaderMoves.map((move, i) => (
-                <CardView
-                  key={i}
-                  defId={defIdInGraveyard(view, move.targetInstanceId as string)}
-                  instanceId={move.targetInstanceId as string}
-                  size="hand"
-                  onPress={() => setPick(move)}
-                />
-              ))}
-            </View>
-          </>
-        )}
-        {activated && isDiscardDraw && (
-          <>
-            <Text variant="caption" tone="accent" style={styles.centerText}>1 · Choose 2 cards to discard ({discardSel.length}/2)</Text>
-            <View style={styles.cardGrid}>
-              {view.you.hand.map((card) => (
-                <CardView
-                  key={card.instanceId}
-                  defId={card.defId}
-                  instanceId={card.instanceId}
-                  size="board"
-                  selected={discardSel.includes(card.instanceId)}
-                  onPress={() =>
-                    setDiscardSel((current) =>
-                      current.includes(card.instanceId)
-                        ? current.filter((id) => id !== card.instanceId)
-                        : current.length < 2
-                          ? [...current, card.instanceId]
-                          : current,
-                    )
-                  }
-                />
-              ))}
-            </View>
-            <Text variant="caption" tone="accent" style={styles.centerText}>2 · Fetch any card from your deck</Text>
-            <View style={styles.cardGrid}>
-              {fetchOptions.map((defId) => (
-                <CardView
-                  key={defId}
-                  defId={defId}
-                  size="board"
-                  selected={fetchSel === defId}
-                  onPress={() => setFetchSel(defId === fetchSel ? null : defId)}
-                />
-              ))}
-            </View>
+      ) : !activated ? (
+        // Leader preview + a deliberate Play step before the ability is used.
+        <View style={styles.zoomBody}>
+          <CardView defId={def.id} size="large" dimmed={sideView.leaderUsed} />
+          {describeCard(def.id).map((line, i) => (
+            <Text key={i} variant="body" style={styles.centerText}>
+              {line}
+            </Text>
+          ))}
+          {status !== null && <Text variant="caption" tone="dim" style={styles.centerText}>{status}</Text>}
+          {leaderMoves.length > 0 && (
             <Button
-              label="Confirm (ends your turn)"
-              disabled={!discardDrawMove}
+              label="Play"
               onPress={() => {
-                if (discardDrawMove) {
-                  onSubmit(discardDrawMove);
+                // A single no-target ability commits straight away; anything
+                // that needs a pick/discard reveals its UI first.
+                if (!isDiscardDraw && leaderMoves.length === 1 && leaderMoves[0].targetInstanceId === undefined) {
+                  onSubmit(leaderMoves[0]);
+                } else {
+                  setActivated(true);
                 }
               }}
             />
-          </>
-        )}
-      </View>
+          )}
+        </View>
+      ) : (
+        // Activated: a clean picker (no leader card), like the medic flow.
+        <View style={styles.zoomBody}>
+          {isDiscardDraw ? (
+            <>
+              <Text variant="caption" tone="accent" style={styles.centerText}>1 · Choose 2 cards to discard ({discardSel.length}/2)</Text>
+              <View style={styles.cardGrid}>
+                {view.you.hand.map((card) => (
+                  <CardView
+                    key={card.instanceId}
+                    defId={card.defId}
+                    instanceId={card.instanceId}
+                    size="board"
+                    selected={discardSel.includes(card.instanceId)}
+                    onPress={() =>
+                      setDiscardSel((current) =>
+                        current.includes(card.instanceId)
+                          ? current.filter((id) => id !== card.instanceId)
+                          : current.length < 2
+                            ? [...current, card.instanceId]
+                            : current,
+                      )
+                    }
+                  />
+                ))}
+              </View>
+              <Text variant="caption" tone="accent" style={styles.centerText}>2 · Fetch any card from your deck</Text>
+              <View style={styles.cardGrid}>
+                {fetchOptions.map((defId) => (
+                  <CardView
+                    key={defId}
+                    defId={defId}
+                    size="board"
+                    selected={fetchSel === defId}
+                    onPress={() => setFetchSel(defId === fetchSel ? null : defId)}
+                  />
+                ))}
+              </View>
+              <Button
+                label="Confirm (ends your turn)"
+                disabled={!discardDrawMove}
+                onPress={() => {
+                  if (discardDrawMove) {
+                    onSubmit(discardDrawMove);
+                  }
+                }}
+              />
+            </>
+          ) : (
+            <>
+              <Text variant="caption" tone="dim" style={styles.centerText}>
+                {def.leaderAbility === 'steal_from_graveyard'
+                  ? 'Take a unit from the enemy graveyard.'
+                  : 'Take a unit from your graveyard.'}
+              </Text>
+              <View style={styles.cardGrid}>
+                {leaderMoves.map((move, i) => (
+                  <CardView
+                    key={i}
+                    defId={defIdInGraveyard(view, move.targetInstanceId as string)}
+                    instanceId={move.targetInstanceId as string}
+                    size="hand"
+                    onPress={() => setPick(move)}
+                  />
+                ))}
+              </View>
+            </>
+          )}
+        </View>
       )}
     </Sheet>
   );
@@ -467,7 +476,10 @@ const styles = StyleSheet.create({
     padding: sp(4),
     borderWidth: border.thin,
     borderColor: color.line,
-    maxHeight: '88%',
+    maxHeight: '90%',
+  },
+  scrollArea: {
+    flexShrink: 1,
   },
   panelHeader: {
     flexDirection: 'row',

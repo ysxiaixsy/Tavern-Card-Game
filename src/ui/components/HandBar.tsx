@@ -80,11 +80,16 @@ function DraggableHandCard({
   const latest = useRef({ playable });
   latest.current = { playable };
 
+  const wantsDrag = (_e: unknown, g: { dx: number; dy: number }): boolean =>
+    latest.current.playable && g.dy < -8 && Math.abs(g.dy) > Math.abs(g.dx);
+
   const responder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => false, // taps/long-press pass through
-      onMoveShouldSetPanResponder: (_e, g) =>
-        latest.current.playable && g.dy < -8 && Math.abs(g.dy) > Math.abs(g.dx),
+      // Capture the vertical drag even though the child CardView Pressable is
+      // the touch responder — otherwise the drag would never start.
+      onMoveShouldSetPanResponderCapture: wantsDrag,
+      onMoveShouldSetPanResponder: wantsDrag,
       onPanResponderGrant: () => {
         ref.current?.measureInWindow((x, y) => onDragStart(card.instanceId, card.defId, x, y));
       },
