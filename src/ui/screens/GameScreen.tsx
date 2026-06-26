@@ -31,6 +31,7 @@ import {
   GraveyardSheet,
   LeaderSheet,
   MedicSheet,
+  Sheet,
 } from '../components/Sheets';
 
 const OPPONENT_ROW_ORDER: readonly RowKind[] = ['siege', 'ranged', 'melee'];
@@ -87,6 +88,9 @@ export function BattleScreen({
   );
   const confirmPassPref = useAppStore((s) => s.prefs.confirmPass);
   const confirmDragPref = useAppStore((s) => s.prefs.confirmDrag);
+  const seenTips = useAppStore((s) => s.prefs.seenTips);
+  const setPref = useAppStore((s) => s.setPref);
+  const dismissTips = (): void => setPref('seenTips', true);
 
   // --- drag-to-play: drag a card onto its legal row, or a decoy onto a unit ---
   // A play staged for confirmation (drag-drop with the confirm pref on).
@@ -568,6 +572,20 @@ export function BattleScreen({
         onClose={() => setLeaderSide(null)}
       />
       <ChooseFirstSheet view={view} onSubmit={submit} />
+
+      {/* One-time quick tips on the first match. */}
+      <Sheet visible={!seenTips} title="Quick tips" onClose={dismissTips}>
+        <View style={styles.tips}>
+          <Text variant="body">• Drag a card up onto a glowing row to play it — agile cards light up two rows.</Text>
+          <Text variant="body">• Decoy and other targets: drag onto a highlighted unit.</Text>
+          <Text variant="body">• Or tap a card for View (info) and Play.</Text>
+          <Text variant="body">• Tap any board or graveyard card to read it. Press Pass to end your round.</Text>
+          <Text variant="caption" tone="dim">
+            Full rules live under “How to Play” on the home screen.
+          </Text>
+          <Button label="Got it" onPress={dismissTips} style={styles.tipsButton} />
+        </View>
+      </Sheet>
     </View>
   );
 }
@@ -670,5 +688,13 @@ const styles = StyleSheet.create({
   passButton: {
     marginHorizontal: sp(2),
     marginBottom: sp(2),
+  },
+  tips: {
+    gap: sp(2),
+  },
+  tipsButton: {
+    alignSelf: 'center',
+    minWidth: 160,
+    marginTop: sp(1),
   },
 });
