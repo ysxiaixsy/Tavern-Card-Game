@@ -36,6 +36,9 @@ import {
 const OPPONENT_ROW_ORDER: readonly RowKind[] = ['siege', 'ranged', 'melee'];
 const YOUR_ROW_ORDER: readonly RowKind[] = ['melee', 'ranged', 'siege'];
 
+/** How close (px) a dragged decoy must get to a unit to target it. */
+const UNIT_SNAP_PX = 64;
+
 interface Targeting {
   cardInstanceId: string;
   targets: ReadonlyMap<string, Move>;
@@ -182,15 +185,21 @@ export function BattleScreen({
     const rows = new Map<string, PlayCardMove>();
     const units = new Map<string, PlayCardMove>();
     if (card) {
-      const sideKey = getCardDef(card.defId).abilities.includes('spy') ? 'opponent' : 'you';
+      const def = getCardDef(card.defId);
+      const sideKey = def.abilities.includes('spy') ? 'opponent' : 'you';
       for (const m of v.legalMoves) {
         if (m.type !== 'PLAY_CARD' || m.cardInstanceId !== cardInstanceId) {
           continue;
         }
-        if (m.row) {
-          rows.set(`${sideKey}:${m.row}`, m);
-        } else if (m.targetInstanceId) {
+        if (m.targetInstanceId) {
           units.set(m.targetInstanceId, m); // decoy: per-unit target
+        } else {
+          // Fixed-row unit moves carry no `row` (the engine uses def.row); agile
+          // moves carry an explicit row. Weather/scorch have no row → not draggable.
+          const row = m.row ?? (def.row && def.row !== 'agile' ? def.row : undefined);
+          if (row) {
+            rows.set(`${sideKey}:${row}`, m);
+          }
         }
       }
     }
@@ -206,8 +215,15 @@ export function BattleScreen({
   const onCardDragMove = useCallback((px: number, py: number) => {
     const inRect = (r: Rect | undefined): boolean =>
       !!r && px >= r.x && px <= r.x + r.width && py >= r.y && py <= r.y + r.height;
+    // Distance from the point to the nearest edge of a rect (0 if inside).
+    const distToRect = (r: Rect): number => {
+      const dx = Math.max(r.x - px, 0, px - (r.x + r.width));
+      const dy = Math.max(r.y - py, 0, py - (r.y + r.height));
+      return Math.hypot(dx, dy);
+    };
     let best: string | null = null;
     if (dragRowsRef.current.size > 0) {
+      // Rows are big bands — the row under the finger.
       for (const key of dragRowsRef.current.keys()) {
         if (inRect(rowRects.current.get(key))) {
           best = key;
@@ -215,11 +231,21 @@ export function BattleScreen({
         }
       }
     } else if (dragUnitsRef.current.size > 0) {
+      // Units are tiny — snap to the nearest valid unit within reach.
+      let bestDist = Infinity;
       for (const id of dragUnitsRef.current.keys()) {
-        if (inRect(unitRects.current.get(id))) {
-          best = id;
-          break;
+        const r = unitRects.current.get(id);
+        if (!r) {
+          continue;
         }
+        const d = distToRect(r);
+        if (d < bestDist) {
+          bestDist = d;
+          best = id;
+        }
+      }
+      if (bestDist > UNIT_SNAP_PX) {
+        best = null; // too far from any target → no drop
       }
     }
     if (dragHoverRef.current !== best) {
