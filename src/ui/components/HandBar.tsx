@@ -71,7 +71,14 @@ function DraggableHandCard({
   playable: boolean;
   hidden: boolean;
   onTap: () => void;
-  onDragStart: (instanceId: string, defId: string, winX: number, winY: number) => void;
+  onDragStart: (
+    instanceId: string,
+    defId: string,
+    winX: number,
+    winY: number,
+    touchX: number,
+    touchY: number,
+  ) => void;
   onDragMove: (dx: number, dy: number, pageX: number, pageY: number) => void;
   onDragEnd: () => void;
 }): React.JSX.Element {
@@ -89,8 +96,12 @@ function DraggableHandCard({
       // the touch responder — otherwise the drag would never start.
       onMoveShouldSetPanResponderCapture: wantsDrag,
       onMoveShouldSetPanResponder: wantsDrag,
-      onPanResponderGrant: () => {
-        ref.current?.measureInWindow((x, y) => onDragStart(card.instanceId, card.defId, x, y));
+      onPanResponderGrant: (e) => {
+        const touchX = e.nativeEvent.pageX;
+        const touchY = e.nativeEvent.pageY;
+        ref.current?.measureInWindow((x, y) =>
+          onDragStart(card.instanceId, card.defId, x, y, touchX, touchY),
+        );
       },
       onPanResponderMove: (e, g) => onDragMove(g.dx, g.dy, e.nativeEvent.pageX, e.nativeEvent.pageY),
       onPanResponderRelease: () => onDragEnd(),
@@ -131,6 +142,9 @@ export function HandBar({
   const handRef = useRef<View>(null);
   const origin = useRef({ x: 0, y: 0 });
   const base = useRef({ x: 0, y: 0 });
+  // Where on the card the finger grabbed it, so we can report the card's
+  // top-left (not the finger) for drop hit-testing.
+  const grab = useRef({ x: 0, y: 0 });
   const pos = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
   const scale = useRef(new Animated.Value(1)).current;
 
@@ -176,8 +190,16 @@ export function HandBar({
 
   // --- drag wiring (the dragged card is rendered as the overlay below; the
   // parent decides which row it lands on and plays it) ---
-  const onDragStart = (instanceId: string, defId: string, winX: number, winY: number): void => {
+  const onDragStart = (
+    instanceId: string,
+    defId: string,
+    winX: number,
+    winY: number,
+    touchX: number,
+    touchY: number,
+  ): void => {
     base.current = { x: winX - origin.current.x, y: winY - origin.current.y };
+    grab.current = { x: touchX - winX, y: touchY - winY };
     pos.setValue(base.current);
     scale.setValue(1);
     setDrag({ instanceId, defId });
@@ -187,8 +209,9 @@ export function HandBar({
   const onDragMove = (dx: number, dy: number, pageX: number, pageY: number): void => {
     pos.setValue({ x: base.current.x + dx, y: base.current.y + dy });
     scale.setValue(1 + Math.min(0.15, Math.max(0, -dy / 160)));
-    // Report the live touch point (window coords) for drop hit-testing.
-    dragApi.current.move(pageX, pageY);
+    // Report the dragged card's top-left (finger minus grab offset) so the drop
+    // test uses the card's body, not just the finger.
+    dragApi.current.move(pageX - grab.current.x, pageY - grab.current.y);
   };
 
   const onDragEnd = (): void => {

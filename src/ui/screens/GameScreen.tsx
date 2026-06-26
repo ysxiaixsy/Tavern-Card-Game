@@ -14,7 +14,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { getView } from '../../engine/view';
 import { getCardDef } from '../../engine/data/cards';
 import type { Move, PlayCardMove, PlayerView, RowKind } from '../../engine/types';
-import { factionTheme, sp } from '../theme';
+import { CARD_SIZE, factionTheme, sp } from '../theme';
 import { color, radius } from '../tokens';
 import { useAppStore } from '../store';
 import { feedback } from '../feedback';
@@ -216,40 +216,61 @@ export function BattleScreen({
     setMeasureSignal((n) => n + 1); // re-measure rows/units where they currently sit
   }, []);
 
+  // px,py = the dragged card's top-left (window coords). We test the whole card
+  // body, so any overlap with a row counts (you don't have to drag it fully up).
   const onCardDragMove = useCallback((px: number, py: number) => {
-    const inRect = (r: Rect | undefined): boolean =>
-      !!r && px >= r.x && px <= r.x + r.width && py >= r.y && py <= r.y + r.height;
-    // Distance from the point to the nearest edge of a rect (0 if inside).
+    const cw = CARD_SIZE.hand.width;
+    const ch = CARD_SIZE.hand.height;
+    const overlap = (r: Rect): number => {
+      const ox = Math.max(0, Math.min(px + cw, r.x + r.width) - Math.max(px, r.x));
+      const oy = Math.max(0, Math.min(py + ch, r.y + r.height) - Math.max(py, r.y));
+      return ox * oy;
+    };
     const distToRect = (r: Rect): number => {
-      const dx = Math.max(r.x - px, 0, px - (r.x + r.width));
-      const dy = Math.max(r.y - py, 0, py - (r.y + r.height));
+      const cx = px + cw / 2;
+      const cy = py + ch / 2;
+      const dx = Math.max(r.x - cx, 0, cx - (r.x + r.width));
+      const dy = Math.max(r.y - cy, 0, cy - (r.y + r.height));
       return Math.hypot(dx, dy);
     };
     let best: string | null = null;
+    let bestScore = 0;
     if (dragRowsRef.current.size > 0) {
-      // Rows are big bands — the row under the finger.
+      // The legal row the card body covers most (any overlap qualifies).
       for (const key of dragRowsRef.current.keys()) {
-        if (inRect(rowRects.current.get(key))) {
+        const r = rowRects.current.get(key);
+        if (!r) {
+          continue;
+        }
+        const a = overlap(r);
+        if (a > bestScore) {
+          bestScore = a;
           best = key;
-          break;
         }
       }
     } else if (dragUnitsRef.current.size > 0) {
-      // Units are tiny — snap to the nearest valid unit within reach.
+      // Decoy: the most-covered valid unit, else snap to the nearest in reach.
       let bestDist = Infinity;
       for (const id of dragUnitsRef.current.keys()) {
         const r = unitRects.current.get(id);
         if (!r) {
           continue;
         }
+        const a = overlap(r);
+        if (a > bestScore) {
+          bestScore = a;
+          best = id;
+        }
         const d = distToRect(r);
         if (d < bestDist) {
           bestDist = d;
-          best = id;
+          if (bestScore === 0) {
+            best = id; // no overlap yet → nearest candidate
+          }
         }
       }
-      if (bestDist > UNIT_SNAP_PX) {
-        best = null; // too far from any target → no drop
+      if (bestScore === 0 && bestDist > UNIT_SNAP_PX) {
+        best = null; // nothing overlapped and nothing close → no target
       }
     }
     if (dragHoverRef.current !== best) {
