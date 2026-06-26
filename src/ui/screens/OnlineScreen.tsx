@@ -18,9 +18,11 @@ import {
   View,
 } from 'react-native';
 import type { Move, PlayerView } from '../../engine/types';
-import { factionTheme, palette, sp } from '../theme';
-import { color } from '../tokens';
+import { factionTheme } from '../theme';
+import { border, color, radius, sp } from '../tokens';
+import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
+import { ScrollHint, useScrollHint } from '../components/ScrollHint';
 import { Text } from '../components/Text';
 import {
   allDecks,
@@ -63,6 +65,7 @@ export function OnlineScreen(): React.JSX.Element {
   const [snapshot, setSnapshot] = useState<OnlineGameSnapshot | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const { scrollProps, metrics } = useScrollHint();
 
   const channelRef = useRef<ReturnType<NonNullable<typeof supabase>['channel']> | null>(null);
   const roundsSeen = useRef(0);
@@ -276,12 +279,14 @@ export function OnlineScreen(): React.JSX.Element {
   if (!isOnlineConfigured) {
     return (
       <Centered>
-        <Text style={styles.title}>Online play is not configured</Text>
-        <Text style={styles.dim}>
+        <Text variant="title" tone="accentBright" style={styles.center}>
+          Online play is not configured
+        </Text>
+        <Text variant="caption" tone="dim" style={styles.center}>
           Add EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY to .env, then restart the
           dev server.
         </Text>
-        <BigButton label="Back" onPress={goHome} ghost />
+        <Button label="Back" variant="ghost" onPress={goHome} style={styles.action} />
       </Centered>
     );
   }
@@ -289,8 +294,10 @@ export function OnlineScreen(): React.JSX.Element {
   if (phase.kind === 'busy') {
     return (
       <Centered>
-        <ActivityIndicator color={palette.gold} size="large" />
-        <Text style={styles.dim}>{phase.message}</Text>
+        <ActivityIndicator color={color.accent} size="large" />
+        <Text variant="caption" tone="dim" style={styles.center}>
+          {phase.message}
+        </Text>
       </Centered>
     );
   }
@@ -298,9 +305,11 @@ export function OnlineScreen(): React.JSX.Element {
   if (phase.kind === 'error') {
     return (
       <Centered>
-        <Text style={styles.title}>{phase.message}</Text>
-        <BigButton label="Back to lobby" onPress={() => setPhase({ kind: 'menu' })} />
-        <BigButton label="Home" onPress={leave} ghost />
+        <Text variant="title" tone="accentBright" style={styles.center}>
+          {phase.message}
+        </Text>
+        <Button label="Back to lobby" onPress={() => setPhase({ kind: 'menu' })} style={styles.action} />
+        <Button label="Home" variant="ghost" onPress={leave} style={styles.action} />
       </Centered>
     );
   }
@@ -308,21 +317,26 @@ export function OnlineScreen(): React.JSX.Element {
   if (phase.kind === 'waiting') {
     return (
       <Centered>
-        <Text style={styles.dim}>ROOM CODE</Text>
-        <Text style={styles.roomCode}>{phase.roomCode}</Text>
-        <Text style={styles.dim}>
+        <Text variant="label" tone="dim" caps>
+          Room code
+        </Text>
+        <Text variant="display" tone="accentBright" style={styles.roomCode}>
+          {phase.roomCode}
+        </Text>
+        <Text variant="caption" tone="dim" style={styles.center}>
           Share this code. The match starts the moment your opponent joins.
         </Text>
-        <ActivityIndicator color={palette.gold} />
-        <BigButton
+        <ActivityIndicator color={color.accent} />
+        <Button
           label="Cancel room"
+          variant="ghost"
           onPress={() => {
             // Best-effort: tear the room down server-side, then go home.
             void cancelRoom(phase.gameId).catch(() => undefined);
             setLastOnlineGame(null);
             leave();
           }}
-          ghost
+          style={styles.action}
         />
       </Centered>
     );
@@ -337,20 +351,21 @@ export function OnlineScreen(): React.JSX.Element {
       const won = view.result.winner === snapshot.seat;
       return (
         <Centered>
-          <Text style={styles.title}>
+          <Text variant="title" tone="accentBright" style={styles.center}>
             {view.result.winner === null ? 'A draw' : won ? 'You win' : 'Defeat'}
           </Text>
           {view.roundHistory.map((r) => (
-            <Text key={r.round} style={styles.dim}>
+            <Text key={r.round} variant="caption" tone="dim" style={styles.center}>
               Round {r.round}: {r.totals.p1} – {r.totals.p2}
             </Text>
           ))}
-          <BigButton
+          <Button
             label="Back to the tavern"
             onPress={() => {
               setLastOnlineGame(null);
               leave();
             }}
+            style={styles.action}
           />
         </Centered>
       );
@@ -396,16 +411,25 @@ export function OnlineScreen(): React.JSX.Element {
             Home
           </Text>
         </Pressable>
-        <Text style={styles.titleSmall}>Online — room codes</Text>
+        <Text variant="heading" tone="accentBright">
+          Online — room codes
+        </Text>
         <View style={styles.backRow} />
       </View>
 
       {lastOnlineGame !== null && (
-        <BigButton label={`Resume game (${lastOnlineGame.roomCode})`} onPress={() => void handleResume()} />
+        <Button label={`Resume game (${lastOnlineGame.roomCode})`} onPress={() => void handleResume()} />
       )}
 
-      <Text style={styles.sectionLabel}>YOUR DECK</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.deckRow}>
+      <Text variant="label" tone="dim" caps style={styles.sectionLabel}>
+        Your deck
+      </Text>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.deckRow}
+        {...scrollProps}
+      >
         {decks.map((deck) => {
           const theme = factionTheme[deck.faction];
           const selected = deck.id === deckId;
@@ -415,16 +439,16 @@ export function OnlineScreen(): React.JSX.Element {
               onPress={() => setDeckId(deck.id)}
               style={[
                 styles.deckChip,
-                { borderColor: selected ? theme.accent : palette.line },
-                selected && { backgroundColor: palette.surfaceRaised },
+                { borderColor: selected ? theme.accent : color.line },
+                selected && { backgroundColor: color.surfaceRaised },
               ]}
             >
-              <Text style={[styles.deckName, { color: selected ? theme.accent : palette.text }]} numberOfLines={1}>
+              <Text variant="bodyStrong" color={selected ? theme.accent : color.ink} numberOfLines={1}>
                 {deck.name}
               </Text>
               <View style={styles.deckMetaRow}>
                 <Icon name="crown" size={12} color={color.inkDim} />
-                <Text style={styles.deckMeta} numberOfLines={1}>
+                <Text variant="caption" tone="dim" numberOfLines={1}>
                   {leaderShortName(deck.leaderId)}
                 </Text>
               </View>
@@ -432,24 +456,31 @@ export function OnlineScreen(): React.JSX.Element {
           );
         })}
       </ScrollView>
+      <ScrollHint metrics={metrics} />
 
-      <BigButton label="Create a room" onPress={() => void handleCreate()} />
+      <Button label="Create a room" onPress={() => void handleCreate()} />
 
-      <Text style={styles.sectionLabel}>OR JOIN A FRIEND</Text>
+      <Text variant="label" tone="dim" caps style={styles.sectionLabel}>
+        Or join a friend
+      </Text>
       <TextInput
         value={joinCode}
         onChangeText={(t) => setJoinCode(t.toUpperCase())}
         placeholder="ROOM CODE"
-        placeholderTextColor={palette.textDim}
+        placeholderTextColor={color.inkDim}
         autoCapitalize="characters"
         autoCorrect={false}
         maxLength={6}
         style={styles.codeInput}
       />
-      <BigButton label="Join room" onPress={() => void handleJoin()} />
+      <Button label="Join room" onPress={() => void handleJoin()} />
 
-      {notice !== null && <Text style={styles.notice}>{notice}</Text>}
-      <Text style={styles.dim}>
+      {notice !== null && (
+        <Text variant="caption" color={color.sealRedBright} style={styles.center}>
+          {notice}
+        </Text>
+      )}
+      <Text variant="caption" tone="dim" style={styles.center}>
         Anonymous account, this device only. Abandoned rooms expire on their own.
       </Text>
     </ScrollView>
@@ -462,26 +493,10 @@ function Centered({ children }: { children: React.ReactNode }): React.JSX.Elemen
   return <View style={[styles.scroll, styles.centered]}>{children}</View>;
 }
 
-function BigButton({
-  label,
-  onPress,
-  ghost,
-}: {
-  label: string;
-  onPress: () => void;
-  ghost?: boolean;
-}): React.JSX.Element {
-  return (
-    <Pressable style={[styles.bigButton, ghost && styles.bigButtonGhost]} onPress={onPress}>
-      <Text style={ghost ? styles.bigButtonGhostText : styles.bigButtonText}>{label}</Text>
-    </Pressable>
-  );
-}
-
 const styles = StyleSheet.create({
   scroll: {
     flex: 1,
-    backgroundColor: palette.bg,
+    backgroundColor: color.bg,
   },
   centered: {
     alignItems: 'center',
@@ -493,16 +508,14 @@ const styles = StyleSheet.create({
     padding: sp(4),
     paddingBottom: sp(10),
     gap: sp(3),
+    // Center the lobby column on tall screens; the deck row still scrolls.
+    flexGrow: 1,
+    justifyContent: 'center',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-  },
-  back: {
-    color: palette.gold,
-    fontSize: 14,
-    minWidth: 52,
   },
   backRow: {
     flexDirection: 'row',
@@ -510,97 +523,49 @@ const styles = StyleSheet.create({
     gap: sp(1),
     minWidth: 64,
   },
-  title: {
-    color: palette.goldBright,
-    fontSize: 20,
-    fontWeight: '800',
+  center: {
     textAlign: 'center',
   },
-  titleSmall: {
-    color: palette.goldBright,
-    fontSize: 16,
-    fontWeight: '800',
-  },
-  dim: {
-    color: palette.textDim,
-    fontSize: 12,
-    textAlign: 'center',
+  action: {
+    alignSelf: 'center',
+    minWidth: 200,
   },
   sectionLabel: {
-    color: palette.textDim,
-    fontSize: 10,
-    letterSpacing: 2,
     marginTop: sp(2),
   },
   deckRow: {
     gap: sp(2),
-    paddingRight: sp(4),
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingHorizontal: sp(2),
   },
   deckChip: {
-    borderWidth: 1.5,
-    borderRadius: 12,
+    borderWidth: border.frame,
+    borderRadius: radius.md,
     paddingVertical: sp(2),
     paddingHorizontal: sp(3),
     minWidth: 160,
     gap: 2,
-  },
-  deckName: {
-    fontWeight: '800',
-    fontSize: 13,
   },
   deckMetaRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: sp(1),
   },
-  deckMeta: {
-    color: palette.textDim,
-    fontSize: 11,
-  },
   codeInput: {
-    borderWidth: 1,
-    borderColor: palette.line,
-    borderRadius: 12,
-    color: palette.goldBright,
+    borderWidth: border.thin,
+    borderColor: color.line,
+    borderRadius: radius.md,
+    color: color.accentBright,
     fontSize: 22,
     fontWeight: '800',
     letterSpacing: 6,
     textAlign: 'center',
     paddingVertical: sp(2),
-    backgroundColor: palette.surface,
+    backgroundColor: color.surface,
   },
   roomCode: {
-    color: palette.goldBright,
     fontSize: 44,
-    fontWeight: '900',
     letterSpacing: 10,
-  },
-  notice: {
-    color: palette.danger,
-    fontSize: 12,
-    textAlign: 'center',
-  },
-  bigButton: {
-    backgroundColor: palette.gold,
-    borderRadius: 24,
-    paddingVertical: sp(3),
-    paddingHorizontal: sp(6),
-    alignItems: 'center',
-    alignSelf: 'stretch',
-  },
-  bigButtonGhost: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: palette.line,
-  },
-  bigButtonText: {
-    color: color.inkOnAccent,
-    fontWeight: '800',
-    fontSize: 14,
-  },
-  bigButtonGhostText: {
-    color: palette.text,
-    fontWeight: '700',
-    fontSize: 14,
   },
 });
