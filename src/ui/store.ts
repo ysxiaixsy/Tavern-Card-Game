@@ -71,6 +71,8 @@ export interface Prefs {
   confirmPass: boolean;
   /** Require a confirm step after dropping a dragged card on a row. */
   confirmDrag: boolean;
+  /** First-match quick-tips overlay has been shown/dismissed. */
+  seenTips: boolean;
   aiSpeed: AiSpeed;
 }
 
@@ -79,11 +81,12 @@ export const DEFAULT_PREFS: Prefs = {
   haptics: true,
   confirmPass: true,
   confirmDrag: false,
+  seenTips: false,
   aiSpeed: 'normal',
 };
 
 export type GameMode = 'hotseat' | 'ai';
-export type Screen = 'home' | 'decks' | 'setup' | 'game' | 'online' | 'settings' | 'gallery';
+export type Screen = 'home' | 'decks' | 'setup' | 'game' | 'online' | 'settings' | 'gallery' | 'guide';
 
 /** Pointer to the most recent online game, persisted for reconnects. */
 export interface LastOnlineGame {
@@ -119,6 +122,7 @@ interface AppStore {
   openDecks(): void;
   openOnline(): void;
   openSettings(): void;
+  openGuide(): void;
   openGallery(): void; // dev: design-system style gallery
   beginSetup(mode: GameMode): void;
   setLastOnlineGame(game: LastOnlineGame | null): void;
@@ -208,6 +212,10 @@ export const useAppStore = create<AppStore>()(
 
         openSettings() {
           set({ screen: 'settings' });
+        },
+
+        openGuide() {
+          set({ screen: 'guide' });
         },
 
         openGallery() {

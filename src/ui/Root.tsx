@@ -15,6 +15,7 @@ import { DeckBuilderScreen } from './screens/DeckBuilderScreen';
 import { GameScreen } from './screens/GameScreen';
 import { GameSetupScreen } from './screens/GameSetupScreen';
 import { HomeScreen } from './screens/HomeScreen';
+import { HowToPlayScreen } from './screens/HowToPlayScreen';
 import { MulliganScreen } from './screens/MulliganScreen';
 import { OnlineScreen } from './screens/OnlineScreen';
 import { PrivacyScreen } from './screens/PrivacyScreen';
@@ -37,6 +38,8 @@ export function Root(): React.JSX.Element {
     content = <SettingsScreen />;
   } else if (screen === 'gallery') {
     content = <StyleGalleryScreen />;
+  } else if (screen === 'guide') {
+    content = <HowToPlayScreen />;
   } else if (screen === 'home' || session === null) {
     content = <HomeScreen />;
   } else if (session.state.phase === 'finished') {

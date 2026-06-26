@@ -19,6 +19,7 @@ export function HomeScreen(): React.JSX.Element {
   const openDecks = useAppStore((s) => s.openDecks);
   const openOnline = useAppStore((s) => s.openOnline);
   const openSettings = useAppStore((s) => s.openSettings);
+  const openGuide = useAppStore((s) => s.openGuide);
   const openGallery = useAppStore((s) => s.openGallery);
   const deckCount = useAppStore((s) => s.customDecks.length);
 
@@ -73,6 +74,12 @@ export function HomeScreen(): React.JSX.Element {
         ) : (
           <Button label="Online — add Supabase keys" disabled />
         )}
+        <Button
+          label="How to Play"
+          variant="ghost"
+          onPress={go(openGuide)}
+          icon={<Icon name="star" size={18} color={color.accentBright} />}
+        />
       </Appear>
 
       <Text variant="caption" tone="dim" style={styles.footer}>

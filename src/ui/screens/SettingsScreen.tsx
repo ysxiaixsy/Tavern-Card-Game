@@ -52,6 +52,7 @@ export function SettingsScreen(): React.JSX.Element {
   const prefs = useAppStore((s) => s.prefs);
   const setPref = useAppStore((s) => s.setPref);
   const goHome = useAppStore((s) => s.goHome);
+  const openGuide = useAppStore((s) => s.openGuide);
   const customDeckCount = useAppStore((s) => s.customDecks.length);
   const deleteDeck = useAppStore((s) => s.deleteDeck);
   const customDecks = useAppStore((s) => s.customDecks);
@@ -135,6 +136,21 @@ export function SettingsScreen(): React.JSX.Element {
             );
           })}
         </View>
+
+        <Text variant="label" tone="dim" caps style={styles.sectionLabel}>
+          Help
+        </Text>
+        <Pressable style={styles.row} onPress={openGuide}>
+          <View style={styles.rowText}>
+            <Text variant="bodyStrong">How to play</Text>
+            <Text variant="caption" tone="dim">
+              Rules of Gwent and this app's controls
+            </Text>
+          </View>
+          <Text variant="label" tone="accent" caps>
+            Open
+          </Text>
+        </Pressable>
 
         <Text variant="label" tone="dim" caps style={styles.sectionLabel}>
           Data
