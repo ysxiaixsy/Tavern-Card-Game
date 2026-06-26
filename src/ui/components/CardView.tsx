@@ -5,7 +5,7 @@
  * the hand-drawn SVG Icon set (no emoji).
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Image, Pressable, StyleSheet, View } from 'react-native';
 import { getCardDef } from '../../engine/data/cards';
 import type { Ability, CardDef, UnitRow } from '../../engine/types';
@@ -96,6 +96,10 @@ function CardViewInner({
   onLongPress,
 }: Props): React.JSX.Element {
   const def = getCardDef(defId);
+  // If a per-copy art variant fails to load, fall back to the base art so the
+  // card never renders blank (reset when the card identity changes).
+  const [artFailed, setArtFailed] = useState(false);
+  useEffect(() => setArtFailed(false), [defId, instanceId]);
   const dims = CARD_SIZE[size];
   const faction = factionTokens[def.faction];
   const isHero = def.type === 'hero';
@@ -146,9 +150,12 @@ function CardViewInner({
 
   // Real card art: cover-fit image + a live strength badge overlaid top-left.
   const artEntry = CARD_ART[defId];
-  const art = Array.isArray(artEntry)
+  const variantArt = Array.isArray(artEntry)
     ? artEntry[copyIndexOf(instanceId) % artEntry.length]
     : artEntry;
+  // A variant that fails to load (e.g. an asset the dev bundle hasn't indexed)
+  // degrades to the base art instead of a blank card.
+  const art = artFailed && Array.isArray(artEntry) ? artEntry[0] : variantArt;
   if (art) {
     return (
       <Pressable
@@ -160,7 +167,12 @@ function CardViewInner({
       >
         {/* Explicit 100% box: on the New Architecture an Image with only
             absoluteFill falls back to its intrinsic pixel size. */}
-        <Image source={art} resizeMode="cover" style={styles.art} />
+        <Image
+          source={art}
+          resizeMode="cover"
+          style={styles.art}
+          onError={() => setArtFailed(true)}
+        />
         {badge && <View style={styles.artBadge}>{badge}</View>}
       </Pressable>
     );
