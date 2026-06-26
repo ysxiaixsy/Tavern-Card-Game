@@ -123,7 +123,7 @@ function DraggableHandCard({
   );
 }
 
-export function HandBar({
+function HandBarInner({
   view,
   myAction,
   selectedId,
@@ -304,6 +304,10 @@ export function HandBar({
     </View>
   );
 }
+
+/** Memoized so board-only re-renders (e.g. drag-hover highlights) don't
+ * re-render the hand and stutter the dragged-card animation. */
+export const HandBar = React.memo(HandBarInner);
 
 const styles = StyleSheet.create({
   actionBar: {

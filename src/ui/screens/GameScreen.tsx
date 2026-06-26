@@ -107,6 +107,13 @@ export function BattleScreen({
   const dragRowsRef = useRef<ReadonlyMap<string, PlayCardMove>>(new Map());
   const dragUnitsRef = useRef<ReadonlyMap<string, PlayCardMove>>(new Map());
   const dragHoverRef = useRef<string | null>(null);
+  // Mirrors so the stable board callbacks below read fresh state.
+  const targetingRef = useRef(targeting);
+  targetingRef.current = targeting;
+  const rowChoiceRef = useRef(rowChoice);
+  rowChoiceRef.current = rowChoice;
+  const pendingTargetRef = useRef(pendingTarget);
+  pendingTargetRef.current = pendingTarget;
 
   // Haptics on round / match results, fired once per new result.
   const roundsSeen = useRef(view.roundHistory.length);
@@ -142,26 +149,29 @@ export function BattleScreen({
         (k === 'storm' && (rowKind === 'ranged' || rowKind === 'siege')),
     );
 
-  const cancelTargeting = (): void => {
+  const cancelTargeting = useCallback((): void => {
     setTargeting(null);
     setPendingTarget(null);
     setRowChoice(null);
-  };
+  }, []);
 
-  const submit = (move: Move): void => {
-    setSelectedId(null);
-    setTargeting(null);
-    setPendingTarget(null);
-    setRowChoice(null);
-    setPendingPlay(null);
-    setLeaderSide(null);
-    if (move.type === 'PASS') {
-      feedback.pass();
-    } else if (move.type === 'PLAY_CARD' || move.type === 'USE_LEADER' || move.type === 'RESOLVE_MEDIC') {
-      feedback.play();
-    }
-    onMove(move);
-  };
+  const submit = useCallback(
+    (move: Move): void => {
+      setSelectedId(null);
+      setTargeting(null);
+      setPendingTarget(null);
+      setRowChoice(null);
+      setPendingPlay(null);
+      setLeaderSide(null);
+      if (move.type === 'PASS') {
+        feedback.pass();
+      } else if (move.type === 'PLAY_CARD' || move.type === 'USE_LEADER' || move.type === 'RESOLVE_MEDIC') {
+        feedback.play();
+      }
+      onMove(move);
+    },
+    [onMove],
+  );
 
   // Stable mirrors for the drag handlers (created once, called by the
   // per-card PanResponder).
@@ -303,6 +313,47 @@ export function BattleScreen({
     // released off any valid target → no play (illegal moves blocked)
   }, []);
 
+  // Stable per-key row measurer so BoardRow's onMeasure identity never changes
+  // (lets React.memo skip rows whose highlight didn't change during a drag).
+  const rowMeasurers = useRef<Map<string, (r: Rect) => void>>(new Map());
+  const rowMeasurer = useCallback((key: string): ((r: Rect) => void) => {
+    let fn = rowMeasurers.current.get(key);
+    if (!fn) {
+      fn = (r: Rect) => {
+        rowRects.current.set(key, r);
+      };
+      rowMeasurers.current.set(key, fn);
+    }
+    return fn;
+  }, []);
+
+  const measureUnit = useCallback((instanceId: string, rect: Rect): void => {
+    unitRects.current.set(instanceId, rect);
+  }, []);
+
+  // Stable: open card info on tap (used by opponent rows when not targeting).
+  const openInfo = useCallback((_id: string, defId: string): void => setZoomDefId(defId), []);
+
+  // Stable: tapping your own board unit — pick a target (decoy), else open info.
+  const onYourUnitPress = useCallback((id: string, defId: string): void => {
+    if (rowChoiceRef.current) {
+      return; // the row drop overlay drives from here
+    }
+    const t = targetingRef.current;
+    if (t) {
+      if (pendingTargetRef.current) {
+        return; // the confirm bar drives from here
+      }
+      const move = t.targets.get(id);
+      if (move) {
+        feedback.tap();
+        setPendingTarget({ id, defId, move });
+      }
+    } else {
+      setZoomDefId(defId);
+    }
+  }, []);
+
   // Drop props for a board row: row-choose (tap) or live drag highlight.
   const rowProps = (
     side: 'you' | 'opponent',
@@ -314,12 +365,7 @@ export function BattleScreen({
     measureSignal: number;
   } => {
     const key = `${side}:${rowKind}`;
-    const base = {
-      onMeasure: (rect: Rect) => {
-        rowRects.current.set(key, rect);
-      },
-      measureSignal,
-    };
+    const base = { onMeasure: rowMeasurer(key), measureSignal };
     if (rowChoice && rowChoice.rows.has(key)) {
       return {
         ...base,
@@ -338,9 +384,29 @@ export function BattleScreen({
     return base;
   };
 
-  const measureUnit = (instanceId: string, rect: Rect): void => {
-    unitRects.current.set(instanceId, rect);
-  };
+  // Stable HandBar callbacks so it can be memoized (no re-render on hover).
+  const handleSelect = useCallback(
+    (id: string | null): void => {
+      if (id !== null) {
+        feedback.tap();
+      }
+      cancelTargeting(); // picking a different card abandons any choice
+      setSelectedId(id);
+    },
+    [cancelTargeting],
+  );
+  const handleEnterTargeting = useCallback(
+    (cardInstanceId: string, targets: ReadonlyMap<string, Move>): void => {
+      setTargeting({ cardInstanceId, targets });
+    },
+    [],
+  );
+  const handleEnterRowChoice = useCallback(
+    (cardInstanceId: string, rows: ReadonlyMap<string, Move>): void => {
+      setRowChoice({ cardInstanceId, rows });
+    },
+    [],
+  );
 
   const doPass = (): void => submit({ type: 'PASS', player: view.player });
 
@@ -400,7 +466,7 @@ export function BattleScreen({
             rowKind={rowKind}
             underWeather={weatherForRow(rowKind)}
             // Single tap opens card info — suppressed while picking a target/row.
-            onUnitPress={targeting || rowChoice ? undefined : (_id, defId) => setZoomDefId(defId)}
+            onUnitPress={targeting || rowChoice ? undefined : openInfo}
             onUnitLongPress={setZoomDefId}
             {...rowProps('opponent', rowKind)}
           />
@@ -439,26 +505,9 @@ export function BattleScreen({
             }
             hoverUnitId={dragUnitIds ? dragHover ?? undefined : undefined}
             onUnitMeasure={measureUnit}
-            // While targeting: tap a gold-framed unit to pick it (then confirm).
-            // While row-choosing: the row overlay handles taps (info suppressed).
-            // Otherwise a tap opens card info (targeting wins; info suppressed).
-            onUnitPress={(id, defId) => {
-              if (rowChoice) {
-                return; // the row drop overlay drives from here
-              }
-              if (targeting) {
-                if (pendingTarget) {
-                  return; // the confirm bar drives from here
-                }
-                const move = targeting.targets.get(id);
-                if (move) {
-                  feedback.tap();
-                  setPendingTarget({ id, defId, move });
-                }
-              } else {
-                setZoomDefId(defId);
-              }
-            }}
+            // Tap a gold unit to pick it (targeting/decoy) or open its info;
+            // suppressed while row-choosing (the row overlay drives).
+            onUnitPress={onYourUnitPress}
             onUnitLongPress={setZoomDefId}
             {...rowProps('you', rowKind)}
           />
@@ -549,17 +598,10 @@ export function BattleScreen({
         view={view}
         myAction={myAction}
         selectedId={selectedId}
-        onSelect={(id) => {
-          if (id !== null) {
-            feedback.tap();
-          }
-          // Picking a different card abandons any in-progress row/target choice.
-          cancelTargeting();
-          setSelectedId(id);
-        }}
+        onSelect={handleSelect}
         onSubmit={submit}
-        onEnterTargeting={(cardInstanceId, targets) => setTargeting({ cardInstanceId, targets })}
-        onEnterRowChoice={(cardInstanceId, rows) => setRowChoice({ cardInstanceId, rows })}
+        onEnterTargeting={handleEnterTargeting}
+        onEnterRowChoice={handleEnterRowChoice}
         onCardDragStart={onCardDragStart}
         onCardDragMove={onCardDragMove}
         onCardDragEnd={onCardDragEnd}

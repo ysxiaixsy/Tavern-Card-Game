@@ -193,7 +193,14 @@ export function MedicSheet({
   const options = mine
     ? view.legalMoves.filter((m): m is ResolveMedicMove => m.type === 'RESOLVE_MEDIC')
     : [];
-  const [pick, setPick] = useState<ResolveMedicMove | null>(null);
+  // Group by target — an agile unit yields one move per row (melee/ranged).
+  const groups = new Map<string, ResolveMedicMove[]>();
+  for (const m of options) {
+    const arr = groups.get(m.targetInstanceId) ?? [];
+    arr.push(m);
+    groups.set(m.targetInstanceId, arr);
+  }
+  const [pick, setPick] = useState<{ targetInstanceId: string; moves: ResolveMedicMove[] } | null>(null);
   useEffect(() => {
     if (!mine) {
       setPick(null);
@@ -203,34 +210,61 @@ export function MedicSheet({
   return (
     <Sheet visible={mine} title={pick ? 'Confirm revive' : 'Medic — choose a unit to revive'}>
       {pick ? (
-        <ConfirmCard
-          defId={defIdInGraveyard(view, pick.targetInstanceId)}
-          instanceId={pick.targetInstanceId}
-          rowTag={pick.row ? rowLabel[pick.row] : null}
-          confirmLabel="Revive"
-          onConfirm={() => {
-            onSubmit(pick);
-            setPick(null);
-          }}
-          onCancel={() => setPick(null)}
-        />
+        pick.moves.length > 1 ? (
+          // Agile unit: let the player choose which row it returns to.
+          <View style={styles.zoomBody}>
+            <CardView
+              defId={defIdInGraveyard(view, pick.targetInstanceId)}
+              instanceId={pick.targetInstanceId}
+              size="large"
+              selected
+            />
+            <Text variant="caption" tone="accent" style={styles.centerText}>
+              Revive to which row?
+            </Text>
+            <View style={styles.confirmRow}>
+              {pick.moves.map((m, i) => (
+                <Button
+                  key={i}
+                  label={m.row ? rowLabel[m.row] : 'Play'}
+                  onPress={() => {
+                    onSubmit(m);
+                    setPick(null);
+                  }}
+                />
+              ))}
+            </View>
+            <Button label="Cancel" variant="ghost" onPress={() => setPick(null)} />
+          </View>
+        ) : (
+          <ConfirmCard
+            defId={defIdInGraveyard(view, pick.targetInstanceId)}
+            instanceId={pick.targetInstanceId}
+            confirmLabel="Revive"
+            onConfirm={() => {
+              onSubmit(pick.moves[0]);
+              setPick(null);
+            }}
+            onCancel={() => setPick(null)}
+          />
+        )
       ) : (
         <>
           <Text variant="caption" tone="dim" style={styles.centerText}>
             The revived unit is played instantly with its full effect.
           </Text>
           <View style={styles.cardGrid}>
-            {options.map((move, i) => (
-              <View key={i} style={styles.pickEntry}>
+            {[...groups.entries()].map(([targetInstanceId, moves]) => (
+              <View key={targetInstanceId} style={styles.pickEntry}>
                 <CardView
-                  defId={defIdInGraveyard(view, move.targetInstanceId)}
-                  instanceId={move.targetInstanceId}
+                  defId={defIdInGraveyard(view, targetInstanceId)}
+                  instanceId={targetInstanceId}
                   size="hand"
-                  onPress={() => setPick(move)}
+                  onPress={() => setPick({ targetInstanceId, moves })}
                 />
-                {move.row && (
+                {moves.length > 1 && (
                   <Text variant="caption" tone="accent">
-                    {rowLabel[move.row]}
+                    agile
                   </Text>
                 )}
               </View>

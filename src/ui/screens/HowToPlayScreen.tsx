@@ -144,7 +144,7 @@ export function HowToPlayScreen(): React.JSX.Element {
           <Entry icon="crown" name="Skellige" desc="returns 2 units from the graveyard when round 3 begins." />
         </Section>
 
-        <Section icon="deck" title="Controls (this app)">
+        <Section icon="deck" title="Controls">
           <Entry icon="hand" name="Play a card" desc="drag it up onto a glowing row to place it; agile shows two rows. Release to play." />
           <Entry icon="decoy" name="Decoy / targets" desc="drag onto a highlighted unit; the nearest valid unit is chosen." />
           <Entry icon="star" name="Tap a hand card" desc="opens View (info) and Play. Play guides any choice it still needs." />
