@@ -508,9 +508,6 @@ const styles = StyleSheet.create({
     padding: sp(4),
     paddingBottom: sp(10),
     gap: sp(3),
-    // Center the lobby column on tall screens; the deck row still scrolls.
-    flexGrow: 1,
-    justifyContent: 'center',
   },
   header: {
     flexDirection: 'row',

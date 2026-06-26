@@ -14,11 +14,13 @@ import { Text } from './Text';
 
 const ROW_ICON: Record<RowKind, IconName> = { melee: 'sword', ranged: 'bow', siege: 'tower' };
 
+type Rect = { x: number; y: number; width: number; height: number };
+
 interface Props {
   row: RowView;
   rowKind: RowKind;
   underWeather: boolean;
-  /** Decoy targeting: instanceIds that may be tapped right now. */
+  /** Decoy targeting/drag: instanceIds that may be targeted right now. */
   targetIds?: ReadonlySet<string>;
   onUnitPress?: (instanceId: string, defId: string) => void;
   onUnitLongPress?: (defId: string) => void;
@@ -27,9 +29,39 @@ interface Props {
   /** Tap handler for the whole-row drop overlay (row-choose); omit for drag. */
   onDropPress?: () => void;
   /** Reports the row's on-screen rect (window coords) for drag hit-testing. */
-  onMeasure?: (rect: { x: number; y: number; width: number; height: number }) => void;
+  onMeasure?: (rect: Rect) => void;
+  /** Reports each unit's on-screen rect (for decoy drag hit-testing). */
+  onUnitMeasure?: (instanceId: string, rect: Rect) => void;
+  /** The unit currently under a dragged decoy (drawn distinctly). */
+  hoverUnitId?: string;
   /** Bump to force a re-measure (e.g. when a drag starts). */
   measureSignal?: number;
+}
+
+/** Wraps a board unit so its on-screen rect can be reported for drag targeting. */
+function MeasuredUnit({
+  instanceId,
+  measureSignal,
+  onMeasure,
+  children,
+}: {
+  instanceId: string;
+  measureSignal?: number;
+  onMeasure?: (instanceId: string, rect: Rect) => void;
+  children: React.ReactNode;
+}): React.JSX.Element {
+  const ref = React.useRef<View>(null);
+  const report = (): void => {
+    if (onMeasure) {
+      ref.current?.measureInWindow((x, y, width, height) => onMeasure(instanceId, { x, y, width, height }));
+    }
+  };
+  React.useEffect(report, [measureSignal]); // eslint-disable-line react-hooks/exhaustive-deps
+  return (
+    <View ref={ref} collapsable={false} onLayout={report}>
+      {children}
+    </View>
+  );
 }
 
 function BoardRowInner({
@@ -42,6 +74,8 @@ function BoardRowInner({
   dropState,
   onDropPress,
   onMeasure,
+  onUnitMeasure,
+  hoverUnitId,
   measureSignal,
 }: Props): React.JSX.Element {
   const targeting = targetIds !== undefined;
@@ -76,20 +110,24 @@ function BoardRowInner({
       >
         {row.units.map((unit) => {
           const isTarget = targetIds?.has(unit.instanceId) ?? false;
+          const isHover = hoverUnitId === unit.instanceId;
           return (
             // Appear keyed by instanceId → only newly-played cards animate in.
             <Appear key={unit.instanceId} distance={10} duration={180}>
-              <CardView
-                defId={unit.defId}
-                instanceId={unit.instanceId}
-                size="board"
-                effective={unit.effectiveStrength}
-                onField
-                highlighted={isTarget}
-                dimmed={targeting && !isTarget}
-                onPress={onUnitPress ? () => onUnitPress(unit.instanceId, unit.defId) : undefined}
-                onLongPress={onUnitLongPress ? () => onUnitLongPress(unit.defId) : undefined}
-              />
+              <MeasuredUnit instanceId={unit.instanceId} measureSignal={measureSignal} onMeasure={onUnitMeasure}>
+                <CardView
+                  defId={unit.defId}
+                  instanceId={unit.instanceId}
+                  size="board"
+                  effective={unit.effectiveStrength}
+                  onField
+                  highlighted={isTarget && !isHover}
+                  selected={isHover}
+                  dimmed={targeting && !isTarget}
+                  onPress={onUnitPress ? () => onUnitPress(unit.instanceId, unit.defId) : undefined}
+                  onLongPress={onUnitLongPress ? () => onUnitLongPress(unit.defId) : undefined}
+                />
+              </MeasuredUnit>
             </Appear>
           );
         })}

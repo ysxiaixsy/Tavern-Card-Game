@@ -14,7 +14,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { getView } from '../../engine/view';
 import { getCardDef } from '../../engine/data/cards';
 import type { Move, PlayCardMove, PlayerView, RowKind } from '../../engine/types';
-import { CARD_SIZE, factionTheme, sp } from '../theme';
+import { factionTheme, sp } from '../theme';
 import { color, radius } from '../tokens';
 import { useAppStore } from '../store';
 import { feedback } from '../feedback';
@@ -39,6 +39,13 @@ const YOUR_ROW_ORDER: readonly RowKind[] = ['melee', 'ranged', 'siege'];
 interface Targeting {
   cardInstanceId: string;
   targets: ReadonlyMap<string, Move>;
+}
+
+interface Rect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
 }
 
 export interface BattleScreenProps {
@@ -78,17 +85,20 @@ export function BattleScreen({
   const confirmPassPref = useAppStore((s) => s.prefs.confirmPass);
   const confirmDragPref = useAppStore((s) => s.prefs.confirmDrag);
 
-  // --- drag-to-play (a card dropped on a highlighted row) ---
+  // --- drag-to-play: drag a card onto its legal row, or a decoy onto a unit ---
   // A play staged for confirmation (drag-drop with the confirm pref on).
   const [pendingPlay, setPendingPlay] = useState<{ move: Move; defId: string } | null>(null);
-  const [dragValidKeys, setDragValidKeys] = useState<ReadonlySet<string> | null>(null);
+  const [dragRowKeys, setDragRowKeys] = useState<ReadonlySet<string> | null>(null);
+  const [dragUnitIds, setDragUnitIds] = useState<ReadonlySet<string> | null>(null);
   const [dragHover, setDragHover] = useState<string | null>(null);
   const [measureSignal, setMeasureSignal] = useState(0);
   // Live mirrors so the per-card PanResponder's stable handlers read fresh data.
   const viewRef = useRef(view);
   viewRef.current = view;
-  const rowRects = useRef<Map<string, { x: number; y: number; width: number; height: number }>>(new Map());
-  const dragValidRef = useRef<ReadonlyMap<string, PlayCardMove>>(new Map());
+  const rowRects = useRef<Map<string, Rect>>(new Map());
+  const unitRects = useRef<Map<string, Rect>>(new Map());
+  const dragRowsRef = useRef<ReadonlyMap<string, PlayCardMove>>(new Map());
+  const dragUnitsRef = useRef<ReadonlyMap<string, PlayCardMove>>(new Map());
   const dragHoverRef = useRef<string | null>(null);
 
   // Haptics on round / match results, fired once per new result.
@@ -153,45 +163,63 @@ export function BattleScreen({
   const confirmDragRef = useRef(confirmDragPref);
   confirmDragRef.current = confirmDragPref;
 
-  const onCardDragStart = useCallback((cardInstanceId: string) => {
+  const findUnitDefId = (instanceId: string): string => {
     const v = viewRef.current;
-    const card = v.you.hand.find((c) => c.instanceId === cardInstanceId);
-    const valid = new Map<string, PlayCardMove>();
-    if (card) {
-      const sideKey = getCardDef(card.defId).abilities.includes('spy') ? 'opponent' : 'you';
-      for (const m of v.legalMoves) {
-        if (m.type === 'PLAY_CARD' && m.cardInstanceId === cardInstanceId && m.row) {
-          valid.set(`${sideKey}:${m.row}`, m);
+    for (const sideView of [v.you, v.opponent]) {
+      for (const rk of ['melee', 'ranged', 'siege'] as RowKind[]) {
+        const u = sideView.rows[rk].units.find((x) => x.instanceId === instanceId);
+        if (u) {
+          return u.defId;
         }
       }
     }
-    dragValidRef.current = valid;
+    return '';
+  };
+
+  const onCardDragStart = useCallback((cardInstanceId: string) => {
+    const v = viewRef.current;
+    const card = v.you.hand.find((c) => c.instanceId === cardInstanceId);
+    const rows = new Map<string, PlayCardMove>();
+    const units = new Map<string, PlayCardMove>();
+    if (card) {
+      const sideKey = getCardDef(card.defId).abilities.includes('spy') ? 'opponent' : 'you';
+      for (const m of v.legalMoves) {
+        if (m.type !== 'PLAY_CARD' || m.cardInstanceId !== cardInstanceId) {
+          continue;
+        }
+        if (m.row) {
+          rows.set(`${sideKey}:${m.row}`, m);
+        } else if (m.targetInstanceId) {
+          units.set(m.targetInstanceId, m); // decoy: per-unit target
+        }
+      }
+    }
+    dragRowsRef.current = rows;
+    dragUnitsRef.current = units;
     dragHoverRef.current = null;
-    setDragValidKeys(new Set(valid.keys()));
+    setDragRowKeys(rows.size > 0 ? new Set(rows.keys()) : null);
+    setDragUnitIds(units.size > 0 ? new Set(units.keys()) : null);
     setDragHover(null);
-    setMeasureSignal((n) => n + 1); // re-measure rows where they currently sit
+    setMeasureSignal((n) => n + 1); // re-measure rows/units where they currently sit
   }, []);
 
-  const onCardDragMove = useCallback((winX: number, winY: number) => {
-    const valid = dragValidRef.current;
-    if (valid.size === 0) {
-      return;
-    }
-    const cw = CARD_SIZE.hand.width;
-    const ch = CARD_SIZE.hand.height;
+  const onCardDragMove = useCallback((px: number, py: number) => {
+    const inRect = (r: Rect | undefined): boolean =>
+      !!r && px >= r.x && px <= r.x + r.width && py >= r.y && py <= r.y + r.height;
     let best: string | null = null;
-    let bestArea = 0;
-    for (const key of valid.keys()) {
-      const r = rowRects.current.get(key);
-      if (!r) {
-        continue;
+    if (dragRowsRef.current.size > 0) {
+      for (const key of dragRowsRef.current.keys()) {
+        if (inRect(rowRects.current.get(key))) {
+          best = key;
+          break;
+        }
       }
-      const ox = Math.max(0, Math.min(winX + cw, r.x + r.width) - Math.max(winX, r.x));
-      const oy = Math.max(0, Math.min(winY + ch, r.y + r.height) - Math.max(winY, r.y));
-      const area = ox * oy; // any overlap counts; pick the largest
-      if (area > bestArea) {
-        bestArea = area;
-        best = key;
+    } else if (dragUnitsRef.current.size > 0) {
+      for (const id of dragUnitsRef.current.keys()) {
+        if (inRect(unitRects.current.get(id))) {
+          best = id;
+          break;
+        }
       }
     }
     if (dragHoverRef.current !== best) {
@@ -202,20 +230,26 @@ export function BattleScreen({
 
   const onCardDragEnd = useCallback(() => {
     const key = dragHoverRef.current;
-    const move = key ? dragValidRef.current.get(key) : undefined;
-    dragValidRef.current = new Map();
+    const rowMove = key ? dragRowsRef.current.get(key) : undefined;
+    const unitMove = key ? dragUnitsRef.current.get(key) : undefined;
+    dragRowsRef.current = new Map();
+    dragUnitsRef.current = new Map();
     dragHoverRef.current = null;
-    setDragValidKeys(null);
+    setDragRowKeys(null);
+    setDragUnitIds(null);
     setDragHover(null);
-    if (!move) {
-      return; // released off any valid row → no play (illegal moves blocked)
+    if (unitMove && key) {
+      // Decoy: confirm via the existing pending-target bar.
+      setPendingTarget({ id: key, defId: findUnitDefId(key), move: unitMove });
+    } else if (rowMove) {
+      if (confirmDragRef.current) {
+        const card = viewRef.current.you.hand.find((c) => c.instanceId === rowMove.cardInstanceId);
+        setPendingPlay({ move: rowMove, defId: card?.defId ?? '' });
+      } else {
+        submitRef.current(rowMove);
+      }
     }
-    if (confirmDragRef.current) {
-      const card = viewRef.current.you.hand.find((c) => c.instanceId === move.cardInstanceId);
-      setPendingPlay({ move, defId: card?.defId ?? '' });
-    } else {
-      submitRef.current(move);
-    }
+    // released off any valid target → no play (illegal moves blocked)
   }, []);
 
   // Drop props for a board row: row-choose (tap) or live drag highlight.
@@ -225,12 +259,12 @@ export function BattleScreen({
   ): {
     dropState?: 'valid' | 'hover';
     onDropPress?: () => void;
-    onMeasure: (rect: { x: number; y: number; width: number; height: number }) => void;
+    onMeasure: (rect: Rect) => void;
     measureSignal: number;
   } => {
     const key = `${side}:${rowKind}`;
     const base = {
-      onMeasure: (rect: { x: number; y: number; width: number; height: number }) => {
+      onMeasure: (rect: Rect) => {
         rowRects.current.set(key, rect);
       },
       measureSignal,
@@ -247,10 +281,14 @@ export function BattleScreen({
         },
       };
     }
-    if (dragValidKeys?.has(key)) {
+    if (dragRowKeys?.has(key)) {
       return { ...base, dropState: dragHover === key ? 'hover' : 'valid' };
     }
     return base;
+  };
+
+  const measureUnit = (instanceId: string, rect: Rect): void => {
+    unitRects.current.set(instanceId, rect);
   };
 
   const doPass = (): void => submit({ type: 'PASS', player: view.player });
@@ -337,17 +375,19 @@ export function BattleScreen({
             row={view.you.rows[rowKind]}
             rowKind={rowKind}
             underWeather={weatherForRow(rowKind)}
-            // Once a target is picked, isolate it (only it stays gold; the rest
-            // dim) so the to-be-confirmed unit is obvious.
+            // Decoy targets glow (tap targeting, the confirm pick, or a dragged
+            // decoy); the rest dim so the choice is obvious.
             targetIds={
               targeting
                 ? new Set(
-                    view.you.rows[rowKind].units
-                      .map((u) => u.instanceId)
-                      .filter((id) => (pendingTarget ? id === pendingTarget.id : targeting.targets.has(id))),
+                    [...targeting.targets.keys()].filter((id) => (pendingTarget ? id === pendingTarget.id : true)),
                   )
-                : undefined
+                : pendingTarget
+                  ? new Set([pendingTarget.id])
+                  : dragUnitIds ?? undefined
             }
+            hoverUnitId={dragUnitIds ? dragHover ?? undefined : undefined}
+            onUnitMeasure={measureUnit}
             // While targeting: tap a gold-framed unit to pick it (then confirm).
             // While row-choosing: the row overlay handles taps (info suppressed).
             // Otherwise a tap opens card info (targeting wins; info suppressed).
@@ -462,6 +502,8 @@ export function BattleScreen({
           if (id !== null) {
             feedback.tap();
           }
+          // Picking a different card abandons any in-progress row/target choice.
+          cancelTargeting();
           setSelectedId(id);
         }}
         onSubmit={submit}

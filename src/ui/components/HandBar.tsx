@@ -54,14 +54,14 @@ interface DragState {
   defId: string;
 }
 
-/** A hand card: tap (select), long-press (zoom), or drag up onto a row (play). */
+/** A hand card: tap to select, or drag up onto its target to play. Info is the
+ * popup's View button — no long-press. */
 function DraggableHandCard({
   card,
   selected,
   playable,
   hidden,
   onTap,
-  onZoom,
   onDragStart,
   onDragMove,
   onDragEnd,
@@ -71,9 +71,8 @@ function DraggableHandCard({
   playable: boolean;
   hidden: boolean;
   onTap: () => void;
-  onZoom: () => void;
   onDragStart: (instanceId: string, defId: string, winX: number, winY: number) => void;
-  onDragMove: (dx: number, dy: number) => void;
+  onDragMove: (dx: number, dy: number, pageX: number, pageY: number) => void;
   onDragEnd: () => void;
 }): React.JSX.Element {
   const ref = useRef<View>(null);
@@ -93,7 +92,7 @@ function DraggableHandCard({
       onPanResponderGrant: () => {
         ref.current?.measureInWindow((x, y) => onDragStart(card.instanceId, card.defId, x, y));
       },
-      onPanResponderMove: (_e, g) => onDragMove(g.dx, g.dy),
+      onPanResponderMove: (e, g) => onDragMove(g.dx, g.dy, e.nativeEvent.pageX, e.nativeEvent.pageY),
       onPanResponderRelease: () => onDragEnd(),
       onPanResponderTerminate: () => onDragEnd(),
     }),
@@ -108,7 +107,6 @@ function DraggableHandCard({
         selected={selected}
         dimmed={!playable && !selected}
         onPress={onTap}
-        onLongPress={onZoom}
       />
     </View>
   );
@@ -133,7 +131,6 @@ export function HandBar({
   const handRef = useRef<View>(null);
   const origin = useRef({ x: 0, y: 0 });
   const base = useRef({ x: 0, y: 0 });
-  const grantWin = useRef({ x: 0, y: 0 });
   const pos = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
   const scale = useRef(new Animated.Value(1)).current;
 
@@ -181,17 +178,17 @@ export function HandBar({
   // parent decides which row it lands on and plays it) ---
   const onDragStart = (instanceId: string, defId: string, winX: number, winY: number): void => {
     base.current = { x: winX - origin.current.x, y: winY - origin.current.y };
-    grantWin.current = { x: winX, y: winY };
     pos.setValue(base.current);
     scale.setValue(1);
     setDrag({ instanceId, defId });
     dragApi.current.start(instanceId);
   };
 
-  const onDragMove = (dx: number, dy: number): void => {
+  const onDragMove = (dx: number, dy: number, pageX: number, pageY: number): void => {
     pos.setValue({ x: base.current.x + dx, y: base.current.y + dy });
     scale.setValue(1 + Math.min(0.15, Math.max(0, -dy / 160)));
-    dragApi.current.move(grantWin.current.x + dx, grantWin.current.y + dy);
+    // Report the live touch point (window coords) for drop hit-testing.
+    dragApi.current.move(pageX, pageY);
   };
 
   const onDragEnd = (): void => {
@@ -245,7 +242,6 @@ export function HandBar({
             playable={myAction}
             hidden={drag?.instanceId === card.instanceId}
             onTap={() => onSelect(card.instanceId === selectedId ? null : card.instanceId)}
-            onZoom={() => onZoom(card.defId)}
             onDragStart={onDragStart}
             onDragMove={onDragMove}
             onDragEnd={onDragEnd}
