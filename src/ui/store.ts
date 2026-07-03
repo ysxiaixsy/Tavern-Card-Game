@@ -22,8 +22,9 @@ import { getView } from '../engine/view';
 import { getCardDef } from '../engine/data/cards';
 import { STARTER_DECKS } from '../engine/data/decks';
 import { GwentError } from '../engine/types';
-import type { GameConfig, GameState, Move, PlayerId } from '../engine/types';
+import type { DeckList, GameConfig, GameState, Move, PlayerId } from '../engine/types';
 import { chooseMove, type Difficulty } from '../ai/agent';
+import { buildAiDeck, pickAiDeck } from '../ai/deckchoice';
 import { playerLabel } from './cardInfo';
 
 /** Factions with a complete card pool. */
@@ -110,6 +111,13 @@ interface Session {
   notice: string | null;
 }
 
+/** How the opponent's deck is chosen: an explicit deck id, a random pick
+ * (random faction, difficulty-weighted strength), or an AI-drafted deck. */
+export type OpponentDeckSpec =
+  | string
+  | { kind: 'random' }
+  | { kind: 'build'; faction: PlayableFaction | 'surprise' };
+
 interface AppStore {
   screen: Screen;
   setupMode: GameMode;
@@ -131,7 +139,7 @@ interface AppStore {
   saveDeck(deck: SavedDeck): void;
   deleteDeck(id: string): void;
   // match flow
-  startMatch(p1DeckId: string, p2DeckId: string, difficulty: Difficulty): string | null;
+  startMatch(p1DeckId: string, p2: OpponentDeckSpec, difficulty: Difficulty): string | null;
   rematch(): void;
   dispatchMove(move: Move): void;
   confirmHandoff(): void;
@@ -267,17 +275,29 @@ export const useAppStore = create<AppStore>()(
         },
 
         /** Returns an error message (shown on the setup screen) or null on success. */
-        startMatch(p1DeckId: string, p2DeckId: string, difficulty: Difficulty): string | null {
+        startMatch(p1DeckId: string, p2: OpponentDeckSpec, difficulty: Difficulty): string | null {
           const decks = allDecks(get().customDecks);
           const p1 = decks.find((d) => d.id === p1DeckId);
-          const p2 = decks.find((d) => d.id === p2DeckId);
-          if (!p1 || !p2) {
+          if (!p1) {
             return 'Pick a deck for both seats.';
+          }
+          let p2List: DeckList;
+          if (typeof p2 === 'string') {
+            const found = decks.find((d) => d.id === p2);
+            if (!found) {
+              return 'Pick a deck for both seats.';
+            }
+            p2List = { leaderId: found.leaderId, cardIds: found.cardIds };
+          } else if (p2.kind === 'random') {
+            const picked = pickAiDeck(decks, difficulty, freshSeed());
+            p2List = { leaderId: picked.leaderId, cardIds: picked.cardIds };
+          } else {
+            p2List = buildAiDeck(p2.faction, difficulty, freshSeed());
           }
           const config: GameConfig = {
             players: {
               p1: { deck: { leaderId: p1.leaderId, cardIds: p1.cardIds } },
-              p2: { deck: { leaderId: p2.leaderId, cardIds: p2.cardIds } },
+              p2: { deck: p2List },
             },
           };
           try {

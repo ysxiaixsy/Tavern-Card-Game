@@ -6,7 +6,15 @@
 import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { border, color, faction as factionTokens, radius, sp } from '../tokens';
-import { allDecks, leaderShortName, useAppStore, type SavedDeck } from '../store';
+import {
+  allDecks,
+  leaderShortName,
+  useAppStore,
+  type OpponentDeckSpec,
+  type PlayableFaction,
+  type SavedDeck,
+} from '../store';
+import { factionTheme } from '../theme';
 import type { Difficulty } from '../../ai/agent';
 import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
@@ -93,10 +101,19 @@ export function GameSetupScreen(): React.JSX.Element {
   const [p1DeckId, setP1DeckId] = useState('starter_northern_realms');
   const [p2DeckId, setP2DeckId] = useState('starter_monsters');
   const [difficulty, setDifficulty] = useState<Difficulty>('normal');
+  // AI opponent deck: an explicit deck, a random pick, or an AI-drafted deck.
+  const [aiDeckMode, setAiDeckMode] = useState<'list' | 'random' | 'build'>('list');
+  const [aiBuildFaction, setAiBuildFaction] = useState<PlayableFaction | 'surprise'>('surprise');
   const [error, setError] = useState<string | null>(null);
 
   const start = (): void => {
-    setError(startMatch(p1DeckId, p2DeckId, difficulty));
+    let p2: OpponentDeckSpec = p2DeckId;
+    if (mode === 'ai' && aiDeckMode === 'random') {
+      p2 = { kind: 'random' };
+    } else if (mode === 'ai' && aiDeckMode === 'build') {
+      p2 = { kind: 'build', faction: aiBuildFaction };
+    }
+    setError(startMatch(p1DeckId, p2, difficulty));
   };
 
   return (
@@ -125,12 +142,92 @@ export function GameSetupScreen(): React.JSX.Element {
         selectedId={p1DeckId}
         onSelect={setP1DeckId}
       />
-      <SeatRow
-        label={mode === 'ai' ? 'AI deck' : 'Player 2'}
-        decks={decks}
-        selectedId={p2DeckId}
-        onSelect={setP2DeckId}
-      />
+      {mode === 'ai' ? (
+        <View style={styles.seatBlock}>
+          <Text variant="label" tone="dim" caps style={styles.seatLabel}>
+            AI deck
+          </Text>
+          <View style={styles.diffRow}>
+            {(
+              [
+                { key: 'list', label: 'Choose' },
+                { key: 'random', label: 'Random' },
+                { key: 'build', label: 'AI drafts' },
+              ] as const
+            ).map((opt) => (
+              <Pressable
+                key={opt.key}
+                onPress={() => setAiDeckMode(opt.key)}
+                style={[styles.diffButton, aiDeckMode === opt.key && styles.diffSelected]}
+              >
+                <Text variant="label" tone={aiDeckMode === opt.key ? 'accentBright' : 'dim'} caps>
+                  {opt.label}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+          {aiDeckMode === 'list' && (
+            <SeatRow label="" decks={decks} selectedId={p2DeckId} onSelect={setP2DeckId} />
+          )}
+          {aiDeckMode === 'random' && (
+            <Text variant="caption" tone="dim" style={styles.aiHint}>
+              A random faction — stronger difficulties bring that faction's strongest deck.
+            </Text>
+          )}
+          {aiDeckMode === 'build' && (
+            <>
+              <View style={styles.factionRow}>
+                {(
+                  [...(Object.keys(factionTheme) as (keyof typeof factionTheme)[])].filter(
+                    (f): f is PlayableFaction => f !== 'neutral',
+                  ) as PlayableFaction[]
+                ).map((f) => (
+                  <Pressable
+                    key={f}
+                    onPress={() => setAiBuildFaction(f)}
+                    style={[
+                      styles.factionChip,
+                      { borderColor: aiBuildFaction === f ? factionTheme[f].accent : color.line },
+                      aiBuildFaction === f && { backgroundColor: color.surfaceRaised },
+                    ]}
+                  >
+                    <Text
+                      variant="caption"
+                      color={aiBuildFaction === f ? factionTheme[f].accent : color.inkDim}
+                      caps
+                      numberOfLines={1}
+                    >
+                      {factionTheme[f].label}
+                    </Text>
+                  </Pressable>
+                ))}
+                <Pressable
+                  onPress={() => setAiBuildFaction('surprise')}
+                  style={[
+                    styles.factionChip,
+                    { borderColor: aiBuildFaction === 'surprise' ? color.accentBright : color.line },
+                    aiBuildFaction === 'surprise' && { backgroundColor: color.surfaceRaised },
+                  ]}
+                >
+                  <Text
+                    variant="caption"
+                    tone={aiBuildFaction === 'surprise' ? 'accentBright' : 'dim'}
+                    caps
+                    numberOfLines={1}
+                  >
+                    Surprise me
+                  </Text>
+                </Pressable>
+              </View>
+              <Text variant="caption" tone="dim" style={styles.aiHint}>
+                The AI drafts its own deck for this match — sharper drafts at higher difficulties.
+              </Text>
+            </>
+          )}
+        </View>
+      ) : (
+        <SeatRow label="Player 2" decks={decks} selectedId={p2DeckId} onSelect={setP2DeckId} />
+      )}
 
       {mode === 'ai' && (
         <View style={styles.diffBlock}>
@@ -233,6 +330,24 @@ const styles = StyleSheet.create({
   diffSelected: {
     borderColor: color.accentBright,
     backgroundColor: color.surfaceRaised,
+  },
+  factionRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: sp(1),
+    marginTop: sp(2),
+  },
+  factionChip: {
+    flexBasis: '31%',
+    flexGrow: 1,
+    borderWidth: border.frame,
+    borderRadius: radius.md,
+    paddingVertical: sp(2),
+    alignItems: 'center',
+  },
+  aiHint: {
+    marginTop: sp(2),
+    textAlign: 'center',
   },
   error: {
     textAlign: 'center',
