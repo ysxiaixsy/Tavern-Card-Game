@@ -462,7 +462,6 @@ function Centered({ children }: { children: React.ReactNode }): React.JSX.Elemen
 const styles = StyleSheet.create({
   scroll: {
     flex: 1,
-    backgroundColor: color.bg,
   },
   centered: {
     alignItems: 'center',

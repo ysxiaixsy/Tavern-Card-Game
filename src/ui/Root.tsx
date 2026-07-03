@@ -9,8 +9,8 @@ import React from 'react';
 import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import { palette } from './theme';
 import { useAppStore } from './store';
+import { ScreenBackground } from './components/ScreenBackground';
 import { DeckBuilderScreen } from './screens/DeckBuilderScreen';
 import { GameScreen } from './screens/GameScreen';
 import { GameSetupScreen } from './screens/GameSetupScreen';
@@ -53,16 +53,17 @@ export function Root(): React.JSX.Element {
   }
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top', 'bottom', 'left', 'right']}>
-      <StatusBar style="light" />
-      {content}
-    </SafeAreaView>
+    <ScreenBackground>
+      <SafeAreaView style={styles.safe} edges={['top', 'bottom', 'left', 'right']}>
+        <StatusBar style="light" />
+        {content}
+      </SafeAreaView>
+    </ScreenBackground>
   );
 }
 
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: palette.bg,
   },
 });

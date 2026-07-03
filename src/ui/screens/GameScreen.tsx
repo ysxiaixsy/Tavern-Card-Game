@@ -693,7 +693,6 @@ export function GameScreen(): React.JSX.Element | null {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: color.bg,
   },
   header: {
     flexDirection: 'row',

@@ -136,7 +136,6 @@ export function MulliganScreen(): React.JSX.Element | null {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: color.bg,
     paddingTop: sp(4),
   },
   waiting: {

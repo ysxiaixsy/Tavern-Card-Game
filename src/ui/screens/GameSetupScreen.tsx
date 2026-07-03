@@ -222,7 +222,6 @@ export function GameSetupScreen(): React.JSX.Element {
 const styles = StyleSheet.create({
   scroll: {
     flex: 1,
-    backgroundColor: color.bg,
   },
   screen: {
     padding: sp(4),

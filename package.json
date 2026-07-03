@@ -34,6 +34,7 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "gen:icons": "tsx scripts/gen-icons.ts",
+    "gen:textures": "tsx scripts/gen-textures.ts",
     "gen:art": "tsx scripts/gen-card-art.ts",
     "optimize:art": "tsx scripts/optimize-art.ts",
     "art:import": "tsx scripts/import-art.ts",

@@ -195,7 +195,7 @@ export function StyleGalleryScreen(): React.JSX.Element {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: color.bg, paddingHorizontal: space.md },
+  screen: { flex: 1, paddingHorizontal: space.md },
   header: {
     flexDirection: 'row',
     alignItems: 'center',

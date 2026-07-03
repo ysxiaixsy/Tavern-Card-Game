@@ -92,7 +92,6 @@ export function HomeScreen(): React.JSX.Element {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: color.bg,
     alignItems: 'center',
     justifyContent: 'center',
     padding: space.xl,

@@ -79,7 +79,6 @@ export function ResultScreen(): React.JSX.Element | null {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: color.bg,
     alignItems: 'center',
     justifyContent: 'center',
     padding: sp(6),

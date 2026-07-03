@@ -157,7 +157,7 @@ export function HowToPlayScreen(): React.JSX.Element {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: color.bg },
+  screen: { flex: 1 },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
