@@ -80,6 +80,9 @@ export function DeckBuilderScreen(): React.JSX.Element {
 
   const [editing, setEditing] = useState<SavedDeck | null>(null);
   const [zoomDefId, setZoomDefId] = useState<string | null>(null);
+  // Multi-delete: select mode over the custom-deck list (starters excluded).
+  const [selecting, setSelecting] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
   if (editing !== null) {
     return (
@@ -120,6 +123,47 @@ export function DeckBuilderScreen(): React.JSX.Element {
     });
   };
 
+  const confirmDeleteOne = (deck: SavedDeck): void => {
+    Alert.alert('Delete this deck?', deck.name, [
+      { text: 'Keep', style: 'cancel' },
+      { text: 'Delete', style: 'destructive', onPress: () => deleteDeck(deck.id) },
+    ]);
+  };
+
+  const toggleSelected = (id: string): void => {
+    setSelected((current) => {
+      const next = new Set(current);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const exitSelectMode = (): void => {
+    setSelecting(false);
+    setSelected(new Set());
+  };
+
+  const confirmDeleteSelected = (): void => {
+    const count = selected.size;
+    Alert.alert('Delete selected decks?', `${count} deck(s) will be removed.`, [
+      { text: 'Keep', style: 'cancel' },
+      {
+        text: `Delete ${count}`,
+        style: 'destructive',
+        onPress: () => {
+          for (const id of selected) {
+            deleteDeck(id);
+          }
+          exitSelectMode();
+        },
+      },
+    ]);
+  };
+
   return (
     <ScrollView style={styles.scroll} contentContainerStyle={styles.screen}>
       <View style={styles.header}>
@@ -142,17 +186,71 @@ export function DeckBuilderScreen(): React.JSX.Element {
         style={styles.newButton}
       />
 
-      <Text variant="label" tone="dim" caps style={styles.sectionLabel}>
-        Your decks
-      </Text>
+      <View style={styles.sectionHeader}>
+        <Text variant="label" tone="dim" caps style={styles.sectionLabel}>
+          Your decks
+        </Text>
+        {customDecks.length > 0 && (
+          <Pressable onPress={selecting ? exitSelectMode : () => setSelecting(true)} hitSlop={8}>
+            <Text variant="label" tone="accent" caps>
+              {selecting ? 'Done' : 'Select'}
+            </Text>
+          </Pressable>
+        )}
+      </View>
       {customDecks.length === 0 && (
         <Text variant="caption" tone="dim">
           None yet — duplicate a starter or build from scratch.
         </Text>
       )}
-      {customDecks.map((deck) => (
-        <DeckRow key={deck.id} deck={deck} onEdit={() => setEditing({ ...deck, cardIds: [...deck.cardIds] })} onDuplicate={() => duplicate(deck)} />
-      ))}
+      {customDecks.map((deck) =>
+        selecting ? (
+          <Pressable
+            key={deck.id}
+            onPress={() => toggleSelected(deck.id)}
+            style={[
+              styles.deckRow,
+              { borderLeftColor: factionTheme[deck.faction].frame },
+              selected.has(deck.id) && styles.deckRowSelected,
+            ]}
+          >
+            <Icon
+              name={selected.has(deck.id) ? 'star' : 'deck'}
+              size={16}
+              color={selected.has(deck.id) ? color.accentBright : color.inkDim}
+            />
+            <View style={{ flex: 1 }}>
+              <Text
+                variant="bodyStrong"
+                color={selected.has(deck.id) ? color.accentBright : factionTheme[deck.faction].accent}
+                numberOfLines={1}
+              >
+                {deck.name}
+              </Text>
+              <Text variant="caption" tone="dim" numberOfLines={1}>
+                {leaderShortName(deck.leaderId)} · {deck.cardIds.length} cards
+              </Text>
+            </View>
+          </Pressable>
+        ) : (
+          <DeckRow
+            key={deck.id}
+            deck={deck}
+            onEdit={() => setEditing({ ...deck, cardIds: [...deck.cardIds] })}
+            onDuplicate={() => duplicate(deck)}
+            onDelete={() => confirmDeleteOne(deck)}
+          />
+        ),
+      )}
+      {selecting && (
+        <Button
+          label={selected.size === 0 ? 'Select decks to delete' : `Delete ${selected.size} deck(s)`}
+          variant="danger"
+          disabled={selected.size === 0}
+          onPress={confirmDeleteSelected}
+          style={styles.deleteBar}
+        />
+      )}
 
       <Text variant="label" tone="dim" caps style={styles.sectionLabel}>
         Starter decks (templates)
@@ -168,10 +266,12 @@ function DeckRow({
   deck,
   onEdit,
   onDuplicate,
+  onDelete,
 }: {
   deck: SavedDeck;
   onEdit?: () => void;
   onDuplicate: () => void;
+  onDelete?: () => void;
 }): React.JSX.Element {
   const theme = factionTheme[deck.faction];
   return (
@@ -189,6 +289,11 @@ function DeckRow({
       </View>
       {onEdit && <Button label="Edit" variant="ghost" onPress={onEdit} style={styles.rowButton} />}
       <Button label={onEdit ? 'Copy' : 'Duplicate'} variant="ghost" onPress={onDuplicate} style={styles.rowButton} />
+      {onDelete && (
+        <Pressable onPress={onDelete} hitSlop={8} style={styles.deleteButton}>
+          <Icon name="close" size={14} color={color.sealRedBright} />
+        </Pressable>
+      )}
     </View>
   );
 }
@@ -492,6 +597,23 @@ const styles = StyleSheet.create({
     borderLeftWidth: border.bold,
     padding: sp(3),
     marginBottom: sp(2),
+  },
+  deckRowSelected: {
+    backgroundColor: color.surfaceRaised,
+    borderWidth: border.thin,
+    borderColor: color.accentBright,
+    borderLeftWidth: border.bold,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+  },
+  deleteBar: {
+    marginTop: sp(1),
+  },
+  deleteButton: {
+    padding: sp(2),
   },
   deckMetaRow: {
     flexDirection: 'row',
