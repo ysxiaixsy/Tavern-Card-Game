@@ -1541,7 +1541,7 @@ export const CARD_DEFS: readonly CardDef[] = [
     name: 'Hjalmar an Craite',
     faction: 'skellige',
     type: 'hero',
-    row: 'melee',
+    row: 'ranged',
     strength: 10,
     abilities: [],
   },

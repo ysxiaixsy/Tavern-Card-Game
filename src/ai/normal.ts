@@ -242,8 +242,9 @@ export function estimateGain(view: PlayerView, move: Move): number {
   }
 }
 
-/** How precious a card is — conceding burns cheap cards, never these. */
-function cardWorth(def: CardDef): number {
+/** How precious a card is — conceding burns cheap cards, never these.
+ * Also reused as the card-value heuristic for AI deck strength/building. */
+export function cardWorth(def: CardDef): number {
   if (def.abilities.includes('spy')) {
     return 90;
   }
