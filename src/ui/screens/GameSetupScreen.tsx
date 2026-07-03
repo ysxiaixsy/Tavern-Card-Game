@@ -138,7 +138,7 @@ export function GameSetupScreen(): React.JSX.Element {
             AI difficulty
           </Text>
           <View style={styles.diffRow}>
-            {(['easy', 'normal', 'hard'] as const).map((d) => (
+            {(['easy', 'normal', 'hard', 'witcher'] as const).map((d) => (
               <Pressable
                 key={d}
                 onPress={() => setDifficulty(d)}

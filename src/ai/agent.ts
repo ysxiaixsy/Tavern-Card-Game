@@ -5,18 +5,20 @@
  * is deterministic: the same view always produces the same move, which keeps
  * simulations and replays reproducible.
  *
- *   easy   — greedy points: plays its biggest immediate board gain, avoids
- *            spies/weather (they "lose points"), passes naively.
- *   normal — the full heuristic policy (see normal.ts).
- *   hard   — normal's shortlist re-ranked by determinized rollouts (hard.ts).
+ *   easy    — greedy points: plays its biggest immediate board gain, avoids
+ *             spies/weather (they "lose points"), passes naively.
+ *   normal  — the full heuristic policy (see normal.ts).
+ *   hard    — normal's shortlist re-ranked by determinized rollouts (hard.ts).
+ *   witcher — the same search with several times the budget and cross-round
+ *             rollouts; prices card economy across rounds.
  */
 
 import { getCardDef } from '../engine/data/cards.ts';
 import type { Move, PlayerView } from '../engine/types.ts';
 import { chooseMulligan, estimateGain, scoreMoves } from './normal.ts';
-import { chooseHardMove } from './hard.ts';
+import { chooseHardMove, chooseWitcherMove } from './hard.ts';
 
-export type Difficulty = 'easy' | 'normal' | 'hard';
+export type Difficulty = 'easy' | 'normal' | 'hard' | 'witcher';
 
 export function chooseMove(view: PlayerView, difficulty: Difficulty): Move {
   if (view.legalMoves.length === 0) {
@@ -35,6 +37,8 @@ export function chooseMove(view: PlayerView, difficulty: Difficulty): Move {
       return scoreMoves(view)[0].move;
     case 'hard':
       return chooseHardMove(view);
+    case 'witcher':
+      return chooseWitcherMove(view);
     default:
       return scoreMoves(view)[0].move;
   }
