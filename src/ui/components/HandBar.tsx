@@ -30,6 +30,7 @@ import { CARD_SIZE, sp } from '../theme';
 import { color, radius } from '../tokens';
 import { Button } from './Button';
 import { CardView } from './CardView';
+import { TiledSurface } from './Material';
 import { ScrollHint, useScrollHint } from './ScrollHint';
 import { Text } from './Text';
 
@@ -280,9 +281,11 @@ function HandBarInner({
 
       {drag !== null && (
         <View pointerEvents="none" style={styles.hintOverlay}>
-          <Text variant="label" tone="accentBright" caps style={styles.dragHint}>
-            Drop on a highlighted row
-          </Text>
+          <TiledSurface texture="oakMid" fallback={color.surface} style={styles.dragHintPill}>
+            <Text variant="label" tone="accentBright" caps>
+              Drop on a highlighted row
+            </Text>
+          </TiledSurface>
         </View>
       )}
 
@@ -326,12 +329,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     zIndex: 101,
   },
-  dragHint: {
-    backgroundColor: color.surface,
+  dragHintPill: {
     paddingHorizontal: sp(3),
     paddingVertical: 2,
     borderRadius: radius.md,
-    overflow: 'hidden',
   },
   hint: {
     paddingVertical: sp(2),

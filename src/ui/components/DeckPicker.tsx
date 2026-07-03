@@ -15,6 +15,7 @@ import { border, color, radius, sp } from '../tokens';
 import { leaderShortName, type SavedDeck } from '../store';
 import { CardView } from './CardView';
 import { Icon } from './Icon';
+import { TiledSurface } from './Material';
 import { ScrollHint, useScrollHint } from './ScrollHint';
 import { Sheet } from './Sheets';
 import { Text } from './Text';
@@ -152,6 +153,8 @@ export function DeckPicker({ decks, selectedId, onSelect }: Props): React.JSX.El
                 selected && styles.cardSelected,
               ]}
             >
+              <TiledSurface texture="leather" pointerEvents="none" style={StyleSheet.absoluteFill} />
+              {selected && <View pointerEvents="none" style={styles.selectedWash} />}
               <Text variant="caption" color={theme.accent} caps numberOfLines={1}>
                 {theme.label}
               </Text>
@@ -201,10 +204,18 @@ const styles = StyleSheet.create({
     paddingVertical: sp(2),
     paddingHorizontal: sp(3),
     gap: 2,
+    overflow: 'hidden',
   },
   cardSelected: {
-    backgroundColor: color.surfaceRaised,
     borderWidth: border.bold,
+  },
+  selectedWash: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(239,206,134,0.07)', // faint candle-gold lift
   },
   name: {
     minHeight: 36,

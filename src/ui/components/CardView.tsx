@@ -10,6 +10,7 @@ import { Image, Pressable, StyleSheet, View } from 'react-native';
 import { getCardDef } from '../../engine/data/cards';
 import type { Ability, CardDef, UnitRow } from '../../engine/types';
 import { CARD_ART } from '../cardArt';
+import { TEXTURE } from '../textures';
 import { CARD_SIZE, type CardSizeKind } from '../theme';
 import { border, color, faction as factionTokens, radius } from '../tokens';
 import { Icon, type IconName } from './Icon';
@@ -189,6 +190,8 @@ function CardViewInner({
       disabled={!onPress && !onLongPress}
       style={[styles.frame, frameBox, { backgroundColor: color.surfaceRaised }]}
     >
+      {/* Worn card stock under the programmatic frame. */}
+      <Image source={TEXTURE.leather} resizeMode="repeat" style={styles.stock} />
       {/* top strip: strength badge or special glyph, + hero star */}
       <View style={styles.topRow}>
         {isUnit ? (
@@ -250,6 +253,13 @@ const styles = StyleSheet.create({
   art: {
     width: '100%',
     height: '100%',
+  },
+  stock: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
   artBadge: {
     position: 'absolute',

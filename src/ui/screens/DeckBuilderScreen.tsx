@@ -28,6 +28,7 @@ import { factionTheme } from '../theme';
 import { border, color, radius, sp } from '../tokens';
 import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
+import { TiledSurface } from '../components/Material';
 import { Text } from '../components/Text';
 import {
   allDecks,
@@ -275,7 +276,7 @@ function DeckRow({
 }): React.JSX.Element {
   const theme = factionTheme[deck.faction];
   return (
-    <View style={[styles.deckRow, { borderLeftColor: theme.frame }]}>
+    <TiledSurface texture="leather" fallback={color.surface} style={[styles.deckRow, { borderLeftColor: theme.frame }]}>
       <View style={{ flex: 1 }}>
         <Text variant="bodyStrong" color={theme.accent} numberOfLines={1}>
           {deck.name}
@@ -294,7 +295,7 @@ function DeckRow({
           <Icon name="close" size={14} color={color.sealRedBright} />
         </Pressable>
       )}
-    </View>
+    </TiledSurface>
   );
 }
 
@@ -396,9 +397,9 @@ function DeckEditor({
           )}
         </View>
 
-        {/* sticky status bar */}
-        <View style={styles.statusWrap}>
-          <View style={styles.statusBar}>
+        {/* sticky status bar (opaque oak so scrolled content occludes) */}
+        <TiledSurface texture="oakDark" fallback={color.bg} style={styles.statusWrap}>
+          <TiledSurface texture="leather" fallback={color.surface} style={styles.statusBar}>
             <Stat label="Total" value={total} ok={total >= MIN_DECK_CARDS && total <= MAX_DECK_CARDS} hint={`${MIN_DECK_CARDS}–${MAX_DECK_CARDS}`} />
             <Stat label="Units" value={units} ok={units >= MIN_UNIT_CARDS} hint={`≥${MIN_UNIT_CARDS}`} />
             <Stat label="Specials" value={specials} ok={specials <= MAX_SPECIAL_CARDS} hint={`≤${MAX_SPECIAL_CARDS}`} />
@@ -408,13 +409,13 @@ function DeckEditor({
               onPress={() => onSave({ id: deck.id, name: name.trim() || 'Unnamed deck', faction, leaderId, cardIds })}
               style={styles.saveButton}
             />
-          </View>
+          </TiledSurface>
           {validationError !== null && (
             <Text variant="caption" color={color.sealRedBright} style={styles.validation}>
               {validationError}
             </Text>
           )}
-        </View>
+        </TiledSurface>
 
         <Text variant="label" tone="dim" caps style={styles.sectionLabel}>
           Faction

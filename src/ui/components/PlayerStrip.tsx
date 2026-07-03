@@ -10,6 +10,7 @@ import type { SideView } from '../../engine/types';
 import { border, color, faction as factionTokens, space } from '../tokens';
 import { Chip } from './Chip';
 import { Icon } from './Icon';
+import { TiledSurface } from './Material';
 import { Text } from './Text';
 
 interface Props {
@@ -42,7 +43,7 @@ function PlayerStripInner({
   const faction = factionTokens[side.faction];
   const leaderName = getCardDef(side.leader.defId).name.split(',')[0];
   return (
-    <View style={[styles.strip, { borderColor: faction.frame }]}>
+    <TiledSurface texture="oakMid" fallback={color.surface} style={[styles.strip, { borderColor: faction.frame }]}>
       <View style={styles.left}>
         <View style={styles.nameRow}>
           <Text variant="bodyStrong" color={faction.accent} numberOfLines={1}>
@@ -82,7 +83,7 @@ function PlayerStripInner({
           {leaderName}
         </Text>
       </Chip>
-    </View>
+    </TiledSurface>
   );
 }
 
@@ -94,7 +95,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.sm,
     paddingVertical: space.xs,
     borderLeftWidth: border.bold,
-    backgroundColor: color.surface,
   },
   left: { flex: 1, gap: 2 },
   nameRow: { flexDirection: 'row', alignItems: 'baseline', gap: space.sm },

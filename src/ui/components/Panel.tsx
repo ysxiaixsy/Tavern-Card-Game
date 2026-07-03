@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { StyleSheet, View, type ViewProps, type ViewStyle } from 'react-native';
+import { ImageBackground, StyleSheet, View, type ViewProps, type ViewStyle } from 'react-native';
 import { border, color, elevation, radius } from '../tokens';
+import { TEXTURE } from '../textures';
 
 interface Props extends ViewProps {
   tone?: 'surface' | 'raised' | 'sunken';
@@ -28,16 +29,21 @@ export function Panel({
 }: Props): React.JSX.Element {
   const bg =
     tone === 'raised' ? color.surfaceRaised : tone === 'sunken' ? color.surfaceSunken : color.surface;
+  // Material per tone: leather hide for surfaces, recessed dark oak for wells.
+  const tile = tone === 'sunken' ? TEXTURE.oakDark : TEXTURE.leather;
   const rad = radius[r];
   return (
-    <View
+    <ImageBackground
       {...rest}
+      source={tile}
+      resizeMode="repeat"
       style={[
         {
           backgroundColor: bg,
           borderRadius: rad,
           borderWidth: border.thin,
           borderColor: color.line,
+          overflow: 'hidden',
         },
         raised && elevation.raised,
         style,
@@ -50,7 +56,7 @@ export function Panel({
         />
       )}
       {children}
-    </View>
+    </ImageBackground>
   );
 }
 

@@ -10,7 +10,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, View, type ViewStyle } from 'react-native';
 import { getView } from '../../engine/view';
 import { getCardDef } from '../../engine/data/cards';
 import type { Move, PlayCardMove, PlayerView, RowKind } from '../../engine/types';
@@ -23,6 +23,7 @@ import { BoardRow } from '../components/BoardRow';
 import { Button } from '../components/Button';
 import { HandBar } from '../components/HandBar';
 import { Icon } from '../components/Icon';
+import { TiledSurface } from '../components/Material';
 import { PlayerStrip } from '../components/PlayerStrip';
 import { Text } from '../components/Text';
 import {
@@ -36,6 +37,15 @@ import {
 
 const OPPONENT_ROW_ORDER: readonly RowKind[] = ['siege', 'ranged', 'melee'];
 const YOUR_ROW_ORDER: readonly RowKind[] = ['melee', 'ranged', 'siege'];
+
+/** An oak strip: the material for the battle screen's bars. */
+function Bar({ children, style }: { children: React.ReactNode; style?: ViewStyle }): React.JSX.Element {
+  return (
+    <TiledSurface texture="oakMid" fallback={color.surface} style={style}>
+      {children}
+    </TiledSurface>
+  );
+}
 
 /** How close (px) a dragged decoy must get to a unit to target it. */
 const UNIT_SNAP_PX = 64;
@@ -472,7 +482,7 @@ export function BattleScreen({
           />
         ))}
 
-        <View style={styles.weatherStrip}>
+        <Bar style={styles.weatherStrip}>
           {view.weather.kinds.length === 0 ? (
             <Text variant="caption" tone="dim">
               clear skies
@@ -484,7 +494,7 @@ export function BattleScreen({
               ))}
             </View>
           )}
-        </View>
+        </Bar>
 
         {YOUR_ROW_ORDER.map((rowKind) => (
           <BoardRow
@@ -516,7 +526,7 @@ export function BattleScreen({
 
       {/* totals / targeting / row-choose / confirm bar */}
       {pendingPlay ? (
-        <View style={styles.totalsBar}>
+        <Bar style={styles.totalsBar}>
           <Text variant="label" tone="accentBright" caps>
             Play {getCardDef(pendingPlay.defId).name}?
           </Text>
@@ -528,18 +538,18 @@ export function BattleScreen({
               Confirm
             </Text>
           </Pressable>
-        </View>
+        </Bar>
       ) : rowChoice ? (
-        <View style={styles.totalsBar}>
+        <Bar style={styles.totalsBar}>
           <Text variant="label" tone="accentBright" caps>
             Tap a highlighted row
           </Text>
           <Pressable onPress={() => setRowChoice(null)} style={styles.cancelBtn} hitSlop={6}>
             <Text variant="caption">Cancel</Text>
           </Pressable>
-        </View>
+        </Bar>
       ) : pendingTarget ? (
-        <View style={styles.totalsBar}>
+        <Bar style={styles.totalsBar}>
           <Text variant="label" tone="accentBright" caps>
             Decoy {getCardDef(pendingTarget.defId).name}?
           </Text>
@@ -551,18 +561,18 @@ export function BattleScreen({
               Confirm
             </Text>
           </Pressable>
-        </View>
+        </Bar>
       ) : targeting ? (
-        <View style={styles.totalsBar}>
+        <Bar style={styles.totalsBar}>
           <Text variant="label" tone="accentBright" caps>
             Tap a gold-framed unit
           </Text>
           <Pressable onPress={cancelTargeting} style={styles.cancelBtn} hitSlop={6}>
             <Text variant="caption">Cancel</Text>
           </Pressable>
-        </View>
+        </Bar>
       ) : (
-        <View style={styles.totalsBar}>
+        <Bar style={styles.totalsBar}>
           <Text variant="label" tone={youLead ? 'accentBright' : 'dim'} caps>
             You
           </Text>
@@ -582,7 +592,7 @@ export function BattleScreen({
           <Text variant="label" tone={oppLead ? 'accentBright' : 'dim'} caps>
             Foe
           </Text>
-        </View>
+        </Bar>
       )}
 
       <PlayerStrip
@@ -714,7 +724,6 @@ const styles = StyleSheet.create({
     minHeight: 26,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: color.surface,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderColor: color.line,
@@ -729,7 +738,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: sp(3),
     paddingVertical: sp(1),
-    backgroundColor: color.surface,
   },
   score: {
     fontSize: 20,

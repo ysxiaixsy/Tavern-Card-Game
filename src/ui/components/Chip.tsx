@@ -5,8 +5,9 @@
  */
 
 import React from 'react';
-import { Pressable, StyleSheet, View, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, type ViewStyle } from 'react-native';
 import { border, color, radius, space, state } from '../tokens';
+import { TiledSurface } from './Material';
 
 interface Props {
   onPress?: () => void;
@@ -18,7 +19,9 @@ interface Props {
 
 export function Chip({ onPress, active, spent, style, children }: Props): React.JSX.Element {
   const body = (
-    <View
+    <TiledSurface
+      texture="oakMid"
+      fallback={color.surfaceRaised}
       style={[
         styles.chip,
         active && { borderColor: color.accentBright },
@@ -27,7 +30,7 @@ export function Chip({ onPress, active, spent, style, children }: Props): React.
       ]}
     >
       {children}
-    </View>
+    </TiledSurface>
   );
   if (!onPress) {
     return body;
@@ -44,7 +47,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: space.xs,
-    backgroundColor: color.surfaceRaised,
     borderRadius: radius.md,
     borderWidth: border.thin,
     borderColor: color.line,

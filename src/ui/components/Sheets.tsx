@@ -21,6 +21,7 @@ import { cardTypeLine, describeCard } from '../cardInfo';
 import { rowLabel, sp } from '../theme';
 import { Button } from './Button';
 import { CardView } from './CardView';
+import { TiledSurface } from './Material';
 
 // ---------------------------------------------------------------------------
 // Base sheet
@@ -38,6 +39,7 @@ export function Sheet({ visible, title, onClose, children }: SheetProps): React.
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <Pressable style={styles.backdrop} onPress={onClose} disabled={!onClose}>
         <Pressable style={styles.panel} onPress={() => undefined}>
+          <TiledSurface texture="leather" pointerEvents="none" style={StyleSheet.absoluteFill} />
           <View style={styles.panelHeader}>
             <Text variant="heading" tone="accentBright" style={styles.title}>
               {title}
@@ -511,6 +513,7 @@ const styles = StyleSheet.create({
     borderWidth: border.thin,
     borderColor: color.line,
     maxHeight: '90%',
+    overflow: 'hidden',
   },
   scrollArea: {
     flexShrink: 1,

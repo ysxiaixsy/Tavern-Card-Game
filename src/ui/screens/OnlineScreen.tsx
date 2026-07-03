@@ -23,6 +23,7 @@ import { border, color, radius, sp } from '../tokens';
 import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
 import { DeckPicker } from '../components/DeckPicker';
+import { TiledSurface } from '../components/Material';
 import { Text } from '../components/Text';
 import {
   allDecks,
@@ -429,16 +430,18 @@ export function OnlineScreen(): React.JSX.Element {
       <Text variant="label" tone="dim" caps style={styles.sectionLabel}>
         Or join a friend
       </Text>
-      <TextInput
-        value={joinCode}
-        onChangeText={(t) => setJoinCode(t.toUpperCase())}
-        placeholder="ROOM CODE"
-        placeholderTextColor={color.inkDim}
-        autoCapitalize="characters"
-        autoCorrect={false}
-        maxLength={6}
-        style={styles.codeInput}
-      />
+      <TiledSurface texture="leather" fallback={color.surface} style={styles.codeInputWrap}>
+        <TextInput
+          value={joinCode}
+          onChangeText={(t) => setJoinCode(t.toUpperCase())}
+          placeholder="ROOM CODE"
+          placeholderTextColor={color.inkDim}
+          autoCapitalize="characters"
+          autoCorrect={false}
+          maxLength={6}
+          style={styles.codeInput}
+        />
+      </TiledSurface>
       <Button label="Join room" onPress={() => void handleJoin()} />
 
       {notice !== null && (
@@ -495,17 +498,18 @@ const styles = StyleSheet.create({
   sectionLabel: {
     marginTop: sp(2),
   },
-  codeInput: {
+  codeInputWrap: {
     borderWidth: border.thin,
     borderColor: color.line,
     borderRadius: radius.md,
+  },
+  codeInput: {
     color: color.accentBright,
     fontSize: 22,
     fontWeight: '800',
     letterSpacing: 6,
     textAlign: 'center',
     paddingVertical: sp(2),
-    backgroundColor: color.surface,
   },
   roomCode: {
     fontSize: 44,
