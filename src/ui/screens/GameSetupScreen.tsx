@@ -5,10 +5,9 @@
 
 import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { border, color, faction as factionTokens, radius, sp } from '../tokens';
+import { border, color, radius, sp } from '../tokens';
 import {
   allDecks,
-  leaderShortName,
   useAppStore,
   type OpponentDeckSpec,
   type PlayableFaction,
@@ -17,41 +16,9 @@ import {
 import { factionTheme } from '../theme';
 import type { Difficulty } from '../../ai/agent';
 import { Button } from '../components/Button';
+import { DeckPicker } from '../components/DeckPicker';
 import { Icon } from '../components/Icon';
-import { ScrollHint, useScrollHint } from '../components/ScrollHint';
 import { Text } from '../components/Text';
-
-function DeckChip({
-  deck,
-  selected,
-  onPress,
-}: {
-  deck: SavedDeck;
-  selected: boolean;
-  onPress: () => void;
-}): React.JSX.Element {
-  const theme = factionTokens[deck.faction];
-  return (
-    <Pressable
-      onPress={onPress}
-      style={[
-        styles.deckChip,
-        { borderColor: selected ? theme.accent : color.line },
-        selected && { backgroundColor: color.surfaceRaised },
-      ]}
-    >
-      <Text variant="bodyStrong" color={selected ? theme.accent : color.ink} numberOfLines={1}>
-        {deck.name}
-      </Text>
-      <View style={styles.deckMeta}>
-        <Icon name="crown" size={12} color={color.inkDim} />
-        <Text variant="caption" tone="dim" numberOfLines={1}>
-          {leaderShortName(deck.leaderId)} · {deck.cardIds.length} cards
-        </Text>
-      </View>
-    </Pressable>
-  );
-}
 
 function SeatRow({
   label,
@@ -64,28 +31,14 @@ function SeatRow({
   selectedId: string;
   onSelect: (id: string) => void;
 }): React.JSX.Element {
-  const { scrollProps, metrics } = useScrollHint();
   return (
     <View style={styles.seatBlock}>
-      <Text variant="label" tone="dim" caps style={styles.seatLabel}>
-        {label}
-      </Text>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.deckRow}
-        {...scrollProps}
-      >
-        {decks.map((deck) => (
-          <DeckChip
-            key={deck.id}
-            deck={deck}
-            selected={deck.id === selectedId}
-            onPress={() => onSelect(deck.id)}
-          />
-        ))}
-      </ScrollView>
-      <ScrollHint metrics={metrics} />
+      {label !== '' && (
+        <Text variant="label" tone="dim" caps style={styles.seatLabel}>
+          {label}
+        </Text>
+      )}
+      <DeckPicker decks={decks} selectedId={selectedId} onSelect={onSelect} />
     </View>
   );
 }
@@ -291,26 +244,6 @@ const styles = StyleSheet.create({
   },
   seatLabel: {
     marginBottom: sp(1),
-  },
-  deckRow: {
-    gap: sp(2),
-    // Center the chips when they fit; scroll from the left when they overflow.
-    flexGrow: 1,
-    justifyContent: 'center',
-    paddingHorizontal: sp(2),
-  },
-  deckChip: {
-    borderWidth: border.frame,
-    borderRadius: radius.md,
-    paddingVertical: sp(2),
-    paddingHorizontal: sp(3),
-    minWidth: 170,
-    gap: 2,
-  },
-  deckMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: sp(1),
   },
   diffBlock: {
     marginBottom: sp(4),

@@ -22,11 +22,10 @@ import { factionTheme } from '../theme';
 import { border, color, radius, sp } from '../tokens';
 import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
-import { ScrollHint, useScrollHint } from '../components/ScrollHint';
+import { DeckPicker } from '../components/DeckPicker';
 import { Text } from '../components/Text';
 import {
   allDecks,
-  leaderShortName,
   useAppStore,
   type SavedDeck,
 } from '../store';
@@ -65,7 +64,6 @@ export function OnlineScreen(): React.JSX.Element {
   const [snapshot, setSnapshot] = useState<OnlineGameSnapshot | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const { scrollProps, metrics } = useScrollHint();
 
   const channelRef = useRef<ReturnType<NonNullable<typeof supabase>['channel']> | null>(null);
   const roundsSeen = useRef(0);
@@ -424,39 +422,7 @@ export function OnlineScreen(): React.JSX.Element {
       <Text variant="label" tone="dim" caps style={styles.sectionLabel}>
         Your deck
       </Text>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.deckRow}
-        {...scrollProps}
-      >
-        {decks.map((deck) => {
-          const theme = factionTheme[deck.faction];
-          const selected = deck.id === deckId;
-          return (
-            <Pressable
-              key={deck.id}
-              onPress={() => setDeckId(deck.id)}
-              style={[
-                styles.deckChip,
-                { borderColor: selected ? theme.accent : color.line },
-                selected && { backgroundColor: color.surfaceRaised },
-              ]}
-            >
-              <Text variant="bodyStrong" color={selected ? theme.accent : color.ink} numberOfLines={1}>
-                {deck.name}
-              </Text>
-              <View style={styles.deckMetaRow}>
-                <Icon name="crown" size={12} color={color.inkDim} />
-                <Text variant="caption" tone="dim" numberOfLines={1}>
-                  {leaderShortName(deck.leaderId)}
-                </Text>
-              </View>
-            </Pressable>
-          );
-        })}
-      </ScrollView>
-      <ScrollHint metrics={metrics} />
+      <DeckPicker decks={decks} selectedId={deckId} onSelect={setDeckId} />
 
       <Button label="Create a room" onPress={() => void handleCreate()} />
 
@@ -529,25 +495,6 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     marginTop: sp(2),
-  },
-  deckRow: {
-    gap: sp(2),
-    flexGrow: 1,
-    justifyContent: 'center',
-    paddingHorizontal: sp(2),
-  },
-  deckChip: {
-    borderWidth: border.frame,
-    borderRadius: radius.md,
-    paddingVertical: sp(2),
-    paddingHorizontal: sp(3),
-    minWidth: 160,
-    gap: 2,
-  },
-  deckMetaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: sp(1),
   },
   codeInput: {
     borderWidth: border.thin,
