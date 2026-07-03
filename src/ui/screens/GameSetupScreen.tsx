@@ -100,7 +100,7 @@ export function GameSetupScreen(): React.JSX.Element {
           <Text variant="label" tone="dim" caps style={styles.seatLabel}>
             AI deck
           </Text>
-          <View style={styles.diffRow}>
+          <View style={[styles.diffRow, styles.aiModeRow]}>
             {(
               [
                 { key: 'list', label: 'Choose' },
@@ -281,6 +281,9 @@ const styles = StyleSheet.create({
   aiHint: {
     marginTop: sp(2),
     textAlign: 'center',
+  },
+  aiModeRow: {
+    marginBottom: sp(3),
   },
   error: {
     textAlign: 'center',
