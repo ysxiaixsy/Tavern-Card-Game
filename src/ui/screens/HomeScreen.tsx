@@ -5,7 +5,8 @@
 
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { color, space } from '../tokens';
+import Svg, { Defs, LinearGradient, Stop, Text as SvgText } from 'react-native-svg';
+import { color, font, space } from '../tokens';
 import { useAppStore } from '../store';
 import { feedback } from '../feedback';
 import { Appear } from '../components/anim';
@@ -14,6 +15,37 @@ import { Icon } from '../components/Icon';
 import { OrnamentDivider } from '../components/Ornament';
 import { Text } from '../components/Text';
 import { isOnlineConfigured } from '../../online/supabase';
+
+/** The tavern-sign title: engraved shadow + gold-leaf gradient + dark edge. */
+function GwentTitle(): React.JSX.Element {
+  const common = {
+    x: '50%',
+    y: 56,
+    fontFamily: font.displayBold,
+    fontSize: 54,
+    letterSpacing: 8,
+    textAnchor: 'middle' as const,
+  };
+  return (
+    <Svg width={320} height={74}>
+      <Defs>
+        <LinearGradient id="goldLeaf" x1="0" y1="0" x2="0" y2="1">
+          <Stop offset="0" stopColor={color.accentBright} />
+          <Stop offset="0.55" stopColor={color.accent} />
+          <Stop offset="1" stopColor={color.accentDim} />
+        </LinearGradient>
+      </Defs>
+      {/* engraved drop shadow */}
+      <SvgText {...common} y={59} fill="#000000" opacity={0.55}>
+        GWENT
+      </SvgText>
+      {/* gold-leaf face with a dark edge */}
+      <SvgText {...common} fill="url(#goldLeaf)" stroke={color.accentDim} strokeWidth={0.8}>
+        GWENT
+      </SvgText>
+    </Svg>
+  );
+}
 
 export function HomeScreen(): React.JSX.Element {
   const beginSetup = useAppStore((s) => s.beginSetup);
@@ -44,9 +76,7 @@ export function HomeScreen(): React.JSX.Element {
         <Text variant="label" tone="dim" caps>
           The Witcher 3 Tavern Game
         </Text>
-        <Text variant="hero" tone="accentBright" style={styles.title}>
-          GWENT
-        </Text>
+        <GwentTitle />
         <OrnamentDivider style={styles.titleRunes} />
       </Appear>
 
@@ -108,11 +138,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     alignSelf: 'stretch',
     marginBottom: space.xxl,
-  },
-  title: {
-    fontSize: 56,
-    letterSpacing: 8,
-    marginVertical: space.xs,
   },
   titleRunes: {
     alignSelf: 'stretch',

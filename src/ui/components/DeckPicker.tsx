@@ -88,12 +88,22 @@ function DeckRosterSheet({
       {deck !== null && (
         <>
           <View style={styles.leaderRow}>
-            <Icon name="crown" size={14} color={color.accent} />
-            <Text variant="caption" tone="accent" numberOfLines={1}>
-              {leaderShortName(deck.leaderId)}
-            </Text>
+            <View style={styles.rosterEntry}>
+              <CardView
+                defId={deck.leaderId}
+                size="board"
+                selected={inspectId === deck.leaderId}
+                onPress={() => setInspectId(deck.leaderId === inspectId ? null : deck.leaderId)}
+              />
+              <View style={styles.leaderTag}>
+                <Icon name="crown" size={11} color={color.accent} />
+                <Text variant="caption" tone="accent" numberOfLines={1}>
+                  {leaderShortName(deck.leaderId)}
+                </Text>
+              </View>
+            </View>
             <Text variant="caption" tone="dim">
-              · {deck.cardIds.length} cards
+              {deck.cardIds.length} cards
             </Text>
           </View>
           <View style={styles.rosterGrid}>
@@ -252,11 +262,15 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   leaderRow: {
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
     gap: sp(1),
     marginBottom: sp(2),
+  },
+  leaderTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    maxWidth: 180,
   },
   rosterGrid: {
     flexDirection: 'row',
