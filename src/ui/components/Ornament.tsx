@@ -1,8 +1,8 @@
 /**
- * Brass ornament details: corner flourishes for panels/sheets, a rune divider
- * for section headers, and a SectionLabel that bundles label + divider.
- * Rune glyphs are ORIGINAL angular geometry (Futhark-flavored, deliberately
- * not CDPR's iconography).
+ * Brass ornament details: corner flourishes for panels/sheets, a geometric
+ * divider for section headers, and a SectionLabel that bundles label +
+ * divider. Pure ornament geometry — nothing that reads as text or borrows
+ * CDPR's iconography.
  */
 
 import React from 'react';
@@ -59,36 +59,21 @@ export function CornerFlourishes({
 }
 
 // ---------------------------------------------------------------------------
-// Rune divider
+// Ornament divider
 // ---------------------------------------------------------------------------
 
-/** Original angular glyphs in an 8×12 box (stroke paths). */
-const RUNES = [
-  'M2 12 L2 0 M2 3 L7 1 M2 8 L7 6', // twin branches
-  'M1 12 L1 0 L7 6 L1 8', // banner
-  'M1 12 L4 0 L7 12 M2.5 7 L5.5 7', // peak
-  'M1 0 L1 12 M7 0 L7 12 M1 2 L7 10', // gate
-  'M4 0 L4 12 M1 3 L4 6 L7 3', // arrow
-];
-
-/** A brass rule with rune glyphs at its center — the section-header divider. */
-export function RuneDivider({ style }: { style?: StyleProp<ViewStyle> }): React.JSX.Element {
+/** A brass rule with a three-diamond stud at its center — the section-header
+ * divider. Pure geometry: nothing that reads as lettering. */
+export function OrnamentDivider({ style }: { style?: StyleProp<ViewStyle> }): React.JSX.Element {
   const tint = color.edgeBrass;
   return (
     <View pointerEvents="none" style={[styles.dividerRow, style]}>
       <View style={[styles.rule, { backgroundColor: tint }]} />
-      <Svg width={RUNES.length * 12} height={12} viewBox={`0 0 ${RUNES.length * 10} 12`} opacity={0.75}>
-        {RUNES.map((d, i) => (
-          <Path
-            key={i}
-            d={d}
-            stroke={tint}
-            strokeWidth={1.1}
-            fill="none"
-            strokeLinecap="square"
-            transform={`translate(${i * 10 + 1},0) scale(0.9)`}
-          />
-        ))}
+      <Svg width={44} height={10} viewBox="0 0 44 10" opacity={0.8}>
+        {/* small — large — small diamonds */}
+        <Path d="M8 5 L11 2.6 L14 5 L11 7.4 Z" fill={tint} />
+        <Path d="M18 5 L22 1 L26 5 L22 9 Z" fill="none" stroke={tint} strokeWidth={1.2} />
+        <Path d="M30 5 L33 2.6 L36 5 L33 7.4 Z" fill={tint} />
       </Svg>
       <View style={[styles.rule, { backgroundColor: tint }]} />
     </View>
@@ -110,7 +95,7 @@ export function SectionLabel({
       <Text variant="label" tone="dim" caps style={textStyle}>
         {children}
       </Text>
-      <RuneDivider style={styles.labelDivider} />
+      <OrnamentDivider style={styles.labelDivider} />
     </View>
   );
 }

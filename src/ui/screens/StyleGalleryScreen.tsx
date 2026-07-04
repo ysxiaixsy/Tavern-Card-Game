@@ -14,7 +14,7 @@ import { CardView } from '../components/CardView';
 import { Chip } from '../components/Chip';
 import { Icon, type IconName } from '../components/Icon';
 import { TiledSurface, type TextureName } from '../components/Material';
-import { RuneDivider } from '../components/Ornament';
+import { OrnamentDivider } from '../components/Ornament';
 import { Panel } from '../components/Panel';
 import { Text } from '../components/Text';
 
@@ -77,7 +77,7 @@ export function StyleGalleryScreen(): React.JSX.Element {
           <Panel keyline style={styles.ornatePanel}>
             <Text variant="caption">keyline panel + flourishes</Text>
           </Panel>
-          <RuneDivider />
+          <OrnamentDivider />
         </Section>
 
         <Section title="Card states">
