@@ -68,7 +68,7 @@ export const faction = {
   nilfgaard: { frame: '#2c2c2c', accent: '#c8a84b', label: 'Nilfgaard' },
   monsters: { frame: '#8c2e2b', accent: '#d96a5a', label: 'Monsters' },
   scoiatael: { frame: '#4e7a3a', accent: '#8cba6a', label: "Scoia'tael" },
-  skellige: { frame: '#2f6d7a', accent: '#6fb7c4', label: 'Skellige' },
+  skellige: { frame: '#5c4488', accent: '#a389d4', label: 'Skellige' },
 } as const;
 
 // ---------------------------------------------------------------------------
