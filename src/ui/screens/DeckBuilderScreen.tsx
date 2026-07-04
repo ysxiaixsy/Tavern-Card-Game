@@ -662,15 +662,15 @@ const styles = StyleSheet.create({
   },
   leaderRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: sp(2),
+    gap: sp(1),
     justifyContent: 'center',
     paddingTop: sp(2), // room for the selected card's lift
   },
   leaderCell: {
     alignItems: 'center',
     gap: 3,
-    width: 84,
+    flexShrink: 1,
+    width: 62, // 5 variants (NR) still fit a ~360dp screen in ONE row
   },
   hint: {
     marginTop: sp(1),
