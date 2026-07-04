@@ -7,9 +7,10 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { getCardDef } from '../../engine/data/cards';
 import { cardTypeLine, describeCard } from '../cardInfo';
+import { FACTION_EMBLEM } from '../factionArt';
 import { factionTheme } from '../theme';
 import { border, color, radius, sp } from '../tokens';
 import { leaderShortName, type SavedDeck } from '../store';
@@ -170,9 +171,12 @@ export function DeckPicker({ decks, selectedId, onSelect }: Props): React.JSX.El
             >
               <TiledSurface texture="leather" pointerEvents="none" style={StyleSheet.absoluteFill} />
               {selected && <View pointerEvents="none" style={styles.selectedWash} />}
-              <Text variant="caption" color={theme.accent} caps numberOfLines={1}>
-                {theme.label}
-              </Text>
+              <View style={styles.cardTop}>
+                <Text variant="caption" color={theme.accent} caps numberOfLines={1} style={styles.cardTopLabel}>
+                  {theme.label}
+                </Text>
+                <Image source={FACTION_EMBLEM[deck.faction]} style={styles.emblem} resizeMode="contain" />
+              </View>
               <Text
                 variant="bodyStrong"
                 color={selected ? color.accentBright : color.ink}
@@ -223,6 +227,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: sp(3),
     gap: 2,
     overflow: 'hidden',
+  },
+  cardTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: sp(1),
+  },
+  cardTopLabel: {
+    flexShrink: 1,
+  },
+  emblem: {
+    width: 26,
+    height: 26,
   },
   cardSelected: {
     borderWidth: border.bold,

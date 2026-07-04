@@ -216,10 +216,10 @@ export function DeckBuilderScreen(): React.JSX.Element {
               selected.has(deck.id) && styles.deckRowSelected,
             ]}
           >
-            <Icon
-              name={selected.has(deck.id) ? 'star' : 'deck'}
-              size={16}
-              color={selected.has(deck.id) ? color.accentBright : color.inkDim}
+            <Image
+              source={FACTION_EMBLEM[deck.faction]}
+              style={[styles.rowEmblem, !selected.has(deck.id) && { opacity: 0.5 }]}
+              resizeMode="contain"
             />
             <View style={{ flex: 1 }}>
               <Text
@@ -276,6 +276,7 @@ function DeckRow({
   const theme = factionTheme[deck.faction];
   return (
     <TiledSurface texture="leather" fallback={color.surface} style={[styles.deckRow, { borderLeftColor: theme.frame }]}>
+      <Image source={FACTION_EMBLEM[deck.faction]} style={styles.rowEmblem} resizeMode="contain" />
       <View style={{ flex: 1 }}>
         <Text variant="bodyStrong" color={theme.accent} numberOfLines={1}>
           {deck.name}
@@ -667,6 +668,10 @@ const styles = StyleSheet.create({
   },
   factionEmblemIdle: {
     opacity: 0.45,
+  },
+  rowEmblem: {
+    width: 32,
+    height: 32,
   },
   leaderRow: {
     flexDirection: 'row',

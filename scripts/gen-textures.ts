@@ -116,15 +116,13 @@ function woodShader(
   const lines = makeNoise(48, seed + 4); // sparse dark grain lines
   return (u, v) => {
     // Stretch: grain varies mostly along u (across the grain), slowly along v.
-    const wobble = (wave(u, v) - 0.5) * 0.1;
+    const wobble = (wave(u, v) - 0.5) * 0.08;
     const n = grain(u + wobble, v * 0.18);
     let l = 1 + (n - 0.5) * 2 * variance;
-    // Darker vertical grain lines (visible plank streaks).
+    // Occasional slightly darker vertical grain line (thin, subtle).
     const line = lines(u * 1.0, v * 0.1);
-    if (line > 0.78) {
-      l -= variance * 1.4;
-    } else if (line < 0.12) {
-      l += variance * 0.9; // occasional lighter streak for contrast
+    if (line > 0.82) {
+      l -= variance * 0.8;
     }
     return [br * l, bg * l, bb * l];
   };
@@ -180,10 +178,10 @@ const PARCHMENT = '#e7d8b6';
 
 async function main(): Promise<void> {
   mkdirSync(OUT_DIR, { recursive: true });
-  // Variance tuned on-device: subtle-but-visible grain on a dark phone screen
-  // (the first pass at ~5% was invisible). Text contrast still holds.
-  await writeTile('oak_dark', 512, woodShader(BG, 0.13, 11));
-  await writeTile('oak_mid', 256, woodShader(SURFACE, 0.11, 22));
+  // Variance tuned on-device: wood stays quiet (13% read as too much),
+  // leather/parchment keep the stronger mottling that finally made them read.
+  await writeTile('oak_dark', 512, woodShader(BG, 0.05, 11));
+  await writeTile('oak_mid', 256, woodShader(SURFACE, 0.045, 22));
   await writeTile('leather', 256, leatherShader(SURFACE_RAISED, 0.11, 33));
   await writeTile('parchment', 256, parchmentShader(PARCHMENT, 0.06, 44));
 }
