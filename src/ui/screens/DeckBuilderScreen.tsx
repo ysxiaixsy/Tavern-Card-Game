@@ -429,8 +429,14 @@ function DeckEditor({
                   style={[styles.factionEmblem, !selected && styles.factionEmblemIdle]}
                   resizeMode="contain"
                 />
-                <Text variant="caption" color={selected ? theme.accent : color.inkDim} caps numberOfLines={1}>
-                  {theme.label.split(' ')[0]}
+                <Text
+                  variant="caption"
+                  color={selected ? theme.accent : color.inkDim}
+                  caps
+                  numberOfLines={2}
+                  style={styles.factionName}
+                >
+                  {theme.label}
                 </Text>
               </Pressable>
             );
@@ -672,6 +678,11 @@ const styles = StyleSheet.create({
   rowEmblem: {
     width: 32,
     height: 32,
+  },
+  factionName: {
+    textAlign: 'center',
+    fontSize: 9,
+    letterSpacing: 1,
   },
   leaderRow: {
     flexDirection: 'row',

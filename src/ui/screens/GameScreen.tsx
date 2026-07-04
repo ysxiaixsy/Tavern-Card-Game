@@ -10,12 +10,12 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, View, type ViewStyle } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import { getView } from '../../engine/view';
 import { getCardDef } from '../../engine/data/cards';
 import type { Move, PlayCardMove, PlayerView, RowKind } from '../../engine/types';
 import { CARD_SIZE, factionTheme, sp } from '../theme';
-import { color, radius } from '../tokens';
+import { border, color, radius } from '../tokens';
 import { useAppStore } from '../store';
 import { feedback } from '../feedback';
 import { Appear, Pulse } from '../components/anim';
@@ -39,7 +39,13 @@ const OPPONENT_ROW_ORDER: readonly RowKind[] = ['siege', 'ranged', 'melee'];
 const YOUR_ROW_ORDER: readonly RowKind[] = ['melee', 'ranged', 'siege'];
 
 /** An oak strip: the material for the battle screen's bars. */
-function Bar({ children, style }: { children: React.ReactNode; style?: ViewStyle }): React.JSX.Element {
+function Bar({
+  children,
+  style,
+}: {
+  children: React.ReactNode;
+  style?: StyleProp<ViewStyle>;
+}): React.JSX.Element {
   return (
     <TiledSurface texture="oakMid" fallback={color.surface} style={style}>
       {children}
@@ -117,6 +123,16 @@ export function BattleScreen({
   const dragRowsRef = useRef<ReadonlyMap<string, PlayCardMove>>(new Map());
   const dragUnitsRef = useRef<ReadonlyMap<string, PlayCardMove>>(new Map());
   const dragHoverRef = useRef<string | null>(null);
+  // Special drags: weather drops on the sky strip; scorch drops anywhere on
+  // the field and previews its victims while hovering it.
+  const [weatherDrag, setWeatherDrag] = useState<'valid' | 'hover' | null>(null);
+  const [scorchIds, setScorchIds] = useState<ReadonlySet<string> | null>(null);
+  const specialRef = useRef<{ kind: 'weather' | 'scorch'; move: PlayCardMove; victims: ReadonlySet<string> } | null>(
+    null,
+  );
+  const specialHoverRef = useRef(false);
+  const weatherRect = useRef<Rect | null>(null);
+  const weatherViewRef = useRef<View>(null);
   // Mirrors so the stable board callbacks below read fresh state.
   const targetingRef = useRef(targeting);
   targetingRef.current = targeting;
@@ -203,11 +219,42 @@ export function BattleScreen({
     return '';
   };
 
+  /** The unit(s) a Scorch would destroy right now: strongest non-hero, ties included. */
+  const computeScorchVictims = (v: PlayerView): ReadonlySet<string> => {
+    let max = -Infinity;
+    const victims = new Set<string>();
+    for (const sideView of [v.you, v.opponent]) {
+      for (const rk of ['melee', 'ranged', 'siege'] as RowKind[]) {
+        for (const u of sideView.rows[rk].units) {
+          if (getCardDef(u.defId).type !== 'unit') {
+            continue; // heroes are immune
+          }
+          if (u.effectiveStrength > max) {
+            max = u.effectiveStrength;
+            victims.clear();
+            victims.add(u.instanceId);
+          } else if (u.effectiveStrength === max) {
+            victims.add(u.instanceId);
+          }
+        }
+      }
+    }
+    return victims;
+  };
+
+  const measureWeather = useCallback((): void => {
+    weatherViewRef.current?.measureInWindow((x, y, width, height) => {
+      weatherRect.current = { x, y, width, height };
+    });
+  }, []);
+  useEffect(measureWeather, [measureSignal, measureWeather]);
+
   const onCardDragStart = useCallback((cardInstanceId: string) => {
     const v = viewRef.current;
     const card = v.you.hand.find((c) => c.instanceId === cardInstanceId);
     const rows = new Map<string, PlayCardMove>();
     const units = new Map<string, PlayCardMove>();
+    let special: typeof specialRef.current = null;
     if (card) {
       const def = getCardDef(card.defId);
       const sideKey = def.abilities.includes('spy') ? 'opponent' : 'you';
@@ -218,11 +265,15 @@ export function BattleScreen({
         if (m.targetInstanceId) {
           units.set(m.targetInstanceId, m); // decoy: per-unit target
         } else {
-          // Fixed-row unit moves carry no `row` (the engine uses def.row); agile
-          // moves carry an explicit row. Weather/scorch have no row → not draggable.
+          // Fixed-row unit moves carry no `row` (the engine uses def.row);
+          // agile moves carry an explicit row.
           const row = m.row ?? (def.row && def.row !== 'agile' ? def.row : undefined);
           if (row) {
             rows.set(`${sideKey}:${row}`, m);
+          } else if (def.type === 'weather') {
+            special = { kind: 'weather', move: m, victims: new Set() };
+          } else if (def.type === 'scorch') {
+            special = { kind: 'scorch', move: m, victims: computeScorchVictims(v) };
           }
         }
       }
@@ -230,10 +281,15 @@ export function BattleScreen({
     dragRowsRef.current = rows;
     dragUnitsRef.current = units;
     dragHoverRef.current = null;
+    specialRef.current = special;
+    specialHoverRef.current = false;
     setDragRowKeys(rows.size > 0 ? new Set(rows.keys()) : null);
     setDragUnitIds(units.size > 0 ? new Set(units.keys()) : null);
     setDragHover(null);
+    setWeatherDrag(special?.kind === 'weather' ? 'valid' : null);
+    setScorchIds(null); // scorch victims only light up once the card is over the field
     setMeasureSignal((n) => n + 1); // re-measure rows/units where they currently sit
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // px,py = the dragged card's top-left (window coords). We test the whole card
@@ -253,6 +309,29 @@ export function BattleScreen({
       const dy = Math.max(r.y - cy, 0, cy - (r.y + r.height));
       return Math.hypot(dx, dy);
     };
+    // Weather/scorch: hovering the sky strip (weather) or anywhere on the
+    // field (scorch) arms the drop; scorch also previews its victims.
+    const special = specialRef.current;
+    if (special) {
+      let hover = false;
+      if (special.kind === 'weather') {
+        hover = weatherRect.current !== null && overlap(weatherRect.current) > 0;
+      } else {
+        hover =
+          (weatherRect.current !== null && overlap(weatherRect.current) > 0) ||
+          [...rowRects.current.values()].some((r) => overlap(r) > 0);
+      }
+      if (hover !== specialHoverRef.current) {
+        specialHoverRef.current = hover;
+        if (special.kind === 'weather') {
+          setWeatherDrag(hover ? 'hover' : 'valid');
+        } else {
+          setScorchIds(hover ? special.victims : null);
+        }
+      }
+      return;
+    }
+
     let best: string | null = null;
     let bestScore = 0;
     if (dragRowsRef.current.size > 0) {
@@ -303,12 +382,30 @@ export function BattleScreen({
     const key = dragHoverRef.current;
     const rowMove = key ? dragRowsRef.current.get(key) : undefined;
     const unitMove = key ? dragUnitsRef.current.get(key) : undefined;
+    const special = specialRef.current;
+    const specialHover = specialHoverRef.current;
     dragRowsRef.current = new Map();
     dragUnitsRef.current = new Map();
     dragHoverRef.current = null;
+    specialRef.current = null;
+    specialHoverRef.current = false;
     setDragRowKeys(null);
     setDragUnitIds(null);
     setDragHover(null);
+    setWeatherDrag(null);
+    setScorchIds(null);
+    if (special) {
+      if (!specialHover) {
+        return; // released off the board → no play
+      }
+      if (confirmDragRef.current) {
+        const card = viewRef.current.you.hand.find((c) => c.instanceId === special.move.cardInstanceId);
+        setPendingPlay({ move: special.move, defId: card?.defId ?? '' });
+      } else {
+        submitRef.current(special.move);
+      }
+      return;
+    }
     if (unitMove && key) {
       // Decoy: confirm via the existing pending-target bar.
       setPendingTarget({ id: key, defId: findUnitDefId(key), move: unitMove });
@@ -475,6 +572,9 @@ export function BattleScreen({
             row={view.opponent.rows[rowKind]}
             rowKind={rowKind}
             underWeather={weatherForRow(rowKind)}
+            // Scorch preview: while a dragged scorch hovers the field, its
+            // victims glow and everything else dims.
+            targetIds={scorchIds ?? undefined}
             // Single tap opens card info — suppressed while picking a target/row.
             onUnitPress={targeting || rowChoice ? undefined : openInfo}
             onUnitLongPress={setZoomDefId}
@@ -482,19 +582,31 @@ export function BattleScreen({
           />
         ))}
 
-        <Bar style={styles.weatherStrip}>
-          {view.weather.kinds.length === 0 ? (
-            <Text variant="caption" tone="dim">
-              clear skies
-            </Text>
-          ) : (
-            <View style={styles.weatherIcons}>
-              {view.weather.kinds.map((k) => (
-                <Icon key={k} name={k} size={16} color={color.debuff} />
-              ))}
-            </View>
-          )}
-        </Bar>
+        <View ref={weatherViewRef} collapsable={false} onLayout={measureWeather}>
+          <Bar
+            style={[
+              styles.weatherStrip,
+              weatherDrag === 'valid' && styles.weatherValid,
+              weatherDrag === 'hover' && styles.weatherHover,
+            ]}
+          >
+            {weatherDrag !== null ? (
+              <Text variant="label" tone="accentBright" caps>
+                Play weather here
+              </Text>
+            ) : view.weather.kinds.length === 0 ? (
+              <Text variant="caption" tone="dim">
+                clear skies
+              </Text>
+            ) : (
+              <View style={styles.weatherIcons}>
+                {view.weather.kinds.map((k) => (
+                  <Icon key={k} name={k} size={16} color={color.debuff} />
+                ))}
+              </View>
+            )}
+          </Bar>
+        </View>
 
         {YOUR_ROW_ORDER.map((rowKind) => (
           <BoardRow
@@ -503,7 +615,7 @@ export function BattleScreen({
             rowKind={rowKind}
             underWeather={weatherForRow(rowKind)}
             // Decoy targets glow (tap targeting, the confirm pick, or a dragged
-            // decoy); the rest dim so the choice is obvious.
+            // decoy); a hovering scorch previews its victims; the rest dim.
             targetIds={
               targeting
                 ? new Set(
@@ -511,7 +623,7 @@ export function BattleScreen({
                   )
                 : pendingTarget
                   ? new Set([pendingTarget.id])
-                  : dragUnitIds ?? undefined
+                  : dragUnitIds ?? scorchIds ?? undefined
             }
             hoverUnitId={dragUnitIds ? dragHover ?? undefined : undefined}
             onUnitMeasure={measureUnit}
@@ -727,6 +839,18 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderColor: color.line,
+  },
+  weatherValid: {
+    borderWidth: border.frame,
+    borderColor: color.accent,
+    borderStyle: 'dashed',
+    backgroundColor: 'rgba(200,162,74,0.10)',
+  },
+  weatherHover: {
+    borderWidth: border.frame,
+    borderColor: color.accentBright,
+    borderStyle: 'solid',
+    backgroundColor: 'rgba(239,206,134,0.20)',
   },
   weatherIcons: {
     flexDirection: 'row',

@@ -141,9 +141,10 @@ export function GameSetupScreen(): React.JSX.Element {
                       variant="caption"
                       color={aiBuildFaction === f ? factionTheme[f].accent : color.inkDim}
                       caps
-                      numberOfLines={1}
+                      numberOfLines={2}
+                      style={styles.factionName}
                     >
-                      {factionTheme[f].label.split(' ')[0]}
+                      {factionTheme[f].label}
                     </Text>
                   </Pressable>
                 ))}
@@ -165,9 +166,10 @@ export function GameSetupScreen(): React.JSX.Element {
                     variant="caption"
                     tone={aiBuildFaction === 'surprise' ? 'accentBright' : 'dim'}
                     caps
-                    numberOfLines={1}
+                    numberOfLines={2}
+                    style={styles.factionName}
                   >
-                    Surprise
+                    Surprise me
                   </Text>
                 </Pressable>
               </View>
@@ -291,6 +293,11 @@ const styles = StyleSheet.create({
   surpriseSelected: {
     borderColor: color.accentBright,
     backgroundColor: color.surfaceRaised,
+  },
+  factionName: {
+    textAlign: 'center',
+    fontSize: 9,
+    letterSpacing: 1,
   },
   aiHint: {
     marginTop: sp(2),
