@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { border, color, radius, sp } from '../tokens';
 import {
   allDecks,
@@ -13,6 +13,7 @@ import {
   type PlayableFaction,
   type SavedDeck,
 } from '../store';
+import { FACTION_EMBLEM } from '../factionArt';
 import { factionTheme } from '../theme';
 import type { Difficulty } from '../../ai/agent';
 import { Button } from '../components/Button';
@@ -130,40 +131,43 @@ export function GameSetupScreen(): React.JSX.Element {
                     (f): f is PlayableFaction => f !== 'neutral',
                   ) as PlayableFaction[]
                 ).map((f) => (
-                  <Pressable
-                    key={f}
-                    onPress={() => setAiBuildFaction(f)}
-                    style={[
-                      styles.factionChip,
-                      { borderColor: aiBuildFaction === f ? factionTheme[f].accent : color.line },
-                      aiBuildFaction === f && { backgroundColor: color.surfaceRaised },
-                    ]}
-                  >
+                  <Pressable key={f} onPress={() => setAiBuildFaction(f)} style={styles.factionCell}>
+                    <Image
+                      source={FACTION_EMBLEM[f]}
+                      style={[styles.factionEmblem, aiBuildFaction !== f && styles.factionEmblemIdle]}
+                      resizeMode="contain"
+                    />
                     <Text
                       variant="caption"
                       color={aiBuildFaction === f ? factionTheme[f].accent : color.inkDim}
                       caps
                       numberOfLines={1}
                     >
-                      {factionTheme[f].label}
+                      {factionTheme[f].label.split(' ')[0]}
                     </Text>
                   </Pressable>
                 ))}
-                <Pressable
-                  onPress={() => setAiBuildFaction('surprise')}
-                  style={[
-                    styles.factionChip,
-                    { borderColor: aiBuildFaction === 'surprise' ? color.accentBright : color.line },
-                    aiBuildFaction === 'surprise' && { backgroundColor: color.surfaceRaised },
-                  ]}
-                >
+                <Pressable onPress={() => setAiBuildFaction('surprise')} style={styles.factionCell}>
+                  <View
+                    style={[
+                      styles.surpriseCircle,
+                      aiBuildFaction === 'surprise' && styles.surpriseSelected,
+                    ]}
+                  >
+                    <Text
+                      variant="heading"
+                      tone={aiBuildFaction === 'surprise' ? 'accentBright' : 'dim'}
+                    >
+                      ?
+                    </Text>
+                  </View>
                   <Text
                     variant="caption"
                     tone={aiBuildFaction === 'surprise' ? 'accentBright' : 'dim'}
                     caps
                     numberOfLines={1}
                   >
-                    Surprise me
+                    Surprise
                   </Text>
                 </Pressable>
               </View>
@@ -258,17 +262,35 @@ const styles = StyleSheet.create({
   },
   factionRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
+    justifyContent: 'center',
     gap: sp(1),
     marginTop: sp(2),
   },
-  factionChip: {
-    flexBasis: '31%',
-    flexGrow: 1,
-    borderWidth: border.frame,
-    borderRadius: radius.md,
-    paddingVertical: sp(2),
+  factionCell: {
     alignItems: 'center',
+    gap: 2,
+    flexShrink: 1,
+    width: 56,
+  },
+  factionEmblem: {
+    width: 46,
+    height: 46,
+  },
+  factionEmblemIdle: {
+    opacity: 0.45,
+  },
+  surpriseCircle: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    borderWidth: border.frame,
+    borderColor: color.line,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  surpriseSelected: {
+    borderColor: color.accentBright,
+    backgroundColor: color.surfaceRaised,
   },
   aiHint: {
     marginTop: sp(2),

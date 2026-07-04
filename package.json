@@ -38,6 +38,7 @@
     "gen:art": "tsx scripts/gen-card-art.ts",
     "optimize:art": "tsx scripts/optimize-art.ts",
     "art:import": "tsx scripts/import-art.ts",
+    "import:factions": "tsx scripts/import-factions.ts",
     "art": "tsx scripts/optimize-art.ts && tsx scripts/gen-card-art.ts",
     "simulate": "tsx scripts/simulate.ts",
     "cards": "tsx scripts/list-cards.ts",

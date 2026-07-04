@@ -8,6 +8,7 @@
 import React, { useMemo, useState } from 'react';
 import {
   Alert,
+  Image,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -24,6 +25,7 @@ import {
   validateDeck,
 } from '../../engine/game';
 import { GwentError, type CardDef } from '../../engine/types';
+import { FACTION_EMBLEM } from '../factionArt';
 import { factionTheme } from '../theme';
 import { border, color, radius, sp } from '../tokens';
 import { Button } from '../components/Button';
@@ -420,13 +422,14 @@ function DeckEditor({
             const theme = factionTheme[f];
             const selected = f === faction;
             return (
-              <Pressable
-                key={f}
-                onPress={() => switchFaction(f)}
-                style={[styles.factionChip, { borderColor: selected ? theme.accent : color.line }, selected && { backgroundColor: color.surfaceRaised }]}
-              >
+              <Pressable key={f} onPress={() => switchFaction(f)} style={styles.factionCell}>
+                <Image
+                  source={FACTION_EMBLEM[f]}
+                  style={[styles.factionEmblem, !selected && styles.factionEmblemIdle]}
+                  resizeMode="contain"
+                />
                 <Text variant="caption" color={selected ? theme.accent : color.inkDim} caps numberOfLines={1}>
-                  {theme.label}
+                  {theme.label.split(' ')[0]}
                 </Text>
               </Pressable>
             );
@@ -649,16 +652,21 @@ const styles = StyleSheet.create({
   },
   factionRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: sp(1),
+    justifyContent: 'center',
+    gap: sp(2),
   },
-  factionChip: {
-    flexBasis: '23%',
-    flexGrow: 1,
-    borderWidth: border.frame,
-    borderRadius: radius.md,
-    paddingVertical: sp(2),
+  factionCell: {
     alignItems: 'center',
+    gap: 2,
+    flexShrink: 1,
+    width: 62,
+  },
+  factionEmblem: {
+    width: 52,
+    height: 52,
+  },
+  factionEmblemIdle: {
+    opacity: 0.45,
   },
   leaderRow: {
     flexDirection: 'row',
