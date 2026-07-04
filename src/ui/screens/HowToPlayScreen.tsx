@@ -4,9 +4,11 @@
  */
 
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { color, space, sp } from '../tokens';
-import { useAppStore } from '../store';
+import { FACTION_EMBLEM } from '../factionArt';
+import { factionTheme } from '../theme';
+import { useAppStore, type PlayableFaction } from '../store';
 import { Icon, type IconName } from '../components/Icon';
 import { Panel } from '../components/Panel';
 import { Text } from '../components/Text';
@@ -49,6 +51,22 @@ function Entry({ icon, name, desc }: { icon: IconName; name: string; desc: strin
       <Text variant="body" style={styles.entryText}>
         <Text variant="bodyStrong" tone="accent">
           {name}
+        </Text>
+        {`  ${desc}`}
+      </Text>
+    </View>
+  );
+}
+
+/** A faction row: emblem shield + accent-colored name + its perk. */
+function FactionEntry({ faction, desc }: { faction: PlayableFaction; desc: string }): React.JSX.Element {
+  const theme = factionTheme[faction];
+  return (
+    <View style={styles.entry}>
+      <Image source={FACTION_EMBLEM[faction]} style={styles.entryEmblem} resizeMode="contain" />
+      <Text variant="body" style={styles.entryText}>
+        <Text variant="bodyStrong" color={theme.accent}>
+          {theme.label}
         </Text>
         {`  ${desc}`}
       </Text>
@@ -132,23 +150,34 @@ export function HowToPlayScreen(): React.JSX.Element {
           <Entry icon="star" name="Hero" desc="immune to weather, scorch and every other effect." />
         </Section>
 
-        <Section icon="crown" title="Leaders & factions">
+        <Section icon="crown" title="Leaders">
           <P>
-            Each deck has a Leader with a once-per-match ability — tap your leader chip, then press
-            Play to use it.
+            Each deck is led by a Leader with a once-per-match ability. Tap your leader chip in
+            battle, then press Play to use it — some resolve instantly, some ask you to pick a card.
           </P>
-          <Entry icon="crown" name="Northern Realms" desc="draw a card whenever you win a round." />
-          <Entry icon="crown" name="Nilfgaard" desc="wins tied rounds." />
-          <Entry icon="crown" name="Monsters" desc="keeps one random unit on the board between rounds." />
-          <Entry icon="crown" name="Scoia'tael" desc="decides who goes first." />
-          <Entry icon="crown" name="Skellige" desc="returns 2 units from the graveyard when round 3 begins." />
+          <P>
+            A few leaders are passive: their power is simply always on (the chip shows it as
+            already spent).
+          </P>
+        </Section>
+
+        <Section icon="gem" title="Factions">
+          <P>Every faction fights by its own rule:</P>
+          <FactionEntry faction="northern_realms" desc="draw an extra card whenever you win a round." />
+          <FactionEntry faction="nilfgaard" desc="wins tied rounds instead of both sides losing a gem." />
+          <FactionEntry faction="monsters" desc="keeps one random unit on the board between rounds." />
+          <FactionEntry faction="scoiatael" desc="decides who takes the first turn of the match." />
+          <FactionEntry faction="skellige" desc="two random units return from the graveyard when round 3 begins." />
         </Section>
 
         <Section icon="deck" title="Controls">
-          <Entry icon="hand" name="Play a card" desc="drag it up onto a glowing row to place it; agile shows two rows. Release to play." />
+          <Entry icon="hand" name="Play a card" desc="drag it up onto a glowing row; agile cards light two rows. Release to play." />
+          <Entry icon="frost" name="Weather" desc="drag onto the sky strip between the boards (it lights up gold)." />
+          <Entry icon="scorch" name="Scorch" desc="drag over the field — the cards it will burn glow before you drop it." />
           <Entry icon="decoy" name="Decoy / targets" desc="drag onto a highlighted unit; the nearest valid unit is chosen." />
           <Entry icon="star" name="Tap a hand card" desc="opens View (info) and Play. Play guides any choice it still needs." />
           <Entry icon="grave" name="Card info" desc="tap any card on the board or in a graveyard to read it." />
+          <Entry icon="deck" name="Deck roster" desc="hold a deck in any deck picker to browse every card in it." />
           <Entry icon="close" name="Pass" desc="the Pass button ends your round. Confirm steps live in Settings." />
         </Section>
       </ScrollView>
@@ -172,5 +201,6 @@ const styles = StyleSheet.create({
   sectionBody: { gap: space.sm },
   entry: { flexDirection: 'row', gap: sp(2), alignItems: 'flex-start' },
   entryIcon: { width: 20, alignItems: 'center', paddingTop: 2 },
+  entryEmblem: { width: 28, height: 28, marginTop: -2 },
   entryText: { flex: 1 },
 });
