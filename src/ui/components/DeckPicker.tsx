@@ -99,7 +99,12 @@ function DeckRosterSheet({
           <View style={styles.rosterGrid}>
             {roster.map(([defId, count]) => (
               <View key={defId} style={styles.rosterEntry}>
-                <CardView defId={defId} size="board" onPress={() => setInspectId(defId === inspectId ? null : defId)} />
+                <CardView
+                  defId={defId}
+                  size="board"
+                  selected={defId === inspectId}
+                  onPress={() => setInspectId(defId === inspectId ? null : defId)}
+                />
                 <Text variant="caption" tone={count > 1 ? 'accent' : 'dim'}>
                   {count > 1 ? `×${count}` : ' '}
                 </Text>
@@ -183,6 +188,9 @@ export function DeckPicker({ decks, selectedId, onSelect }: Props): React.JSX.El
         })}
       </ScrollView>
       <ScrollHint metrics={metrics} />
+      <Text variant="caption" tone="dim" style={styles.hint}>
+        Hold a deck to view its cards
+      </Text>
       <DeckRosterSheet deck={rosterDeck} onClose={() => setRosterDeck(null)} />
     </View>
   );
@@ -227,6 +235,11 @@ const styles = StyleSheet.create({
   },
   metaText: {
     flex: 1,
+  },
+  hint: {
+    textAlign: 'center',
+    marginTop: 4,
+    opacity: 0.8,
   },
   inspect: {
     borderBottomWidth: StyleSheet.hairlineWidth,
