@@ -22,6 +22,7 @@ import { rowLabel, sp } from '../theme';
 import { Button } from './Button';
 import { CardView } from './CardView';
 import { TiledSurface } from './Material';
+import { CornerFlourishes } from './Ornament';
 
 // ---------------------------------------------------------------------------
 // Base sheet
@@ -40,6 +41,7 @@ export function Sheet({ visible, title, onClose, children }: SheetProps): React.
       <Pressable style={styles.backdrop} onPress={onClose} disabled={!onClose}>
         <Pressable style={styles.panel} onPress={() => undefined}>
           <TiledSurface texture="leather" pointerEvents="none" style={StyleSheet.absoluteFill} />
+          <CornerFlourishes />
           <View style={styles.panelHeader}>
             <Text variant="heading" tone="accentBright" style={styles.title}>
               {title}

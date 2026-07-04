@@ -13,6 +13,8 @@ import { Button } from '../components/Button';
 import { CardView } from '../components/CardView';
 import { Chip } from '../components/Chip';
 import { Icon, type IconName } from '../components/Icon';
+import { TiledSurface, type TextureName } from '../components/Material';
+import { RuneDivider } from '../components/Ornament';
 import { Panel } from '../components/Panel';
 import { Text } from '../components/Text';
 
@@ -61,6 +63,23 @@ export function StyleGalleryScreen(): React.JSX.Element {
       </View>
 
       <ScrollView contentContainerStyle={{ paddingBottom: space.xxl, gap: space.lg }}>
+        <Section title="Materials">
+          <View style={styles.swatches}>
+            {(['oakDark', 'oakMid', 'leather', 'parchment'] as TextureName[]).map((t) => (
+              <View key={t} style={styles.swatchCell}>
+                <TiledSurface texture={t} style={styles.tileSwatch} />
+                <Text variant="caption" tone="dim">
+                  {t}
+                </Text>
+              </View>
+            ))}
+          </View>
+          <Panel keyline style={styles.ornatePanel}>
+            <Text variant="caption">keyline panel + flourishes</Text>
+          </Panel>
+          <RuneDivider />
+        </Section>
+
         <Section title="Card states">
           <View style={styles.cardRow}>
             <CardCell label="normal">
@@ -227,4 +246,15 @@ const styles = StyleSheet.create({
   iconCell: { width: 56, alignItems: 'center', gap: 4 },
   cardRow: { flexDirection: 'row', flexWrap: 'wrap', gap: space.md },
   cardCell: { alignItems: 'center', gap: 4 },
+  tileSwatch: {
+    width: 72,
+    height: 48,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    borderColor: color.line,
+  },
+  ornatePanel: {
+    padding: space.lg,
+    alignItems: 'center',
+  },
 });

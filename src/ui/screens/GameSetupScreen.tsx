@@ -18,6 +18,7 @@ import type { Difficulty } from '../../ai/agent';
 import { Button } from '../components/Button';
 import { DeckPicker } from '../components/DeckPicker';
 import { Icon } from '../components/Icon';
+import { SectionLabel } from '../components/Ornament';
 import { Text } from '../components/Text';
 
 function SeatRow({
@@ -33,11 +34,7 @@ function SeatRow({
 }): React.JSX.Element {
   return (
     <View style={styles.seatBlock}>
-      {label !== '' && (
-        <Text variant="label" tone="dim" caps style={styles.seatLabel}>
-          {label}
-        </Text>
-      )}
+      {label !== '' && <SectionLabel style={styles.seatLabel}>{label}</SectionLabel>}
       <DeckPicker decks={decks} selectedId={selectedId} onSelect={onSelect} />
     </View>
   );
@@ -97,9 +94,7 @@ export function GameSetupScreen(): React.JSX.Element {
       />
       {mode === 'ai' ? (
         <View style={styles.seatBlock}>
-          <Text variant="label" tone="dim" caps style={styles.seatLabel}>
-            AI deck
-          </Text>
+          <SectionLabel style={styles.seatLabel}>AI deck</SectionLabel>
           <View style={[styles.diffRow, styles.aiModeRow]}>
             {(
               [
@@ -184,9 +179,7 @@ export function GameSetupScreen(): React.JSX.Element {
 
       {mode === 'ai' && (
         <View style={styles.diffBlock}>
-          <Text variant="label" tone="dim" caps style={styles.seatLabel}>
-            AI difficulty
-          </Text>
+          <SectionLabel style={styles.seatLabel}>AI difficulty</SectionLabel>
           <View style={styles.diffRow}>
             {(['easy', 'normal', 'hard', 'witcher'] as const).map((d) => (
               <Pressable

@@ -11,6 +11,7 @@ import { feedback } from '../feedback';
 import { Appear } from '../components/anim';
 import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
+import { RuneDivider } from '../components/Ornament';
 import { Text } from '../components/Text';
 import { isOnlineConfigured } from '../../online/supabase';
 
@@ -46,6 +47,7 @@ export function HomeScreen(): React.JSX.Element {
         <Text variant="hero" tone="accentBright" style={styles.title}>
           GWENT
         </Text>
+        <RuneDivider style={styles.titleRunes} />
       </Appear>
 
       <Appear delay={120} style={styles.menu}>
@@ -111,6 +113,11 @@ const styles = StyleSheet.create({
     fontSize: 56,
     letterSpacing: 8,
     marginVertical: space.xs,
+  },
+  titleRunes: {
+    alignSelf: 'stretch',
+    marginHorizontal: space.xl,
+    marginTop: space.xs,
   },
   menu: {
     gap: space.md,

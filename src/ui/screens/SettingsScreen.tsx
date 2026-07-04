@@ -11,6 +11,7 @@ import { feedback } from '../feedback';
 import { useAppStore, type AiSpeed, type Prefs } from '../store';
 import { Appear } from '../components/anim';
 import { Icon } from '../components/Icon';
+import { SectionLabel } from '../components/Ornament';
 import { Text } from '../components/Text';
 
 function ToggleRow({
@@ -89,9 +90,7 @@ export function SettingsScreen(): React.JSX.Element {
       </View>
 
       <Appear>
-        <Text variant="label" tone="dim" caps style={styles.sectionLabel}>
-          Gameplay
-        </Text>
+        <SectionLabel style={styles.sectionLabel}>Gameplay</SectionLabel>
         <ToggleRow
           label="Animations"
           hint="Card and screen transitions"
@@ -117,9 +116,7 @@ export function SettingsScreen(): React.JSX.Element {
           onChange={(v) => set('confirmDrag', v)}
         />
 
-        <Text variant="label" tone="dim" caps style={styles.sectionLabel}>
-          AI thinking speed
-        </Text>
+        <SectionLabel style={styles.sectionLabel}>AI thinking speed</SectionLabel>
         <View style={styles.segment}>
           {AI_SPEEDS.map((s) => {
             const selected = prefs.aiSpeed === s.key;
@@ -137,9 +134,7 @@ export function SettingsScreen(): React.JSX.Element {
           })}
         </View>
 
-        <Text variant="label" tone="dim" caps style={styles.sectionLabel}>
-          Help
-        </Text>
+        <SectionLabel style={styles.sectionLabel}>Help</SectionLabel>
         <Pressable style={styles.row} onPress={openGuide}>
           <View style={styles.rowText}>
             <Text variant="bodyStrong">How to play</Text>
@@ -152,9 +147,7 @@ export function SettingsScreen(): React.JSX.Element {
           </Text>
         </Pressable>
 
-        <Text variant="label" tone="dim" caps style={styles.sectionLabel}>
-          Data
-        </Text>
+        <SectionLabel style={styles.sectionLabel}>Data</SectionLabel>
         <Pressable
           style={[styles.dangerButton, customDeckCount === 0 && styles.dangerDisabled]}
           disabled={customDeckCount === 0}

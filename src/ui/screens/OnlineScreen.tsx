@@ -24,6 +24,7 @@ import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
 import { DeckPicker } from '../components/DeckPicker';
 import { TiledSurface } from '../components/Material';
+import { SectionLabel } from '../components/Ornament';
 import { Text } from '../components/Text';
 import {
   allDecks,
@@ -420,16 +421,12 @@ export function OnlineScreen(): React.JSX.Element {
         <Button label={`Resume game (${lastOnlineGame.roomCode})`} onPress={() => void handleResume()} />
       )}
 
-      <Text variant="label" tone="dim" caps style={styles.sectionLabel}>
-        Your deck
-      </Text>
+      <SectionLabel style={styles.sectionLabel}>Your deck</SectionLabel>
       <DeckPicker decks={decks} selectedId={deckId} onSelect={setDeckId} />
 
       <Button label="Create a room" onPress={() => void handleCreate()} />
 
-      <Text variant="label" tone="dim" caps style={styles.sectionLabel}>
-        Or join a friend
-      </Text>
+      <SectionLabel style={styles.sectionLabel}>Or join a friend</SectionLabel>
       <TiledSurface texture="leather" fallback={color.surface} style={styles.codeInputWrap}>
         <TextInput
           value={joinCode}

@@ -9,6 +9,7 @@ import React from 'react';
 import { ImageBackground, StyleSheet, View, type ViewProps, type ViewStyle } from 'react-native';
 import { border, color, elevation, radius } from '../tokens';
 import { TEXTURE } from '../textures';
+import { CornerFlourishes } from './Ornament';
 
 interface Props extends ViewProps {
   tone?: 'surface' | 'raised' | 'sunken';
@@ -55,6 +56,7 @@ export function Panel({
           style={[styles.keyline, { borderRadius: Math.max(0, rad - 2) }]}
         />
       )}
+      {keyline && <CornerFlourishes />}
       {children}
     </ImageBackground>
   );

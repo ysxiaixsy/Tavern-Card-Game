@@ -29,6 +29,7 @@ import { border, color, radius, sp } from '../tokens';
 import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
 import { TiledSurface } from '../components/Material';
+import { SectionLabel } from '../components/Ornament';
 import { Text } from '../components/Text';
 import {
   allDecks,
@@ -188,9 +189,7 @@ export function DeckBuilderScreen(): React.JSX.Element {
       />
 
       <View style={styles.sectionHeader}>
-        <Text variant="label" tone="dim" caps style={styles.sectionLabel}>
-          Your decks
-        </Text>
+        <SectionLabel style={styles.sectionLabel}>Your decks</SectionLabel>
         {customDecks.length > 0 && (
           <Pressable onPress={selecting ? exitSelectMode : () => setSelecting(true)} hitSlop={8}>
             <Text variant="label" tone="accent" caps>
@@ -253,9 +252,7 @@ export function DeckBuilderScreen(): React.JSX.Element {
         />
       )}
 
-      <Text variant="label" tone="dim" caps style={styles.sectionLabel}>
-        Starter decks (templates)
-      </Text>
+      <SectionLabel style={styles.sectionLabel}>Starter decks (templates)</SectionLabel>
       {allDecks([]).map((deck) => (
         <DeckRow key={deck.id} deck={deck} onDuplicate={() => duplicate(deck)} />
       ))}
@@ -417,9 +414,7 @@ function DeckEditor({
           )}
         </TiledSurface>
 
-        <Text variant="label" tone="dim" caps style={styles.sectionLabel}>
-          Faction
-        </Text>
+        <SectionLabel style={styles.sectionLabel}>Faction</SectionLabel>
         <View style={styles.factionRow}>
           {FACTIONS.map((f) => {
             const theme = factionTheme[f];
@@ -441,9 +436,7 @@ function DeckEditor({
           Switching faction resets the deck to that faction's starter.
         </Text>
 
-        <Text variant="label" tone="dim" caps style={styles.sectionLabel}>
-          Leader (long-press for ability)
-        </Text>
+        <SectionLabel style={styles.sectionLabel}>Leader (long-press for ability)</SectionLabel>
         <View style={styles.factionRow}>
           {leadersOf(faction).map((leader) => {
             const selected = leader.id === leaderId;
@@ -501,9 +494,7 @@ function CardSection({
 }): React.JSX.Element {
   return (
     <View>
-      <Text variant="label" tone="dim" caps style={styles.sectionLabel}>
-        {title}
-      </Text>
+      <SectionLabel style={styles.sectionLabel}>{title}</SectionLabel>
       {defs.map((def) => {
         const count = counts[def.id] ?? 0;
         const max = def.maxCopiesPerDeck ?? 1;
