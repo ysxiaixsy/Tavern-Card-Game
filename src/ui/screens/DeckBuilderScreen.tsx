@@ -437,21 +437,27 @@ function DeckEditor({
         </Text>
 
         <SectionLabel style={styles.sectionLabel}>Leader (long-press for ability)</SectionLabel>
-        <View style={styles.factionRow}>
+        <View style={styles.leaderRow}>
           {leadersOf(faction).map((leader) => {
             const selected = leader.id === leaderId;
             return (
-              <Pressable
-                key={leader.id}
-                onPress={() => setLeaderId(leader.id)}
-                onLongPress={() => setZoomDefId(leader.id)}
-                delayLongPress={250}
-                style={[styles.leaderChip, { borderColor: selected ? factionTheme[faction].accent : color.line }, selected && { backgroundColor: color.surfaceRaised }]}
-              >
-                <Text variant="caption" color={selected ? color.ink : color.inkDim} numberOfLines={2} style={styles.center}>
+              <View key={leader.id} style={styles.leaderCell}>
+                <CardView
+                  defId={leader.id}
+                  size="hand"
+                  selected={selected}
+                  onPress={() => setLeaderId(leader.id)}
+                  onLongPress={() => setZoomDefId(leader.id)}
+                />
+                <Text
+                  variant="caption"
+                  color={selected ? color.accentBright : color.inkDim}
+                  numberOfLines={2}
+                  style={styles.center}
+                >
                   {leaderShortName(leader.id)}
                 </Text>
-              </Pressable>
+              </View>
             );
           })}
         </View>
@@ -654,15 +660,17 @@ const styles = StyleSheet.create({
     paddingVertical: sp(2),
     alignItems: 'center',
   },
-  leaderChip: {
-    flexBasis: '48%',
-    flexGrow: 1,
-    borderWidth: border.thin,
-    borderRadius: radius.md,
-    padding: sp(1),
-    alignItems: 'center',
+  leaderRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: sp(2),
     justifyContent: 'center',
-    minHeight: 40,
+    paddingTop: sp(2), // room for the selected card's lift
+  },
+  leaderCell: {
+    alignItems: 'center',
+    gap: 3,
+    width: 84,
   },
   hint: {
     marginTop: sp(1),
